@@ -23,8 +23,20 @@ typealias DetectarColor = suspend (FotoCapturada) -> GarmentColor?
 val SinQuitarFondo: QuitarFondo = { it }
 val SinDetectarColor: DetectarColor = { null }
 
-/** Tallas disponibles en el formulario. */
-val TALLAS = listOf("XS", "S", "M", "L", "XL")
+/** Tallas en letra y en numeración EU de ropa (las dos aparecen en las tablas de marca). */
+private val TALLAS_LETRA = listOf("XXS", "XS", "S", "M", "L", "XL", "XXL")
+private val TALLAS_ROPA_NUMERICAS = (32..48 step 2).map { it.toString() }
+private val TALLAS_CALZADO = (35..46).map { it.toString() }
+
+/**
+ * Tallas del formulario según el tipo de prenda: calzado, numeración de pie; ropa, letras y
+ * numeración EU (Zara, H&M o Brownie dan pantalones como 38); bolsos y accesorios no tienen talla corporal.
+ */
+fun tallasPara(tipo: GarmentType?): List<String> = when (tipo) {
+    GarmentType.SHOES -> TALLAS_CALZADO
+    GarmentType.BAG, GarmentType.ACCESSORY -> TALLAS_LETRA
+    else -> TALLAS_LETRA + TALLAS_ROPA_NUMERICAS
+}
 
 /** Marcas con tabla de tallas (docs/requisitos.md); se sugieren al escribir, pero la marca es texto libre. */
 val MARCAS_CON_TABLA = listOf(

@@ -18,6 +18,8 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
         withHostTest {}
+        // Sin esto los recursos de Compose (tablas de tallas) no entran en el APK.
+        androidResources { enable = true }
     }
 
     listOf(
