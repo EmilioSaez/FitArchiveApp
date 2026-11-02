@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.emilio.fitarchive"
+    namespace = "app.luxion.fitarchiveapp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.emilio.fitarchive"
+        applicationId = "app.luxion.fitarchiveapp"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

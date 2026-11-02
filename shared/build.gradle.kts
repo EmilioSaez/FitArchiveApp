@@ -11,7 +11,7 @@ plugins {
 
 kotlin {
     androidLibrary {
-        namespace = "com.emilio.fitarchive.shared"
+        namespace = "app.luxion.fitarchiveapp.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
         compilerOptions {
@@ -38,6 +38,8 @@ kotlin {
             implementation(compose.ui)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.sqldelight.coroutines)
+            implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -62,7 +64,7 @@ kotlin {
 sqldelight {
     databases {
         create("FitArchiveDatabase") {
-            packageName.set("com.emilio.fitarchive.db")
+            packageName.set("app.luxion.fitarchiveapp.db")
         }
     }
 }
