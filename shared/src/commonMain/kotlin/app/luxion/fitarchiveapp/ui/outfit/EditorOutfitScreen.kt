@@ -58,10 +58,12 @@ fun EditorOutfitScreen(
     armario: GarmentRepository,
     onTerminado: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Outfit guardado que se edita; null crea uno nuevo. */
+    outfitId: Long? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val vm = remember(outfits, armario) {
-        EditorOutfitViewModel(outfits, armario, scope) { Clock.System.now().toEpochMilliseconds() }
+    val vm = remember(outfits, armario, outfitId) {
+        EditorOutfitViewModel(outfits, armario, scope, outfitId) { Clock.System.now().toEpochMilliseconds() }
     }
     val estado by vm.estado.collectAsState()
     LaunchedEffect(estado.idGuardado) { if (estado.idGuardado != null) onTerminado() }
@@ -81,7 +83,7 @@ fun EditorOutfitScreen(
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onTerminado) { Text("Cancelar") }
             Text(
-                "Nuevo outfit",
+                if (outfitId == null) "Nuevo outfit" else "Editar outfit",
                 Modifier.weight(1f),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
@@ -207,7 +209,7 @@ private fun Slot.titulo() = when (this) {
     else -> name
 }
 
-private fun Occasion.etiqueta() = when (this) {
+internal fun Occasion.etiqueta() = when (this) {
     Occasion.WORK -> "Trabajo"
     Occasion.DATE -> "Cita"
     Occasion.PARTY -> "Fiesta"
