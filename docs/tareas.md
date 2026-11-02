@@ -6,7 +6,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 
 ## Base
 - [x] T01 Framework (Kotlin Multiplatform) y proyecto — Base — PR #1
-- [ ] T02 Navegación y tema visual base (colores, tipografía editorial) — UI — T01
+- [x] T02 Navegación y tema visual base (colores, tipografía editorial) — UI — T01
 - [ ] T03 Modelo de datos y BD local: prenda, outfit, medidas, día de calendario, viaje — Datos — T01
 - [ ] T04 Capa de acceso a datos con tests — Datos — T03
 
@@ -24,7 +24,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T15 Pruebas v0.1 — QA — T05–T14
 
 ## v0.2 Outfits
-- [ ] T16 Diseñar avatar 2D con capas — Diseño — —
+- [x] T16 Diseñar avatar 2D con capas — Diseño — —
 - [ ] T17 Prendas sobre el avatar por capas — Lógica — T07, T16
 - [ ] T18 Editor de outfit — UI — T17
 - [ ] T19 Lista de outfits guardados — UI — T18
@@ -34,9 +34,9 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 ## v0.3 Tallas
 - [ ] T22 Pantalla de medidas con guía — UI — T04
 - [ ] T23 Tablas Zara, Pull&Bear, Bershka, Stradivarius, Massimo Dutti — Contenido — —
-- [ ] T24 Tablas Mango y H&M — Contenido — —
+- [~] T24 Tablas Mango y H&M — Contenido — — (parcial: H&M camiseta y pantalón hecho; Mango pendiente de guía oficial)
 - [ ] T25 Tablas Brownie, Scalpers, Hollister, Brandy Melville — Contenido — —
-- [ ] T26 Tabla genérica europea — Contenido — —
+- [x] T26 Tabla genérica europea — Contenido — —
 - [ ] T27 Formato común de tablas y carga — Datos — T03, T23–T26
 - [ ] T28 Algoritmo de ajuste y talla ideal — Lógica — T22, T27
 - [ ] T29 Etiqueta de corte (slim/normal/oversize) — Lógica — T28
@@ -65,6 +65,6 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T46 Pulir estética de revista — Diseño — T44
 - [ ] T47 Rendimiento con armarios grandes — Lógica — T44
 - [x] T48 Icono y fichas de tiendas — Contenido — —
-- [ ] T49 Política de privacidad (cámara, ubicación) — Contenido — —
+- [x] T49 Política de privacidad (cámara, ubicación) — Contenido — —
 - [ ] T50 Prueba con usuarias reales y errores — QA — T45–T47
 - [ ] T51 Publicar en Google Play y App Store — Base — T48–T50

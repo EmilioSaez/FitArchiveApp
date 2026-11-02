@@ -1,0 +1,49 @@
+{
+  "marca": "H&M",
+  "fuente": "https://www2.hm.com/es_es/ (modal 'Guía de tallas' de las fichas de producto, rango REGULAR)",
+  "fecha": "2026-11-02",
+  "notas": [
+    "Medidas corporales en cm; [min, max] por talla. 'cadera' es el valor 'Cadera baja' de la guía de H&M.",
+    "'eur' es la equivalencia numérica EUR que indica la guía.",
+    "Guía de 'partes de arriba' leída en la ficha de un jersey; guía de 'faldas, pantalones, etc.' leída en fichas de pantalón/vaquero. Sin pecho en la guía de pantalones.",
+    "Largo de entrepierna de pantalón omitido (no encaja en el esquema común).",
+    "Rangos PETITE y MATERNIDAD no recogidos (pendiente). Talla 62 de pantalón no recogida (pendiente)."
+  ],
+  "pendiente": [
+    "vestido: guía de H&M no consultada",
+    "falda: se asume la misma guía que pantalones, sin verificar en una ficha de falda",
+    "chaqueta: guía no consultada",
+    "calzado: guía no consultada",
+    "tallas PETITE y MATERNIDAD"
+  ],
+  "prendas": {
+    "camiseta": {
+      "XXS": {"eur": "32", "pecho": [75, 78], "cintura": [62, 64], "cadera": [82, 86]},
+      "XS": {"eur": "34", "pecho": [78, 82], "cintura": [64, 66], "cadera": [86, 90]},
+      "S": {"eur": "36-38", "pecho": [82, 90], "cintura": [66, 74], "cadera": [90, 97.5]},
+      "M": {"eur": "40-42", "pecho": [90, 98], "cintura": [74, 82.5], "cadera": [97.5, 103.5]},
+      "L": {"eur": "44-46", "pecho": [98, 107], "cintura": [82.5, 93], "cadera": [103.5, 110.5]},
+      "XL": {"eur": "48-50", "pecho": [107, 119], "cintura": [93, 105], "cadera": [110.5, 120.5]},
+      "XXL": {"eur": "52-54", "pecho": [119, 131], "cintura": [105, 117.5], "cadera": [120.5, 131]},
+      "3XL": {"eur": "56-58", "pecho": [131, 143], "cintura": [117.5, 131.5], "cadera": [131, 143]},
+      "4XL": {"eur": "60-62", "pecho": [143, 155], "cintura": [131.5, 145.5], "cadera": [143, 155]}
+    },
+    "pantalon": {
+      "32": {"cintura": [62, 64], "cadera": [82, 86]},
+      "34": {"cintura": [64, 66], "cadera": [86, 90]},
+      "36": {"cintura": [66, 70], "cadera": [90, 94]},
+      "38": {"cintura": [70, 74], "cadera": [94, 97.5]},
+      "40": {"cintura": [74, 78], "cadera": [97.5, 100.5]},
+      "42": {"cintura": [78, 82.5], "cadera": [100.5, 103.5]},
+      "44": {"cintura": [82.5, 87.5], "cadera": [103.5, 106.5]},
+      "46": {"cintura": [87.5, 93], "cadera": [106.5, 110.5]},
+      "48": {"cintura": [93, 99], "cadera": [110.5, 115.5]},
+      "50": {"cintura": [99, 105], "cadera": [115.5, 120.5]},
+      "52": {"cintura": [105, 111], "cadera": [120.5, 125.5]},
+      "54": {"cintura": [111, 117.5], "cadera": [125.5, 131]},
+      "56": {"cintura": [117.5, 124.5], "cadera": [131, 137]},
+      "58": {"cintura": [124.5, 131.5], "cadera": [137, 143]},
+      "60": {"cintura": [131.5, 138.5], "cadera": [143, 149]}
+    }
+  }
+}
