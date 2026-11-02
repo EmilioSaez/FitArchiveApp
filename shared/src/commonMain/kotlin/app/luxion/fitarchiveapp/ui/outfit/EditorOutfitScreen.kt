@@ -116,7 +116,7 @@ fun EditorOutfitScreen(
                 Ocasiones(estado.ocasion, vm::cambiarOcasion)
                 OutlinedButton(
                     onClick = { compartir.compartir(estado.nombre, prendasAvatar) { vm.mostrarError("No se pudo compartir el outfit") } },
-                    enabled = prendasAvatar.isNotEmpty(),
+                    enabled = puedeCompartir(estado.elegidas.size, prendasAvatar.size),
                 ) { Text("Compartir") }
                 estado.error?.let {
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -161,6 +161,9 @@ fun EditorOutfitScreen(
         }
     }
 }
+
+/** Compartir exige que todas las prendas elegidas tengan ya su foto cargada; si no, la imagen saldría sin ellas. */
+internal fun puedeCompartir(elegidas: Int, cargadas: Int) = elegidas > 0 && cargadas == elegidas
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
