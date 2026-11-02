@@ -21,13 +21,13 @@ import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
 import app.luxion.fitarchiveapp.ui.calendario.CalendarioScreen
 import app.luxion.fitarchiveapp.ui.detalle.DetallePrendaScreen
+import app.luxion.fitarchiveapp.ui.hoy.OutfitDelDiaScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
 import app.luxion.fitarchiveapp.ui.outfit.EditorOutfitScreen
 import app.luxion.fitarchiveapp.ui.outfit.OutfitsScreen
 import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
-import app.luxion.fitarchiveapp.ui.screens.PantallaVacia
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
 import app.luxion.fitarchiveapp.ui.viaje.ViajesScreen
 import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
@@ -94,9 +94,8 @@ fun App(repositories: Repositories) {
         }
         val ubicacion = rememberProveedorUbicacion()
         val almacenCiudad = rememberAlmacenCiudad()
-        val seleccionCiudad = remember(ubicacion, almacenCiudad) {
-            SeleccionCiudad(ServicioTiempoOpenMeteo(ClienteHttpKtor(), ubicacion), almacenCiudad)
-        }
+        val servicioTiempo = remember(ubicacion) { ServicioTiempoOpenMeteo(ClienteHttpKtor(), ubicacion) }
+        val seleccionCiudad = remember(servicioTiempo, almacenCiudad) { SeleccionCiudad(servicioTiempo, almacenCiudad) }
         Scaffold(
             bottomBar = {
                 NavigationBar {
@@ -113,6 +112,14 @@ fun App(repositories: Repositories) {
             },
         ) { padding ->
             when (destino) {
+                Destino.Hoy -> OutfitDelDiaScreen(
+                    repositories,
+                    servicioTiempo,
+                    ciudad = seleccionCiudad::ciudadGuardada,
+                    onAbrirPerfil = { destino = Destino.Perfil },
+                    onAnadirPrendas = { anadiendo = true },
+                    modifier = Modifier.padding(padding),
+                )
                 Destino.Perfil -> MedidasScreen(repositories.measurements, Modifier.padding(padding)) {
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                 }
@@ -143,7 +150,6 @@ fun App(repositories: Repositories) {
                     repositories.garments,
                     Modifier.padding(padding),
                 )
-                else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
             }
         }
     }
