@@ -1,0 +1,10 @@
+# O1: "Aplicar" está fijo abajo en la hoja de filtro, visible sin hacer scroll. Requiere al menos una prenda.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Filtrar"
+- assertVisible: "Aplicar"
+- assertVisible: "Limpiar"
+- tapOn: "Rojo"
+- tapOn: "Aplicar"
+- assertVisible: "Filtrar [(]1[)]"
+- tapOn: "Limpiar"

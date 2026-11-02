@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.backup
 
+import app.luxion.fitarchiveapp.foto.extensionDeImagen
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
@@ -19,7 +20,7 @@ import kotlin.time.Clock
 /**
  * Fotos en el directorio Documents de la app ([baseDir]).
  *
- * Las rutas que devuelve [save] son relativas a [baseDir] (`fotos/prenda_<id>_<ms>.jpg`):
+ * Las rutas que devuelve [save] son relativas a [baseDir] (`fotos/prenda_<id>_<ms>.<ext>`, con la extensión del formato real: png o jpg):
  * la ruta absoluta del contenedor de iOS cambia entre instalaciones/actualizaciones.
  * [read] y [delete] aceptan también rutas absolutas.
  */
@@ -38,7 +39,7 @@ class IosPhotoStore(
     }
 
     override suspend fun save(garmentId: Long, bytes: ByteArray): String = withContext(context) {
-        val relative = "$PHOTOS_DIR/prenda_${garmentId}_${now()}.jpg"
+        val relative = "$PHOTOS_DIR/prenda_${garmentId}_${now()}.${extensionDeImagen(bytes)}"
         files.createDirectoryAtPath("$baseDir/$PHOTOS_DIR", withIntermediateDirectories = true, attributes = null, error = null)
         val ok = files.createFileAtPath(resolve(relative), contents = bytes.toNSData(), attributes = null)
         if (!ok) error("No se pudo guardar la foto de la prenda $garmentId")

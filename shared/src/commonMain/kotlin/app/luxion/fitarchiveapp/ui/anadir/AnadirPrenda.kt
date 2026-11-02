@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -78,16 +79,39 @@ fun AnadirPrendaFlow(
     var procesando by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val selector = rememberSelectorFoto { resultado ->
-        if (resultado != null) {
-            scope.launch {
-                procesando = true
-                val sinFondo = runCatching { quitarFondo(resultado) }.getOrDefault(resultado)
+    // Foto original cuyo recorte de fondo falló: se avisa y se deja reintentar o seguir sin recorte.
+    var recorteFallido by remember { mutableStateOf<FotoCapturada?>(null) }
+
+    fun procesar(original: FotoCapturada, recortar: Boolean) {
+        scope.launch {
+            procesando = true
+            recorteFallido = null
+            var sinFondo = original
+            if (recortar) {
+                runCatching { quitarFondo(original) }
+                    .onSuccess { sinFondo = it }
+                    .onFailure { recorteFallido = original }
+            }
+            if (recorteFallido == null) {
                 colorDetectado = runCatching { detectarColor(sinFondo) }.getOrNull()
                 foto = sinFondo
-                procesando = false
             }
+            procesando = false
         }
+    }
+
+    val selector = rememberSelectorFoto { resultado ->
+        if (resultado != null) procesar(resultado, recortar = true)
+    }
+
+    recorteFallido?.let { original ->
+        AlertDialog(
+            onDismissRequest = { recorteFallido = null },
+            title = { Text("No pudimos quitar el fondo") },
+            text = { Text("Puedes reintentarlo o usar la foto original, con su fondo.") },
+            confirmButton = { TextButton(onClick = { procesar(original, recortar = true) }) { Text("Reintentar") } },
+            dismissButton = { TextButton(onClick = { procesar(original, recortar = false) }) { Text("Usar original") } },
+        )
     }
 
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {

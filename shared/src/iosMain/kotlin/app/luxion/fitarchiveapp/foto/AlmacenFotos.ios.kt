@@ -27,7 +27,7 @@ private class AlmacenFotosIos : AlmacenFotos {
             .URLsForDirectory(NSDocumentDirectory, NSUserDomainMask).first() as NSURL
         val dir = base.URLByAppendingPathComponent("prendas")!!
         NSFileManager.defaultManager.createDirectoryAtURL(dir, true, null, null)
-        val ruta = dir.URLByAppendingPathComponent("prenda_${NSUUID().UUIDString}.jpg")!!.path!!
+        val ruta = dir.URLByAppendingPathComponent("prenda_${NSUUID().UUIDString}.${extensionDeImagen(foto.bytes)}")!!.path!!
         val datos = foto.bytes.usePinned { NSData.create(bytes = it.addressOf(0), length = foto.bytes.size.toULong()) }
         datos.writeToFile(ruta, atomically = true)
         return ruta

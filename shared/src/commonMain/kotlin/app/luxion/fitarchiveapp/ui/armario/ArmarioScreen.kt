@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -32,6 +34,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -232,22 +235,26 @@ private fun FiltrosActivos(filtro: GarmentFilter, onCambiar: (GarmentFilter) -> 
 @Composable
 private fun HojaFiltro(inicial: GarmentFilter, onAplicar: (GarmentFilter) -> Unit, onCerrar: () -> Unit) {
     var filtro by remember { mutableStateOf(inicial) }
-    ModalBottomSheet(onDismissRequest = onCerrar) {
-        Column(
-            Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text("Filtrar", style = MaterialTheme.typography.headlineMedium)
-            Grupo("Tipo", GarmentType.entries, filtro.type, { it.etiqueta() }) { filtro = filtro.copy(type = it) }
-            Grupo("Color", GarmentColor.entries, filtro.color, { it.etiqueta() }) { filtro = filtro.copy(color = it) }
-            Grupo("Estación", Season.entries, filtro.season, { it.etiqueta() }) { filtro = filtro.copy(season = it) }
-            Grupo("Uso", Usage.entries, filtro.usage, { it.etiqueta() }) { filtro = filtro.copy(usage = it) }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Solo favoritas", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                Switch(
-                    checked = filtro.favorite == true,
-                    onCheckedChange = { filtro = filtro.copy(favorite = if (it) true else null) },
-                )
+    // Sin estado intermedio: la hoja se abre entera y los botones fijos quedan a la vista.
+    ModalBottomSheet(onDismissRequest = onCerrar, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Los criterios se desplazan; los botones quedan fijos abajo, siempre a la vista.
+            Column(
+                Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("Filtrar", style = MaterialTheme.typography.headlineMedium)
+                Grupo("Tipo", GarmentType.entries, filtro.type, { it.etiqueta() }) { filtro = filtro.copy(type = it) }
+                Grupo("Color", GarmentColor.entries, filtro.color, { it.etiqueta() }) { filtro = filtro.copy(color = it) }
+                Grupo("Estación", Season.entries, filtro.season, { it.etiqueta() }) { filtro = filtro.copy(season = it) }
+                Grupo("Uso", Usage.entries, filtro.usage, { it.etiqueta() }) { filtro = filtro.copy(usage = it) }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Solo favoritas", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                    Switch(
+                        checked = filtro.favorite == true,
+                        onCheckedChange = { filtro = filtro.copy(favorite = if (it) true else null) },
+                    )
+                }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onClick = { filtro = GarmentFilter() }, Modifier.weight(1f)) { Text("Limpiar") }
@@ -311,17 +318,27 @@ internal fun FotoPrenda(
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             )
         }
-        if (onAlternarFavorita != null) TextButton(
-            onClick = onAlternarFavorita,
-            modifier = Modifier.align(Alignment.TopEnd).semantics {
-                contentDescription = if (prenda.favorite) "Quitar de favoritas" else "Marcar como favorita"
-            },
-        ) {
-            Text(
-                if (prenda.favorite) "♥" else "♡",
-                style = MaterialTheme.typography.titleLarge,
-                color = if (prenda.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-            )
+        if (onAlternarFavorita != null) {
+            // Disco semitransparente: el corazón se ve sobre cualquier color de prenda.
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(6.dp)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                    .clickable(onClick = onAlternarFavorita)
+                    .semantics {
+                        contentDescription = if (prenda.favorite) "Quitar de favoritas" else "Marcar como favorita"
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    if (prenda.favorite) "♥" else "♡",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = if (prenda.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
     }
 }

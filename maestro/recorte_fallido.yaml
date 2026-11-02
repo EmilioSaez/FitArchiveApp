@@ -1,0 +1,19 @@
+# O4: si falla el recorte de fondo se avisa con "Reintentar" / "Usar original".
+# Sólo reproducible con un build que haga fallar quitarFondo (p. ej. sin red la primera vez, o un error forzado). Requiere FOTO_X.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "[+] Añadir"
+- tapOn: "Elegir de la galería"
+- waitForAnimationToEnd
+- tapOn:
+    point: "${FOTO_X},62%"
+- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "No pudimos quitar el fondo"
+    timeout: 60000
+- tapOn: "Reintentar"
+- assertVisible: "No pudimos quitar el fondo"
+- tapOn: "Usar original"
+- extendedWaitUntil:
+    visible: "Guardar prenda|Tipo.*"
+    timeout: 10000
