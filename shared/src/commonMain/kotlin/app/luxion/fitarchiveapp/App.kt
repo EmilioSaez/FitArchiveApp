@@ -29,9 +29,7 @@ import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.screens.PantallaVacia
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import kotlin.time.Clock
+import app.luxion.fitarchiveapp.ui.viaje.ViajesScreen
 import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
 import app.luxion.fitarchiveapp.weather.SeleccionCiudad
 import app.luxion.fitarchiveapp.weather.ServicioTiempoOpenMeteo
@@ -134,6 +132,12 @@ fun App(repositories: Repositories) {
                 Destino.Calendario -> CalendarioScreen(
                     repositories.calendar,
                     repositories.outfits,
+                    Modifier.padding(padding),
+                )
+                Destino.Viajes -> ViajesScreen(
+                    repositories.trips,
+                    repositories.outfits,
+                    repositories.garments,
                     Modifier.padding(padding),
                 )
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))

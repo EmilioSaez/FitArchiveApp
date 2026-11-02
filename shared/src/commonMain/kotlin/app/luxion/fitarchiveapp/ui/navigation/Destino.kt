@@ -5,5 +5,6 @@ enum class Destino(val titulo: String) {
     Armario("Armario"),
     Outfits("Outfits"),
     Calendario("Calendario"),
+    Viajes("Viajes"),
     Perfil("Perfil"),
 }
