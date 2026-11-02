@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.emilio.fitarchive.ui.navigation.Destino
+import com.emilio.fitarchive.data.MedidasRepositoryEnMemoria
+import com.emilio.fitarchive.ui.screens.MedidasScreen
 import com.emilio.fitarchive.ui.screens.PantallaVacia
 import com.emilio.fitarchive.ui.theme.FitArchiveTheme
 
@@ -20,6 +22,7 @@ import com.emilio.fitarchive.ui.theme.FitArchiveTheme
 fun App() {
     FitArchiveTheme {
         var destino by remember { mutableStateOf(Destino.Hoy) }
+        val medidasRepo = remember { MedidasRepositoryEnMemoria() }
         Scaffold(
             bottomBar = {
                 NavigationBar {
@@ -35,7 +38,10 @@ fun App() {
                 }
             },
         ) { padding ->
-            PantallaVacia(destino.titulo, Modifier.padding(padding))
+            when (destino) {
+                Destino.Perfil -> MedidasScreen(medidasRepo, Modifier.padding(padding))
+                else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
+            }
         }
     }
 }
