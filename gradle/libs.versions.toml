@@ -2,6 +2,8 @@
 agp = "9.5.0"
 kotlin = "2.4.21"
 sqldelight = "2.1.0"
+kotlinx-serialization = "1.9.0"
+kotlinx-coroutines = "1.10.2"
 composeMultiplatform = "1.12.2"
 androidx-activity = "1.10.1"
 android-compileSdk = "37"
@@ -12,6 +14,8 @@ android-targetSdk = "36"
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 
 sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 
 [plugins]
@@ -20,4 +24,5 @@ androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.lib
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
