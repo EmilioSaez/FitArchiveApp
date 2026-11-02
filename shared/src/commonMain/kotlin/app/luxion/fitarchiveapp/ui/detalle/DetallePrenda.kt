@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.data.GarmentRepository
+import app.luxion.fitarchiveapp.data.MeasurementsRepository
 import app.luxion.fitarchiveapp.foto.AlmacenFotos
 import app.luxion.fitarchiveapp.foto.cargarImagen
 import app.luxion.fitarchiveapp.foto.rememberAlmacenFotos
@@ -50,8 +51,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetallePrendaScreen(
     garments: GarmentRepository,
+    measurements: MeasurementsRepository,
     prendaId: Long,
     onVolver: () -> Unit,
+    onAbrirPerfil: () -> Unit,
     modifier: Modifier = Modifier,
     almacen: AlmacenFotos = rememberAlmacenFotos(),
 ) {
@@ -88,6 +91,8 @@ fun DetallePrendaScreen(
                 onVolver = onVolver,
                 onEditar = { editando = true },
                 onEliminar = { confirmando = true },
+                measurements = measurements,
+                onAbrirPerfil = onAbrirPerfil,
             )
         }
     }
@@ -119,6 +124,8 @@ private fun DetalleContenido(
     onVolver: () -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
+    measurements: MeasurementsRepository,
+    onAbrirPerfil: () -> Unit,
 ) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -168,7 +175,7 @@ private fun DetalleContenido(
             HorizontalDivider()
 
             // Huecos reservados: T30 rellena el resultado de talla y T34 el estado limpia/sucia.
-            HuecoResultadoTalla(prenda)
+            SeccionTalla(prenda, measurements, onAbrirPerfil)
             HuecoEstadoLimpieza(prenda)
 
             HorizontalDivider()
@@ -178,12 +185,6 @@ private fun DetalleContenido(
             }
         }
     }
-}
-
-/** Hueco para el resultado de talla (T30): talla ideal y etiqueta de corte. Vacío hasta entonces. */
-@Composable
-@Suppress("UNUSED_PARAMETER")
-private fun HuecoResultadoTalla(prenda: Garment) {
 }
 
 /** Hueco para el estado limpia/sucia (T34) y su control. Vacío hasta entonces. */
