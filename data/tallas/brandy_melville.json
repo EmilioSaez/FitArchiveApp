@@ -1,0 +1,18 @@
+{
+  "marca": "Brandy Melville",
+  "fuente": [
+    "https://eu.brandymelville.com",
+    "https://us.brandymelville.com"
+  ],
+  "fecha": "2026-11-02",
+  "talla_unica": true,
+  "unidad": "cm",
+  "notas": [
+    "Muchas prendas son talla única ('One Size') en las fichas de producto; la marca no publica guía de tallas con medidas corporales (/pages/size-guide devuelve 404).",
+    "Las fichas dan medidas de la prenda (p. ej. largo, contorno de pecho en plano), no del cuerpo: no son comparables con las medidas de la usuaria."
+  ],
+  "prendas": {},
+  "pendiente": [
+    "Tabla de medidas corporales: no existe en la web oficial; no se inventa. Valorar tratar como talla única con ajuste 'ajustada' por defecto o recoger medidas de prenda por producto."
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "marca": "Scalpers",
+  "fuente": "https://scalperscompany.com/pages/guia-tallas-mujer",
+  "fecha": "2026-11-02",
+  "unidad": "cm",
+  "tipo_valor": "punto",
+  "notas": [
+    "La página no indica la unidad; se asume cm (coherente con la guía EU en eu.scalperscompany.com/pages/size-guide-women).",
+    "Un único valor por talla, no rango: se guarda como [valor,valor].",
+    "Equivalencia numérica EU: inferior XS34 S36 M38 L40 XL42; abrigos S36 M38 L40 XL42."
+  ],
+  "prendas": {
+    "parte_superior": {
+      "S": {
+        "pecho": [
+          86,
+          86
+        ],
+        "cintura": [
+          66,
+          66
+        ]
+      },
+      "M": {
+        "pecho": [
+          90,
+          90
+        ],
+        "cintura": [
+          70,
+          70
+        ]
+      },
+      "L": {
+        "pecho": [
+          94,
+          94
+        ],
+        "cintura": [
+          74,
+          74
+        ]
+      },
+      "XL": {
+        "pecho": [
+          98,
+          98
+        ],
+        "cintura": [
+          78,
+          78
+        ]
+      }
+    },
+    "parte_inferior": {
+      "XS": {
+        "cintura": [
+          62,
+          62
+        ],
+        "cadera": [
+          90,
+          90
+        ],
+        "talla_eu": 34
+      },
+      "S": {
+        "cintura": [
+          66,
+          66
+        ],
+        "cadera": [
+          94,
+          94
+        ],
+        "talla_eu": 36
+      },
+      "M": {
+        "cintura": [
+          70,
+          70
+        ],
+        "cadera": [
+          98,
+          98
+        ],
+        "talla_eu": 38
+      },
+      "L": {
+        "cintura": [
+          74,
+          74
+        ],
+        "cadera": [
+          102,
+          102
+        ],
+        "talla_eu": 40
+      },
+      "XL": {
+        "cintura": [
+          78,
+          78
+        ],
+        "cadera": [
+          106,
+          106
+        ],
+        "talla_eu": 42
+      }
+    },
+    "vestidos": {
+      "S": {
+        "pecho": [
+          86,
+          86
+        ],
+        "cintura": [
+          66,
+          66
+        ],
+        "cadera": [
+          94,
+          94
+        ]
+      },
+      "M": {
+        "pecho": [
+          90,
+          90
+        ],
+        "cintura": [
+          70,
+          70
+        ],
+        "cadera": [
+          98,
+          98
+        ]
+      },
+      "L": {
+        "pecho": [
+          94,
+          94
+        ],
+        "cintura": [
+          74,
+          74
+        ],
+        "cadera": [
+          102,
+          102
+        ]
+      },
+      "XL": {
+        "pecho": [
+          98,
+          98
+        ],
+        "cintura": [
+          78,
+          78
+        ],
+        "cadera": [
+          106,
+          106
+        ]
+      }
+    },
+    "abrigos_chaquetas": {
+      "S": {
+        "pecho": [
+          86,
+          86
+        ],
+        "cintura": [
+          66,
+          66
+        ],
+        "cadera": [
+          94,
+          94
+        ],
+        "talla_eu": 36
+      },
+      "M": {
+        "pecho": [
+          90,
+          90
+        ],
+        "cintura": [
+          70,
+          70
+        ],
+        "cadera": [
+          98,
+          98
+        ],
+        "talla_eu": 38
+      },
+      "L": {
+        "pecho": [
+          94,
+          94
+        ],
+        "cintura": [
+          74,
+          74
+        ],
+        "cadera": [
+          102,
+          102
+        ],
+        "talla_eu": 40
+      },
+      "XL": {
+        "pecho": [
+          98,
+          98
+        ],
+        "cintura": [
+          78,
+          78
+        ],
+        "cadera": [
+          106,
+          106
+        ],
+        "talla_eu": 42
+      }
+    }
+  },
+  "pendiente": [
+    "Tallas por encima de XL/por debajo de XS no aparecen en la guía.",
+    "Calzado (EU 37-40) fuera del alcance de medidas corporales."
+  ]
+}

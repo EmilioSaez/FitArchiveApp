@@ -35,7 +35,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T22 Pantalla de medidas con guía — UI — T04
 - [ ] T23 Tablas Zara, Pull&Bear, Bershka, Stradivarius, Massimo Dutti — Contenido — —
 - [~] T24 Tablas Mango y H&M — Contenido — — (parcial: H&M camiseta y pantalón hecho; Mango pendiente de guía oficial)
-- [ ] T25 Tablas Brownie, Scalpers, Hollister, Brandy Melville — Contenido — —
+- [x] T25 Tablas Brownie, Scalpers, Hollister, Brandy Melville — Contenido — —
 - [x] T26 Tabla genérica europea — Contenido — —
 - [ ] T27 Formato común de tablas y carga — Datos — T03, T23–T26
 - [ ] T28 Algoritmo de ajuste y talla ideal — Lógica — T22, T27

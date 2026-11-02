@@ -1,0 +1,196 @@
+{
+  "marca": "Brownie",
+  "fuente": [
+    "https://www.browniespain.com/pages/guia-de-tallas-ropa",
+    "https://www.browniespain.com/pages/guia-de-tallas-partes-abajo"
+  ],
+  "fecha": "2026-11-02",
+  "unidad": "cm",
+  "tipo_valor": "punto",
+  "notas": [
+    "Las guías oficiales dan un único valor por talla (medida corporal en cm), no un rango; se guarda como [valor,valor].",
+    "Tallas XXS2, XS-S y M-L son variantes que aparecen en la guía oficial."
+  ],
+  "prendas": {
+    "parte_superior": {
+      "XXS": {
+        "pecho": [
+          77,
+          77
+        ],
+        "cintura": [
+          60,
+          60
+        ],
+        "cadera": [
+          85,
+          85
+        ]
+      },
+      "XS": {
+        "pecho": [
+          81,
+          81
+        ],
+        "cintura": [
+          64,
+          64
+        ],
+        "cadera": [
+          89,
+          89
+        ]
+      },
+      "S": {
+        "pecho": [
+          85,
+          85
+        ],
+        "cintura": [
+          68,
+          68
+        ],
+        "cadera": [
+          93,
+          93
+        ]
+      },
+      "M": {
+        "pecho": [
+          89,
+          89
+        ],
+        "cintura": [
+          72,
+          72
+        ],
+        "cadera": [
+          97,
+          97
+        ]
+      },
+      "L": {
+        "pecho": [
+          93,
+          93
+        ],
+        "cintura": [
+          76,
+          76
+        ],
+        "cadera": [
+          101,
+          101
+        ]
+      },
+      "XXS2": {
+        "pecho": [
+          79,
+          79
+        ],
+        "cintura": [
+          62,
+          62
+        ],
+        "cadera": [
+          87,
+          87
+        ]
+      },
+      "XS-S": {
+        "pecho": [
+          85,
+          85
+        ],
+        "cintura": [
+          68,
+          68
+        ],
+        "cadera": [
+          93,
+          93
+        ]
+      },
+      "M-L": {
+        "pecho": [
+          91,
+          91
+        ],
+        "cintura": [
+          74,
+          74
+        ],
+        "cadera": [
+          99,
+          99
+        ]
+      }
+    },
+    "parte_inferior": {
+      "32": {
+        "cintura": [
+          60,
+          60
+        ],
+        "cadera": [
+          85,
+          85
+        ]
+      },
+      "34": {
+        "cintura": [
+          64,
+          64
+        ],
+        "cadera": [
+          89,
+          89
+        ]
+      },
+      "36": {
+        "cintura": [
+          68,
+          68
+        ],
+        "cadera": [
+          93,
+          93
+        ]
+      },
+      "38": {
+        "cintura": [
+          72,
+          72
+        ],
+        "cadera": [
+          97,
+          97
+        ]
+      },
+      "40": {
+        "cintura": [
+          76,
+          76
+        ],
+        "cadera": [
+          101,
+          101
+        ]
+      },
+      "42": {
+        "cintura": [
+          80,
+          80
+        ],
+        "cadera": [
+          105,
+          105
+        ]
+      }
+    }
+  },
+  "pendiente": [
+    "Tallas en letra de la guía de partes de abajo (Petite, XXS...M-L, S-M): la tabla extraída tiene columnas ambiguas; revisar a mano.",
+    "Vestidos, abrigos y calzado: sin tabla propia en las guías consultadas."
+  ]
+}
