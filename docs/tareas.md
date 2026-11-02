@@ -32,7 +32,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T21 Pruebas v0.2 — QA — T16–T20
 
 ## v0.3 Tallas
-- [ ] T22 Pantalla de medidas con guía — UI — T04
+- [x] T22 Pantalla de medidas con guía — UI — T04
 - [ ] T23 Tablas Zara, Pull&Bear, Bershka, Stradivarius, Massimo Dutti — Contenido — —
 - [~] T24 Tablas Mango y H&M — Contenido — — (parcial: H&M camiseta y pantalón hecho; Mango pendiente de guía oficial)
 - [x] T25 Tablas Brownie, Scalpers, Hollister, Brandy Melville — Contenido — —
@@ -54,7 +54,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 
 ## v0.5 Sugerencias
 - [ ] T39 Servicio del tiempo (ubicación o ciudad) — Lógica — T02
-- [ ] T40 Reglas de combinación de colores — Lógica — T03
+- [x] T40 Reglas de combinación de colores — Lógica — T03
 - [ ] T41 Motor de sugerencias — Lógica — T35, T36, T39, T40
 - [ ] T42 Aprender estilo de likes y outfits guardados — Lógica — T14, T41
 - [ ] T43 Pantalla "outfit del día" — UI — T17, T41
