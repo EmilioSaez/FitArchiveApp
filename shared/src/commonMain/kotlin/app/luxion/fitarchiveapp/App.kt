@@ -18,6 +18,7 @@ import app.luxion.fitarchiveapp.fondo.crearQuitaFondo
 import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
+import app.luxion.fitarchiveapp.ui.detalle.DetallePrendaScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
 import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
@@ -50,6 +51,11 @@ fun App(repositories: Repositories) {
             )
             return@FitArchiveTheme
         }
+        var detalleId by remember { mutableStateOf<Long?>(null) }
+        detalleId?.let { id ->
+            DetallePrendaScreen(repositories.garments, id, onVolver = { detalleId = null })
+            return@FitArchiveTheme
+        }
         val ubicacion = rememberProveedorUbicacion()
         val almacenCiudad = rememberAlmacenCiudad()
         val seleccionCiudad = remember(ubicacion, almacenCiudad) {
@@ -77,6 +83,7 @@ fun App(repositories: Repositories) {
                 Destino.Armario -> ArmarioScreen(
                     repositories.garments,
                     onAnadirPrenda = { anadiendo = true },
+                    onAbrirPrenda = { detalleId = it.id },
                     modifier = Modifier.padding(padding),
                 )
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
