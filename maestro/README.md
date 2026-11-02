@@ -10,3 +10,5 @@ Observaciones menores: `filtro_aplicar_fijo` (O1), `favorita_visible` (O2), `rec
 ## Tallas (T31)
 `medidas_perfil` (guarda el cuerpo M), `anadir_prenda_talla` (galería + marca + talla + corte; env `FOTO_X TIPO ESTACION USO MARCA TALLA CORTE`), `detalle_talla` (comprueba etiqueta y talla ideal de la 1ª prenda de la pestaña; env `ETIQUETA IDEAL`). Resultados en `docs/pruebas-tallas.md`. La galería del emulador nuevo está vacía: empujar JPG a `/sdcard/Pictures/` y lanzar `MEDIA_SCANNER_SCAN_FILE`.
 
+## Outfits (T21)
+`outfit_crear` (camiseta + pantalón, env `NOMBRE`), `outfit_lista` (favorito, reinicio, cancelar/confirmar eliminar; env `NOMBRE`), `outfit_compartir` (selector del sistema con vista previa). Suponen un armario con una camiseta y un pantalón (fotos de color plano). Resultados en `docs/bugs-v02.md`.

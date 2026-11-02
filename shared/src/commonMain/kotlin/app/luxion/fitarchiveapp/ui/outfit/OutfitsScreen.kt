@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
+import app.luxion.fitarchiveapp.compartir.rememberCompartirOutfit
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
 import app.luxion.fitarchiveapp.foto.cargarImagen
@@ -42,10 +45,7 @@ import app.luxion.fitarchiveapp.model.Outfit
 import app.luxion.fitarchiveapp.ui.avatar.AvatarConPrendas
 import app.luxion.fitarchiveapp.ui.avatar.PrendaAvatar
 
-/**
- * Pestaña Outfits (T19): "Mis outfits" con los outfits guardados.
- * [onCompartir] es el enganche de T20 (compartir como imagen): mientras sea null no se muestra la acción.
- */
+/** Pestaña Outfits (T19): "Mis outfits" con los outfits guardados; cada tarjeta se puede compartir como imagen (T20). */
 @Composable
 fun OutfitsScreen(
     outfits: OutfitRepository,
@@ -53,11 +53,11 @@ fun OutfitsScreen(
     onNuevoOutfit: () -> Unit,
     onAbrirOutfit: (Outfit) -> Unit,
     modifier: Modifier = Modifier,
-    onCompartir: ((OutfitEnLista) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val vm = remember(outfits, armario) { ListaOutfitsViewModel(outfits, armario, scope) }
     val estado by vm.estado.collectAsState()
+    val compartir = rememberCompartirOutfit()
 
     // Las fotos se cargan una vez por ruta y se comparten entre miniaturas.
     val imagenes = remember { mutableStateMapOf<String, ImageBitmap>() }
@@ -117,7 +117,9 @@ fun OutfitsScreen(
                         onAbrir = { onAbrirOutfit(item.outfit) },
                         onFavorito = { vm.alternarFavorito(item.outfit) },
                         onEliminar = { vm.pedirEliminar(item.outfit) },
-                        onCompartir = onCompartir?.let { { it(item) } },
+                        onCompartir = { prendas ->
+                            compartir.compartir(item.outfit.name, prendas) { vm.mostrarError("No se pudo compartir el outfit") }
+                        },
                     )
                 }
             }
@@ -143,6 +145,7 @@ private fun EstadoVacio(onNuevoOutfit: () -> Unit, modifier: Modifier = Modifier
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TarjetaOutfit(
     item: OutfitEnLista,
@@ -150,7 +153,7 @@ private fun TarjetaOutfit(
     onAbrir: () -> Unit,
     onFavorito: () -> Unit,
     onEliminar: () -> Unit,
-    onCompartir: (() -> Unit)?,
+    onCompartir: (List<PrendaAvatar>) -> Unit,
 ) {
     val prendas = item.prendas.mapNotNull { p ->
         imagenes[p.prenda.photoPath]?.let {
@@ -177,10 +180,16 @@ private fun TarjetaOutfit(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(onClick = onFavorito) { Text(if (item.outfit.favorite) "★" else "☆") }
-            onCompartir?.let { TextButton(onClick = it) { Text("Compartir") } }
-            TextButton(onClick = onEliminar) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            // Tres acciones en media pantalla: si no caben en una línea, la última pasa a la siguiente.
+            val relleno = PaddingValues(horizontal = 8.dp)
+            TextButton(onClick = onFavorito, contentPadding = relleno) { Text(if (item.outfit.favorite) "★" else "☆") }
+            TextButton(onClick = { onCompartir(prendas) }, enabled = prendas.isNotEmpty(), contentPadding = relleno) {
+                Text("Compartir", maxLines = 1, softWrap = false)
+            }
+            TextButton(onClick = onEliminar, contentPadding = relleno) {
+                Text("Eliminar", color = MaterialTheme.colorScheme.error, maxLines = 1, softWrap = false)
+            }
         }
     }
 }

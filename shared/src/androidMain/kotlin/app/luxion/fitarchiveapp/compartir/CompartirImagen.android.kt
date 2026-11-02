@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.compartir
 
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -36,9 +37,11 @@ private class CompartirImagenAndroid(private val context: Context) : CompartirIm
         val enviar = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
+            // El ClipData lleva el permiso de lectura: sin él el selector no puede leer la imagen (vista previa) ni las apps destino.
+            clipData = ClipData.newRawUri(null, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        val selector = Intent.createChooser(enviar, null)
+        val selector = Intent.createChooser(enviar, null).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         // Fuera de una Activity hace falta una tarea nueva.
         if (context !is android.app.Activity) selector.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(selector)

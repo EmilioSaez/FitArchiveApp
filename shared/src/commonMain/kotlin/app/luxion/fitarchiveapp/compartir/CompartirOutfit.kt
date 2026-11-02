@@ -54,19 +54,14 @@ fun renderizarTarjetaOutfit(
     CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(bitmap), tamano) {
         drawRect(Color.White)
 
-        val titulo = medidor.measure(
-            tituloTarjeta(nombre),
-            style = TextStyle(
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                fontSize = 84.sp,
-                color = Tinta,
-                textAlign = TextAlign.Center,
-            ),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            constraints = Constraints(maxWidth = d.anchoTitulo.toInt()),
-        )
+        // El título baja de tamaño hasta caber entre su borde superior y el filete (nombres largos ocupan 2 líneas).
+        val alturaTitulo = d.filete.y - d.tituloY - 12f
+        var tamanoTitulo = TITULO_MAX_SP
+        var titulo = medirTitulo(medidor, nombre, tamanoTitulo, d.anchoTitulo)
+        while ((titulo.size.height > alturaTitulo || titulo.hasVisualOverflow) && tamanoTitulo > TITULO_MIN_SP) {
+            tamanoTitulo -= 6
+            titulo = medirTitulo(medidor, nombre, tamanoTitulo, d.anchoTitulo)
+        }
         drawText(titulo, topLeft = Offset((tamano.width - titulo.size.width) / 2f, d.tituloY))
 
         drawRect(Tinta, Offset(d.filete.x, d.filete.y), Size(d.filete.w, d.filete.h))
@@ -90,6 +85,23 @@ fun renderizarTarjetaOutfit(
     }
     return bitmap
 }
+
+private const val TITULO_MAX_SP = 84
+private const val TITULO_MIN_SP = 36
+
+private fun medirTitulo(medidor: TextMeasurer, nombre: String, tamanoSp: Int, anchoMax: Float) = medidor.measure(
+    tituloTarjeta(nombre),
+    style = TextStyle(
+        fontFamily = FontFamily.Serif,
+        fontWeight = FontWeight.Bold,
+        fontSize = tamanoSp.sp,
+        color = Tinta,
+        textAlign = TextAlign.Center,
+    ),
+    overflow = TextOverflow.Ellipsis,
+    maxLines = 2,
+    constraints = Constraints(maxWidth = anchoMax.toInt()),
+)
 
 /** Exporta un outfit como imagen y abre el share sheet del sistema. */
 class CompartirOutfit internal constructor(

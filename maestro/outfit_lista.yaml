@@ -1,0 +1,18 @@
+# T21: lista de outfits: favorito, persistencia tras reiniciar, cancelar y confirmar eliminación. Env: NOMBRE.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "☆"
+- assertVisible: "★"
+- launchApp:
+    stopApp: true
+- tapOn: "Outfits"
+- assertVisible: "${NOMBRE}"
+- assertVisible: "★"
+- tapOn: "Eliminar"
+- assertVisible: "Eliminar outfit"
+- tapOn: "Cancelar"
+- assertVisible: "${NOMBRE}"
+- tapOn: "Eliminar"
+- tapOn:
+    point: "74%,56%"
+- assertVisible: "Aún no tienes outfits"
