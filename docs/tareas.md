@@ -40,7 +40,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T27 Formato común de tablas y carga — Datos — T03, T23–T26
 - [x] T28 Algoritmo de ajuste y talla ideal — Lógica — T22, T27
 - [ ] T29 Etiqueta de corte (slim/normal/oversize) — Lógica — T28
-- [ ] T30 Resultado de talla en el detalle — UI — T13, T28
+- [x] T30 Resultado de talla en el detalle — UI — T13, T28
 - [ ] T31 Pruebas del algoritmo con casos reales — QA — T28–T30
 
 ## v0.4 Organización

@@ -54,7 +54,16 @@ fun App(repositories: Repositories) {
         }
         var detalleId by remember { mutableStateOf<Long?>(null) }
         detalleId?.let { id ->
-            DetallePrendaScreen(repositories.garments, id, onVolver = { detalleId = null })
+            DetallePrendaScreen(
+                repositories.garments,
+                repositories.measurements,
+                id,
+                onVolver = { detalleId = null },
+                onAbrirPerfil = {
+                    destino = Destino.Perfil
+                    detalleId = null
+                },
+            )
             return@FitArchiveTheme
         }
         val ubicacion = rememberProveedorUbicacion()
