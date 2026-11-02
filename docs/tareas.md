@@ -19,7 +19,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T10 Armario con pestañas por tipo — UI — T04
 - [ ] T11 Pestañas por color y estación — UI — T10
 - [ ] T12 Filtro multicriterio — UI — T10
-- [ ] T13 Detalle de prenda: editar y eliminar con confirmación — UI — T08
+- [x] T13 Detalle de prenda: editar y eliminar con confirmación — UI — T08
 - [ ] T14 Like y pestaña de favoritas — UI — T10
 - [ ] T15 Pruebas v0.1 — QA — T05–T14
 
