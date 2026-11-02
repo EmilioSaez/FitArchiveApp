@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.tallas
 
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.GarmentType
 import app.luxion.fitarchiveapp.model.Measurements
 import kotlin.math.abs
@@ -33,7 +34,8 @@ enum class EstadoAjuste {
  * Se tolera más holgura que estrechez: una prenda algo grande se lleva, una pequeña no.
  * Las tallas de valor único (Brownie, Scalpers) se tratan como `v ± semiAnchoPunto`
  * (las tallas avanzan 3–4 cm, así que quedan contiguas).
- * T29 (etiqueta de corte) ampliará esta clase con sus parámetros.
+ *
+ * El [corte] de la prenda (T29) mueve esos rangos con un [AjusteCorte]; no afecta al calzado.
  */
 data class OpcionesAjuste(
     val margenAjustada: Double = 1.0,
@@ -45,6 +47,30 @@ data class OpcionesAjuste(
     val semiAnchoPuntoPie: Double = 0.4,
     /** Al elegir la talla ideal, quedarse corta pesa más que quedarse grande. */
     val pesoAjustada: Double = 2.0,
+    /** Corte de la prenda (T29); NORMAL no cambia nada. */
+    val corte: Fit = Fit.NORMAL,
+    val ajusteSlim: AjusteCorte = AjusteCorte(desplazamiento = -2.0, extraAjustada = -1.0, extraHolgada = -3.0),
+    val ajusteOversize: AjusteCorte = AjusteCorte(desplazamiento = 4.0, extraAjustada = 1.0, extraHolgada = 6.0),
+) {
+    internal val ajusteCorte: AjusteCorte
+        get() = when (corte) {
+            Fit.SLIM -> ajusteSlim
+            Fit.NORMAL -> AjusteCorte()
+            Fit.OVERSIZE -> ajusteOversize
+        }
+}
+
+/**
+ * Cómo cambia un corte la evaluación de pecho, cintura y cadera (cm):
+ * - [desplazamiento]: se suma a `min` y `max` de cada talla. Oversize > 0: la prenda cae más grande,
+ *   así que una talla "cubre" cuerpos mayores y la ideal sale una talla menos; slim < 0, al revés.
+ * - [extraAjustada] / [extraHolgada]: se suman a los márgenes antes de etiquetar. Oversize tolera más
+ *   estrechez y mucha más holgura (es lo buscado); slim es más estricto en ambas.
+ */
+data class AjusteCorte(
+    val desplazamiento: Double = 0.0,
+    val extraAjustada: Double = 0.0,
+    val extraHolgada: Double = 0.0,
 )
 
 /** Medidas de la usuaria en cm; las ausentes son null. */
@@ -84,6 +110,8 @@ data class ResultadoAjuste(
     val esGenerica: Boolean = false,
     /** Clave de prenda de la tabla usada (`camiseta`, `parte_superior`…). */
     val clavePrenda: String? = null,
+    /** Corte con el que se calculó. */
+    val corte: Fit = Fit.NORMAL,
 )
 
 object AjusteTalla {
@@ -147,6 +175,7 @@ object AjusteTalla {
             tablaUsada = tabla.marca,
             esGenerica = delaMarca == null,
             clavePrenda = prenda.clave,
+            corte = opciones.corte,
         )
 
         val hayMedidas = prenda.tallas.any { t -> t.medidas.keys.any { medidas[it] != null } }
@@ -181,10 +210,19 @@ object AjusteTalla {
         return Rango(r.min - s, r.max + s)
     }
 
-    internal fun etiquetar(cuerpo: Double, r: Rango, m: Medida, o: OpcionesAjuste): EtiquetaAjuste {
+    /** Rango de la talla tras aplicar el corte (el calzado no tiene corte). */
+    private fun efectivo(r: Rango, m: Medida, o: OpcionesAjuste): Rango {
         val l = limites(r, m, o)
-        val ajustada = if (m == Medida.PIE) o.margenAjustadaPie else o.margenAjustada
-        val holgada = if (m == Medida.PIE) o.margenHolgadaPie else o.margenHolgada
+        if (m == Medida.PIE) return l
+        val d = o.ajusteCorte.desplazamiento
+        return Rango(l.min + d, l.max + d)
+    }
+
+    internal fun etiquetar(cuerpo: Double, r: Rango, m: Medida, o: OpcionesAjuste): EtiquetaAjuste {
+        val l = efectivo(r, m, o)
+        val c = o.ajusteCorte
+        val ajustada = if (m == Medida.PIE) o.margenAjustadaPie else maxOf(0.0, o.margenAjustada + c.extraAjustada)
+        val holgada = if (m == Medida.PIE) o.margenHolgadaPie else maxOf(0.0, o.margenHolgada + c.extraHolgada)
         return when {
             cuerpo > l.max + ajustada -> EtiquetaAjuste.AJUSTADA
             cuerpo < l.min - holgada -> EtiquetaAjuste.HOLGADA
@@ -198,13 +236,13 @@ object AjusteTalla {
         var centro = 0.0
         for ((m, r) in t.medidas) {
             val c = medidas[m] ?: continue
-            val l = limites(r, m, o)
+            val l = efectivo(r, m, o)
             fuera += when {
                 c > l.max -> (c - l.max) * o.pesoAjustada
                 c < l.min -> l.min - c
                 else -> 0.0
             }
-            centro += abs(c - r.centro)
+            centro += abs(c - (l.min + l.max) / 2)
         }
         return fuera to centro
     }

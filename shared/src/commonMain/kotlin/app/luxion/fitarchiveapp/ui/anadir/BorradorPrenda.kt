@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.ui.anadir
 
 import app.luxion.fitarchiveapp.foto.FotoCapturada
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -46,6 +47,7 @@ data class BorradorPrenda(
     val usage: Usage? = null,
     val brand: String = "",
     val size: String? = null,
+    val fit: Fit = Fit.NORMAL,
 ) {
     val completo: Boolean get() = type != null && color != null && season != null && usage != null
 
@@ -53,7 +55,7 @@ data class BorradorPrenda(
         /** Borrador con los datos de una prenda existente, para editarla. */
         fun desde(g: Garment) = BorradorPrenda(
             type = g.type, color = g.color, season = g.season, usage = g.usage,
-            brand = g.brand.orEmpty(), size = g.size,
+            brand = g.brand.orEmpty(), size = g.size, fit = g.fit,
         )
     }
 
@@ -70,6 +72,7 @@ data class BorradorPrenda(
             usage = usage!!,
             brand = brand.trim().ifEmpty { null },
             size = size,
+            fit = fit,
         )
     }
 
@@ -85,6 +88,7 @@ data class BorradorPrenda(
             usage = usage!!,
             brand = brand.trim().ifEmpty { null },
             size = size,
+            fit = fit,
             favorite = false,
             dirty = false,
             wearsSinceWash = 0,
@@ -110,6 +114,12 @@ fun GarmentType.etiqueta() = when (this) {
     GarmentType.SHOES -> "Calzado"
     GarmentType.BAG -> "Bolso"
     GarmentType.ACCESSORY -> "Accesorio"
+}
+
+fun Fit.etiqueta() = when (this) {
+    Fit.SLIM -> "Slim"
+    Fit.NORMAL -> "Normal"
+    Fit.OVERSIZE -> "Oversize"
 }
 
 fun Season.etiqueta() = when (this) {

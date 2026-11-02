@@ -64,4 +64,19 @@ Solo se han movido de `data/tallas/` a la carpeta de recursos; el contenido no s
 - **Global**: ajustada si alguna zona lo es; si no, holgada si alguna lo es; si no, bien.
 - **Talla ideal**: la talla de la tabla con menor penalización (cm fuera de rango; quedarse corta pesa ×2), desempate por cercanía al centro y luego por orden de tabla.
 - **Medidas ausentes**: solo se evalúan las zonas con medida y dato en la talla; sin ninguna → `SIN_MEDIDAS`. Talla no indicada o inexistente → `TALLA_NO_ENCONTRADA` (con talla ideal). `Measurements.footCm` guarda el largo del pie (cm) y `MedidasUsuaria.de(m)` lo usa para el calzado.
-- **T29**: el corte se añadirá a `OpcionesAjuste` / `ResultadoAjuste` sin cambiar la firma.
+
+## Etiqueta de corte (T29)
+
+`Garment.fit` (`Fit`: `SLIM`, `NORMAL`, `OVERSIZE`; por defecto `NORMAL`; columna `fit` en `Garment`, campo `fit` en el backup con `"NORMAL"` por defecto) se elige en el formulario de añadir/editar prenda. Se pasa a `AjusteTalla.calcular` con `OpcionesAjuste(corte = prenda.fit)` (firma sin cambios); `ResultadoAjuste.corte` lo devuelve.
+
+El corte se aplica a pecho, cintura y cadera, no al calzado. Con `d` = desplazamiento, se suma a `min` y `max` de cada talla (antes de aplicar los márgenes, tras la ampliación de valores únicos), y los márgenes de las etiquetas cambian así (cm; valores en `AjusteCorte`):
+
+| Corte | `d` | Margen ajustada (base 1) | Margen holgada (base 3) | Efecto |
+|---|---|---|---|---|
+| `SLIM` | −2 | 0 | 0 | Más estricto; la talla ideal sube (≈ una talla más) |
+| `NORMAL` | 0 | 1 | 3 | Sin cambios |
+| `OVERSIZE` | +4 | 2 | 9 | Tolera más holgura y estrechez; la ideal baja (≈ una talla menos) |
+
+Ejemplo (genérica, camiseta `M` = pecho 86–94): con corte normal, un pecho de 95,1 cm es *ajustada*; en oversize sigue *bien* hasta 100 cm. Pecho 90 / cintura 72: ideal `M` normal, `S` oversize.
+
+La talla ideal usa los mismos rangos desplazados (la penalización y la distancia al centro se miden contra el rango desplazado).
