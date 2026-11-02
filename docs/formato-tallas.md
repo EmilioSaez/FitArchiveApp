@@ -53,3 +53,15 @@ Ids: `generica-eu`, `zara`, `pullbear`, `bershka`, `stradivarius`, `massimo_dutt
 ## Cambios en los datos
 
 Solo se han movido de `data/tallas/` a la carpeta de recursos; el contenido no se ha modificado.
+
+## Algoritmo de ajuste (T28)
+
+`AjusteTalla.calcular(medidas, marca, tipo, talla, tablas, opciones)` en `tallas/AjusteTalla.kt`; lógica pura en commonMain.
+
+- **Tabla**: la de la marca (el texto libre se normaliza: `Pull&Bear` → `pullbear`) si tiene datos para el tipo de prenda; si no (marca sin tabla, vacía/pendiente o sin ese tipo), la genérica EU (`esGenerica = true`).
+- **Clave de prenda** (`clavesPara`): camiseta/camisa/jersey → `camiseta`, `parte_superior`; chaqueta/abrigo → `chaqueta`, `abrigos_chaquetas`; pantalón/vaquero/short → `pantalon`, `parte_inferior`, `parte_inferior_numerica_us`; falda → `falda`, `parte_inferior`; vestido/mono → `vestido`, `vestidos`; calzado → `calzado`; bolso/accesorio → sin talla (`NO_APLICA`). Se usa la primera clave que contiene la talla indicada (así `5` de Hollister va a la numérica US).
+- **Etiqueta por zona** (pecho, cintura, cadera; pie en calzado), con cuerpo `c` y rango `[min, max]` de la talla: `c > max + 1` → ajustada; `c < min - 3` → holgada; si no, bien. Valores únicos se tratan como `v ± 2`. Pie: `+0,3` / `-1,0` y `± 0,4`. Valores en `OpcionesAjuste`.
+- **Global**: ajustada si alguna zona lo es; si no, holgada si alguna lo es; si no, bien.
+- **Talla ideal**: la talla de la tabla con menor penalización (cm fuera de rango; quedarse corta pesa ×2), desempate por cercanía al centro y luego por orden de tabla.
+- **Medidas ausentes**: solo se evalúan las zonas con medida y dato en la talla; sin ninguna → `SIN_MEDIDAS`. Talla no indicada o inexistente → `TALLA_NO_ENCONTRADA` (con talla ideal). `Measurements` no guarda el pie: `MedidasUsuaria.de(m, pieCm)` lo recibe aparte.
+- **T29**: el corte se añadirá a `OpcionesAjuste` / `ResultadoAjuste` sin cambiar la firma.
