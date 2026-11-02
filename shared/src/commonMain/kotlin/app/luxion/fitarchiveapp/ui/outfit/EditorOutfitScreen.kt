@@ -41,6 +41,7 @@ import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.LIENZO_ALTO
 import app.luxion.fitarchiveapp.avatar.Slot
 import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
+import app.luxion.fitarchiveapp.compartir.rememberCompartirOutfit
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
 import app.luxion.fitarchiveapp.foto.cargarImagen
@@ -74,6 +75,8 @@ fun EditorOutfitScreen(
         imagenes[e.prenda.photoPath]?.let { PrendaAvatar(it, subtipoPorDefecto(e.prenda.type), e.ajuste) }
     }
 
+    val compartir = rememberCompartirOutfit()
+
     Column(modifier.fillMaxSize().padding(top = 8.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onTerminado) { Text("Cancelar") }
@@ -106,6 +109,10 @@ fun EditorOutfitScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Ocasiones(estado.ocasion, vm::cambiarOcasion)
+                OutlinedButton(
+                    onClick = { compartir.compartir(estado.nombre, prendasAvatar) { vm.mostrarError("No se pudo compartir el outfit") } },
+                    enabled = prendasAvatar.isNotEmpty(),
+                ) { Text("Compartir") }
                 estado.error?.let {
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
                 }
