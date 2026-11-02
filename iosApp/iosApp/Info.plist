@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>es</string>
+	<!-- Selector de fotos del sistema (PHPicker): no requiere NSPhotoLibraryUsageDescription -->
+	<key>NSCameraUsageDescription</key>
+	<string>FitArchive usa la cámara para que fotografíes tus prendas y añadirlas a tu armario. Las fotos se quedan en tu móvil.</string>
+</dict>
+</plist>
