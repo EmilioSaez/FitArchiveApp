@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -36,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.MeasurementsRepository
+import app.luxion.fitarchiveapp.data.UsoRepository
 import app.luxion.fitarchiveapp.foto.AlmacenFotos
 import app.luxion.fitarchiveapp.foto.cargarImagen
 import app.luxion.fitarchiveapp.foto.rememberAlmacenFotos
@@ -53,6 +57,7 @@ import kotlinx.coroutines.launch
 fun DetallePrendaScreen(
     garments: GarmentRepository,
     measurements: MeasurementsRepository,
+    usos: UsoRepository,
     prendaId: Long,
     onVolver: () -> Unit,
     onAbrirPerfil: () -> Unit,
@@ -69,7 +74,7 @@ fun DetallePrendaScreen(
     LaunchedEffect(estado) { estado?.let { prenda = it } }
     val actual = estado ?: prenda ?: return
 
-    Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).windowInsetsPadding(WindowInsets.systemBars)) {
         if (editando) {
             val imagen by produceState<ImageBitmap?>(null, actual.photoPath) { value = cargarImagen(actual.photoPath) }
             FormularioPrenda(
@@ -94,6 +99,7 @@ fun DetallePrendaScreen(
                 onEliminar = { confirmando = true },
                 onAlternarLimpieza = { scope.launch { garments.setDirty(actual.id, !actual.dirty) } },
                 measurements = measurements,
+                usos = usos,
                 onAbrirPerfil = onAbrirPerfil,
             )
         }
@@ -128,6 +134,7 @@ private fun DetalleContenido(
     onEliminar: () -> Unit,
     onAlternarLimpieza: () -> Unit,
     measurements: MeasurementsRepository,
+    usos: UsoRepository,
     onAbrirPerfil: () -> Unit,
 ) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
@@ -174,7 +181,9 @@ private fun DetalleContenido(
             Dato("Uso", prenda.usage.etiqueta())
             Dato("Marca", prenda.brand ?: "—")
             Dato("Talla", prenda.size ?: "—")
-            Dato("Veces usada", prenda.totalWears.toString())
+
+            HorizontalDivider()
+            HistorialUsos(prenda, usos)
             HorizontalDivider()
 
             SeccionTalla(prenda, measurements, onAbrirPerfil)

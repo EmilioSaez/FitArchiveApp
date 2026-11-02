@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.backup
 
 import app.luxion.fitarchiveapp.model.CalendarDay
+import app.luxion.fitarchiveapp.model.WearRecord
 import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
@@ -88,6 +89,8 @@ class BackupService(
         refs(m.calendar.all { it.outfitId == null || it.outfitId in o }, "calendario")
         refs(m.tripOutfits.all { it.tripId in t && it.outfitId in o }, "viajes")
         refs(m.tripGarments.all { it.tripId in t && it.garmentId in g }, "viajes")
+        noDuplicates(m.wears.map { it.date to it.garmentId }, "usos")
+        refs(m.wears.all { it.garmentId in g }, "usos")
         refs(m.photos.all { it.garmentId in g }, "fotos")
     }
 }
@@ -110,6 +113,7 @@ private fun WardrobeSnapshot.toManifest(createdAt: Long, photos: List<PhotoEntry
     trips = trips.map { TripDto(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
     tripOutfits = tripOutfits.map { TripOutfitDto(it.tripId, it.outfitId) },
     tripGarments = tripGarments.map { TripGarmentDto(it.tripId, it.garmentId, it.packed) },
+    wears = wears.map { WearDto(it.date, it.garmentId) },
     photos = photos,
 )
 
@@ -138,4 +142,5 @@ private fun BackupManifest.toSnapshot() = WardrobeSnapshot(
     trips = trips.map { Trip(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
     tripOutfits = tripOutfits.map { TripOutfitLink(it.tripId, it.outfitId) },
     tripGarments = tripGarments.map { TripGarmentLink(it.tripId, it.garmentId, it.packed) },
+    wears = wears.map { WearRecord(it.date, it.garmentId) },
 )

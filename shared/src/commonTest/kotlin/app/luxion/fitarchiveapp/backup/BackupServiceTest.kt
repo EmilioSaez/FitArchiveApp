@@ -12,6 +12,7 @@ import app.luxion.fitarchiveapp.model.OutfitGarment
 import app.luxion.fitarchiveapp.model.Season
 import app.luxion.fitarchiveapp.model.Trip
 import app.luxion.fitarchiveapp.model.Usage
+import app.luxion.fitarchiveapp.model.WearRecord
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -49,6 +50,7 @@ private fun sample() = WardrobeSnapshot(
     trips = listOf(Trip(20, "Roma", "Italia", "2026-12-01", "2026-12-05", 9), Trip(21, "Sin fechas", null, null, null, 10)),
     tripOutfits = listOf(TripOutfitLink(20, 10)),
     tripGarments = listOf(TripGarmentLink(20, 1, true), TripGarmentLink(20, 2, false)),
+    wears = listOf(WearRecord("2026-11-02", 1), WearRecord("2026-11-02", 2)),
 )
 
 class BackupServiceTest {
@@ -75,6 +77,7 @@ class BackupServiceTest {
         assertEquals(data.trips, restored.trips)
         assertEquals(data.tripOutfits, restored.tripOutfits)
         assertEquals(data.tripGarments, restored.tripGarments)
+        assertEquals(data.wears, restored.wears)
         assertEquals(RestoreResult(3, 2, listOf(3L)), result)
     }
 

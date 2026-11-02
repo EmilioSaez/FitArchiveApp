@@ -29,10 +29,13 @@ Tests: se mantienen los de T16–T20 y se añaden `mostrarErrorYDescartarlo`, `e
 - **B6. Cabecera del editor bajo la barra de estado.** El editor se pinta fuera del `Scaffold` y no aplicaba insets: "Cancelar/Guardar" quedaban sobre el reloj. Fix: `windowInsetsPadding(WindowInsets.systemBars)`.
 - **B7. Iconos de la barra de estado ilegibles en toda la app** (blancos sobre fondo claro). Fix: `enableEdgeToEdge()` en `MainActivity`.
 
+## Observaciones corregidas
+
+- **O6. Pantallas fuera del `Scaffold` sin insets.** Añadir prenda y detalle de prenda se pintaban bajo las barras de estado/navegación. Fix: `windowInsetsPadding(WindowInsets.systemBars)` tras el fondo en `AnadirPrendaFlow` y `DetallePrendaScreen`, como el editor. El resto de pantallas (Armario, Perfil, Outfits, Calendario, Hoy) van dentro del `Scaffold`, que ya aplica insets; `PantallaCarga` es un splash centrado. Verificado en emulador solo la pantalla inicial de añadir prenda (centrada, sin cambio visible); formulario y detalle no comprobados visualmente (armario vacío).
+- **O7. "Compartir" pulsable antes de cargar las fotos.** Fix: se habilita solo si todas las prendas elegidas tienen la foto cargada (`puedeCompartir`, test `PuedeCompartirTest`). No verificado en emulador (ventana de milisegundos).
+
 ## Observaciones pendientes
 
-- **O6.** Las pantallas que se pintan fuera del `Scaffold` (añadir prenda, detalle) tampoco aplican insets; no revisadas a fondo en esta tarea.
-- **O7.** "Compartir" en el editor se puede pulsar antes de que carguen las fotos de las prendas: la imagen saldría sin ellas. Solo ocurre en los primeros instantes; sin corregir.
 - **O8.** `subtipoPorDefecto` fija un subtipo por tipo (camiseta siempre manga corta, pantalón siempre largo); el avatar no refleja cortes distintos hasta que la BD guarde subtipo.
 - **O9.** El deslizador de tamaño del editor se ve con el pulgar como barra vertical (estilo Material 3 actual); funcional.
 - No cubierto: iOS (compartir y render sin compilar en Windows), gestos de arrastrar/pellizcar en el avatar (verificados solo por tests del ViewModel, no con Maestro).

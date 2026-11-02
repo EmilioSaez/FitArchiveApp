@@ -7,7 +7,7 @@ Un solo archivo binario, creado y leído con el selector de documentos del siste
 | 0–7 | Magia `FITARCH` + `0x01` |
 | 8–11 | Versión del formato (u32 big-endian) |
 | 12–15 | Longitud N del manifiesto (u32 big-endian) |
-| 16… | Manifiesto JSON UTF-8 (N bytes): prendas, outfits, posiciones, medidas, calendario, viajes y listas de maleta, e índice de fotos |
+| 16… | Manifiesto JSON UTF-8 (N bytes): prendas, outfits, posiciones, medidas, calendario, historial de usos, viajes y listas de maleta, e índice de fotos |
 | tras el manifiesto | Bytes de cada foto, en el orden de `photos` (cada entrada indica `garmentId` y `size`) |
 
 Reglas:

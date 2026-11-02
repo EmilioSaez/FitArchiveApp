@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.backup
 
 import app.luxion.fitarchiveapp.model.CalendarDay
+import app.luxion.fitarchiveapp.model.WearRecord
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.Measurements
 import app.luxion.fitarchiveapp.model.Outfit
@@ -21,6 +22,7 @@ data class WardrobeSnapshot(
     val trips: List<Trip> = emptyList(),
     val tripOutfits: List<TripOutfitLink> = emptyList(),
     val tripGarments: List<TripGarmentLink> = emptyList(),
+    val wears: List<WearRecord> = emptyList(),
 )
 
 /**

@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,10 @@ fun App(repositories: Repositories) {
             PantallaCarga(onTerminado = { cargando = false })
             return@FitArchiveTheme
         }
+        // Cada día que pasa con un outfit asignado suma un uso a sus prendas (T33).
+        LaunchedEffect(Unit) {
+            runCatching { repositories.usos.registrarHasta(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
+        }
         var destino by remember { mutableStateOf(Destino.Hoy) }
         var anadiendo by remember { mutableStateOf(false) }
         if (anadiendo) {
@@ -60,6 +65,7 @@ fun App(repositories: Repositories) {
             DetallePrendaScreen(
                 repositories.garments,
                 repositories.measurements,
+                repositories.usos,
                 id,
                 onVolver = { detalleId = null },
                 onAbrirPerfil = {
