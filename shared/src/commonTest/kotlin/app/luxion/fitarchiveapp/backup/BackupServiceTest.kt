@@ -44,7 +44,7 @@ private fun sample() = WardrobeSnapshot(
     garments = listOf(garment(1, "old/1.jpg", "Mango ñ \"é\""), garment(2, "old/2.jpg"), garment(3, "old/gone.jpg")),
     outfits = listOf(Outfit(10, "Cena", Occasion.DATE, true, 5), Outfit(11, "Sin ocasión", null, false, 6)),
     outfitGarments = listOf(OutfitGarment(10, 1, 0.25f, -3.5f, 1.5f, 2), OutfitGarment(10, 2, 0f, 0f, 1f, 0)),
-    measurements = Measurements(165f, 90f, null, 95.5f, 40f, 58f, 100f, 777),
+    measurements = Measurements(165f, 90f, null, 95.5f, 40f, 58f, 100f, 777, footCm = 24.5f),
     calendar = listOf(CalendarDay("2026-11-02", 10, "Boda"), CalendarDay("2026-11-03", null, null)),
     trips = listOf(Trip(20, "Roma", "Italia", "2026-12-01", "2026-12-05", 9), Trip(21, "Sin fechas", null, null, null, 10)),
     tripOutfits = listOf(TripOutfitLink(20, 10)),
@@ -162,6 +162,19 @@ class BackupServiceTest {
         val store = FakeStore()
         BackupService(store, FakePhotos()) { 1L }.import(header + raw)
         assertEquals("X", store.data.outfits.single().name)
+    }
+
+    @Test
+    fun copiaAnteriorSinPieSeImportaConPieNulo() = runTest {
+        val json = """{"formatVersion":1,"createdAt":5,"measurements":{"heightCm":165.0,"updatedAt":9}}"""
+        val raw = json.encodeToByteArray()
+        val header = BackupCodec.encode(BackupManifest(formatVersion = 1, createdAt = 0), emptyList()).copyOf(16)
+        for (i in 0..3) header[12 + i] = (raw.size ushr (24 - 8 * i)).toByte()
+        val store = FakeStore()
+        BackupService(store, FakePhotos()) { 1L }.import(header + raw)
+        val m = store.data.measurements!!
+        assertEquals(165f, m.heightCm)
+        assertNull(m.footCm)
     }
 
     @Test

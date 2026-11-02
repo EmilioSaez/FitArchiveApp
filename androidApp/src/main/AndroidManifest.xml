@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Ubicación aproximada: solo para el tiempo. Opcional (alternativa: elegir ciudad) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Cámara para fotografiar prendas (docs/permisos.md). Opcional: también se puede elegir de la galería -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"

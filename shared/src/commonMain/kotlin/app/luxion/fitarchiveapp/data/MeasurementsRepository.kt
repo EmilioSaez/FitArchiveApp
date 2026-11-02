@@ -40,6 +40,7 @@ internal class SqlMeasurementsRepository(
             shoulders_cm = measurements.shouldersCm?.toDouble(),
             arm_cm = measurements.armCm?.toDouble(),
             leg_cm = measurements.legCm?.toDouble(),
+            foot_cm = measurements.footCm?.toDouble(),
             updated_at = now(),
         )
         Unit

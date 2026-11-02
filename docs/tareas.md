@@ -21,7 +21,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T12 Filtro multicriterio — UI — T10
 - [x] T13 Detalle de prenda: editar y eliminar con confirmación — UI — T08
 - [x] T14 Like y pestaña de favoritas — UI — T10
-- [ ] T15 Pruebas v0.1 — QA — T05–T14
+- [x] T15 Pruebas v0.1 — QA — T05–T14 (ver docs/bugs-v01.md)
 
 ## v0.2 Outfits
 - [x] T16 Diseñar avatar 2D con capas — Diseño — —

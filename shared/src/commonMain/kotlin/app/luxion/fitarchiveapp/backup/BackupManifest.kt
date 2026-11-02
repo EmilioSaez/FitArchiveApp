@@ -80,6 +80,8 @@ data class MeasurementsDto(
     val armCm: Float? = null,
     val legCm: Float? = null,
     val updatedAt: Long,
+    /** Ausente en copias anteriores a T22c. */
+    val footCm: Float? = null,
 )
 
 @Serializable

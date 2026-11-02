@@ -175,6 +175,7 @@ class AjusteTallaTest {
     fun desdeMeasurements() {
         val m = Measurements(165f, 90f, 72f, 98f, null, null, null, 0L)
         assertEquals(MedidasUsuaria(90.0, 72.0, 98.0, null), MedidasUsuaria.de(m))
+        assertEquals(24.5, MedidasUsuaria.de(m.copy(footCm = 24.5f)).pie)
     }
 
     // --- T29: corte ---

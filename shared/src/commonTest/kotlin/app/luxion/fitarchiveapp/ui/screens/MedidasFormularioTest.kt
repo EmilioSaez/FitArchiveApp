@@ -39,9 +39,18 @@ class MedidasFormularioTest {
 
     @Test
     fun idaYVueltaMedidasTextosMedidas() {
-        val medidas = Measurements(170f, 90f, 65.5f, 95f, 40f, 58f, 80f, updatedAt = 123L)
+        val medidas = Measurements(170f, 90f, 65.5f, 95f, 40f, 58f, 80f, updatedAt = 123L, footCm = 24.5f)
         val lecturas = medidas.aTextos().mapValues { (c, t) -> leer(t, c) }
         assertEquals(medidas.copy(updatedAt = 0L), lecturas.aMedidas())
+    }
+
+    @Test
+    fun pieValidaRangoRazonable() {
+        assertEquals(Lectura.Valor(24.5f), leer("24,5", Campo.Pie))
+        assertEquals(Lectura.Valor(null), leer("", Campo.Pie))
+        assertEquals(Lectura.Invalido, leer("14", Campo.Pie))
+        assertEquals(Lectura.Invalido, leer("36", Campo.Pie))
+        assertEquals(Lectura.Invalido, leer("39", Campo.Pie)) // número de calzado, no cm
     }
 
     @Test

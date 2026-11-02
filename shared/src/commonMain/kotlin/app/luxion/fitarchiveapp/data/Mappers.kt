@@ -65,6 +65,7 @@ internal fun app.luxion.fitarchiveapp.db.Measurements.toModel() = Measurements(
     armCm = arm_cm?.toFloat(),
     legCm = leg_cm?.toFloat(),
     updatedAt = updated_at,
+    footCm = foot_cm?.toFloat(),
 )
 
 internal fun app.luxion.fitarchiveapp.db.CalendarDay.toModel() = CalendarDay(

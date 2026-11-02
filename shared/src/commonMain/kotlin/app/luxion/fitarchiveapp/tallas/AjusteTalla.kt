@@ -88,12 +88,11 @@ data class MedidasUsuaria(
     }
 
     companion object {
-        /** `Measurements` aún no guarda el pie: se pasa aparte si se conoce. */
-        fun de(m: Measurements?, pieCm: Float? = null) = MedidasUsuaria(
+        fun de(m: Measurements?) = MedidasUsuaria(
             pecho = m?.bustCm?.toDouble(),
             cintura = m?.waistCm?.toDouble(),
             cadera = m?.hipCm?.toDouble(),
-            pie = pieCm?.toDouble(),
+            pie = m?.footCm?.toDouble(),
         )
     }
 }
