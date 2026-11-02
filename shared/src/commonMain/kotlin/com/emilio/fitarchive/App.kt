@@ -26,6 +26,7 @@ fun App() {
             return@FitArchiveTheme
         }
         var destino by remember { mutableStateOf(Destino.Hoy) }
+        val medidasRepo = remember { MedidasRepositoryEnMemoria() }
         Scaffold(
             bottomBar = {
                 NavigationBar {
@@ -41,7 +42,10 @@ fun App() {
                 }
             },
         ) { padding ->
-            PantallaVacia(destino.titulo, Modifier.padding(padding))
+            when (destino) {
+                Destino.Perfil -> MedidasScreen(medidasRepo, Modifier.padding(padding))
+                else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
+            }
         }
     }
 }
