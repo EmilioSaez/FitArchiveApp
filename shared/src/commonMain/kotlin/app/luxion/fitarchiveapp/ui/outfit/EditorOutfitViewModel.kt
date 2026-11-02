@@ -141,6 +141,8 @@ class EditorOutfitViewModel(
         e.copy(elegidas = e.elegidas + (e.slotActivo to actual.copy(ajuste = cambio(actual.ajuste).limitado(caja))))
     }
 
+    fun mostrarError(mensaje: String) = _estado.update { it.copy(error = mensaje) }
+
     fun descartarError() = _estado.update { it.copy(error = null) }
 
     /** Guarda el outfit si [EditorOutfitUiState.puedeGuardar]; al terminar rellena `idGuardado`. */

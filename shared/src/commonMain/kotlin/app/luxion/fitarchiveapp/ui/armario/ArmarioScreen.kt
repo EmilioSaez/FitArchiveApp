@@ -311,19 +311,17 @@ internal fun FotoPrenda(
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             )
         }
-        if (onAlternarFavorita != null) {
-            TextButton(
-                onClick = onAlternarFavorita,
-                modifier = Modifier.align(Alignment.TopEnd).semantics {
-                    contentDescription = if (prenda.favorite) "Quitar de favoritas" else "Marcar como favorita"
-                },
-            ) {
-                Text(
-                    if (prenda.favorite) "♥" else "♡",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = if (prenda.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                )
-            }
+        if (onAlternarFavorita != null) TextButton(
+            onClick = onAlternarFavorita,
+            modifier = Modifier.align(Alignment.TopEnd).semantics {
+                contentDescription = if (prenda.favorite) "Quitar de favoritas" else "Marcar como favorita"
+            },
+        ) {
+            Text(
+                if (prenda.favorite) "♥" else "♡",
+                style = MaterialTheme.typography.titleLarge,
+                color = if (prenda.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }
