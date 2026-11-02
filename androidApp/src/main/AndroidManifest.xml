@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Foto de prendas. La cámara no es imprescindible: se puede elegir de galería -->
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Consulta del tiempo -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Ubicación aproximada: solo para el tiempo. Opcional (alternativa: elegir ciudad) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
