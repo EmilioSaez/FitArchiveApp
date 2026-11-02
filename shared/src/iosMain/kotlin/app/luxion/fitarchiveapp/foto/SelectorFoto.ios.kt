@@ -108,12 +108,12 @@ private class DelegadoGaleria(
     override fun picker(picker: PHPickerViewController, didFinishPicking: List<*>) {
         picker.dismissViewControllerAnimated(true, null)
         val proveedor = (didFinishPicking.firstOrNull() as? PHPickerResult)?.itemProvider
-        if (proveedor == null || !proveedor.canLoadObjectOfClass(UIImage)) {
+        if (proveedor == null || !proveedor.hasItemConformingToTypeIdentifier("public.image")) {
             alTerminar(null)
             return
         }
-        proveedor.loadObjectOfClass(UIImage) { objeto, _ ->
-            val foto = (objeto as? UIImage)?.aFoto()
+        proveedor.loadDataRepresentationForTypeIdentifier("public.image") { datos, _ ->
+            val foto = datos?.let { UIImage.imageWithData(it) }?.aFoto()
             dispatch_async(dispatch_get_main_queue()) { alTerminar(foto) }
         }
     }

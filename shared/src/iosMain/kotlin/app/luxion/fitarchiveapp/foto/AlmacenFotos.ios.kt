@@ -32,6 +32,10 @@ private class AlmacenFotosIos : AlmacenFotos {
         datos.writeToFile(ruta, atomically = true)
         return ruta
     }
+
+    override suspend fun borrar(ruta: String) {
+        NSFileManager.defaultManager.removeItemAtPath(ruta, null)
+    }
 }
 
 actual fun decodificarImagen(bytes: ByteArray): ImageBitmap? =

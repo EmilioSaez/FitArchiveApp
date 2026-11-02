@@ -49,4 +49,25 @@ class BorradorPrendaTest {
         assertEquals(emptyList(), sugerenciasDeMarca("zara"))
         assertEquals(emptyList(), sugerenciasDeMarca("Otra"))
     }
+
+    @Test
+    fun editarConservaIdFotoYContadores() {
+        val original = completo.copy(brand = "Zara", size = "M").aPrenda("f.jpg", 9)!!
+            .copy(id = 7, favorite = true, dirty = true, totalWears = 4, wearsSinceWash = 2, washAfterWears = 3)
+        val editado = BorradorPrenda.desde(original).copy(type = GarmentType.SHIRT, brand = " ", size = null)
+            .aplicarA(original)!!
+        assertEquals(original.copy(type = GarmentType.SHIRT, brand = null, size = null), editado)
+    }
+
+    @Test
+    fun desdeYAplicarSinCambiosEsIdempotente() {
+        val g = completo.copy(brand = "Mango", size = "S").aPrenda("f.jpg", 1)!!.copy(id = 3)
+        assertEquals(g, BorradorPrenda.desde(g).aplicarA(g))
+    }
+
+    @Test
+    fun editarSinCampoObligatorioNoGuarda() {
+        val g = completo.aPrenda("f.jpg", 1)!!
+        assertNull(BorradorPrenda.desde(g).copy(color = null).aplicarA(g))
+    }
 }

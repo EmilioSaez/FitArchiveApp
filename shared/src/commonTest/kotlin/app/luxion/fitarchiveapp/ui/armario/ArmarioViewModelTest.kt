@@ -35,7 +35,7 @@ class ArmarioViewModelTest {
         val vm = ArmarioViewModel(GarmentRepositoryEnMemoria(), backgroundScope)
         val estado = vm.estado.first { !it.cargando }
         assertTrue(estado.armarioVacio)
-        assertEquals(PestanaTipo.entries.size, estado.pestanas.size)
+        assertEquals(PestanaTipo.entries.size + 1, estado.pestanas.size)
     }
 
     @Test
@@ -147,5 +147,25 @@ class ArmarioViewModelTest {
         vm.seleccionarAgrupacion(Agrupacion.PorEstacion)
         val estado = vm.estado.first { it.agrupacion == Agrupacion.PorEstacion && it.total == 1 }
         assertEquals(GarmentColor.RED, estado.filtro.color)
+    }
+
+    @Test
+    fun alternarFavoritaActualizaLaPestanaFavoritas() = runTest(UnconfinedTestDispatcher()) {
+        val repo = GarmentRepositoryEnMemoria()
+        val vm = ArmarioViewModel(repo, backgroundScope)
+        repo.add(prenda(GarmentType.TSHIRT))
+        repo.add(prenda(GarmentType.SHOES))
+        val favoritas = vm.estado.first { it.total == 2 }.pestanas.indexOfFirst { it.id == "FAVORITAS" }
+        vm.seleccionarPestana(favoritas)
+        assertTrue(vm.estado.first { it.total == 2 && it.pestanaActual == favoritas }.prendas.isEmpty())
+
+        val zapatos = vm.estado.first { it.total == 2 }.let { repo.get(2)!! }
+        vm.alternarFavorita(zapatos)
+        val con = vm.estado.first { it.prendas.isNotEmpty() }
+        assertEquals(listOf(GarmentType.SHOES), con.prendas.map { it.type })
+        assertEquals(1, con.conteos[favoritas])
+
+        vm.alternarFavorita(con.prendas.single())
+        assertTrue(vm.estado.first { it.prendas.isEmpty() }.conteos[favoritas] == 0)
     }
 }

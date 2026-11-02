@@ -25,6 +25,10 @@ private class AlmacenFotosAndroid(private val context: Context) : AlmacenFotos {
         archivo.writeBytes(foto.bytes)
         archivo.absolutePath
     }
+
+    override suspend fun borrar(ruta: String) {
+        withContext(Dispatchers.IO) { File(ruta).delete() }
+    }
 }
 
 actual fun decodificarImagen(bytes: ByteArray): ImageBitmap? =

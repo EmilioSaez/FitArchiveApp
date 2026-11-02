@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -101,8 +102,10 @@ fun AnadirPrendaFlow(
                 onCancelar = onTerminado,
             )
             else -> FormularioPrenda(
-                foto = actual,
-                colorInicial = colorDetectado,
+                titulo = "Nueva prenda",
+                imagen = remember(actual) { decodificarImagen(actual.bytes) },
+                borradorInicial = BorradorPrenda(color = colorDetectado),
+                textoGuardar = "Guardar prenda",
                 onCambiarFoto = { foto = null; colorDetectado = null },
                 onCancelar = onTerminado,
                 onGuardar = { borrador ->
@@ -135,24 +138,29 @@ private fun ElegirFoto(onCamara: () -> Unit, onGaleria: () -> Unit, onCancelar: 
     }
 }
 
+/**
+ * Formulario de prenda compartido por añadir (T08) y editar (T13).
+ * [onCambiarFoto] null = la foto no se puede cambiar (edición).
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FormularioPrenda(
-    foto: FotoCapturada,
-    colorInicial: GarmentColor?,
-    onCambiarFoto: () -> Unit,
+internal fun FormularioPrenda(
+    titulo: String,
+    imagen: ImageBitmap?,
+    borradorInicial: BorradorPrenda,
+    textoGuardar: String,
+    onCambiarFoto: (() -> Unit)?,
     onCancelar: () -> Unit,
     onGuardar: (BorradorPrenda) -> Unit,
 ) {
-    var borrador by remember { mutableStateOf(BorradorPrenda(color = colorInicial)) }
+    var borrador by remember { mutableStateOf(borradorInicial) }
     var guardando by remember { mutableStateOf(false) }
-    val imagen = remember(foto) { decodificarImagen(foto.bytes) }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        Text("Nueva prenda", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
+        Text(titulo, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
 
         Box(
             Modifier.fillMaxWidth().aspectRatio(4f / 5f).clip(MaterialTheme.shapes.small)
@@ -170,7 +178,9 @@ private fun FormularioPrenda(
                 Text("No se puede mostrar la foto")
             }
         }
-        TextButton(onClick = onCambiarFoto, enabled = !guardando) { Text("Cambiar foto") }
+        if (onCambiarFoto != null) {
+            TextButton(onClick = onCambiarFoto, enabled = !guardando) { Text("Cambiar foto") }
+        }
 
         Seccion("Tipo *") {
             Opciones(GarmentType.entries, borrador.type, { it.etiqueta() }) { borrador = borrador.copy(type = it) }
@@ -229,7 +239,7 @@ private fun FormularioPrenda(
             onClick = { guardando = true; onGuardar(borrador) },
             enabled = borrador.completo && !guardando,
             modifier = Modifier.fillMaxWidth().height(52.dp),
-        ) { Text("Guardar prenda") }
+        ) { Text(textoGuardar) }
         if (!borrador.completo) {
             Text("Elige tipo, color, estación y uso para guardar.", style = MaterialTheme.typography.bodySmall)
         }
@@ -242,7 +252,7 @@ private fun FormularioPrenda(
 }
 
 @Composable
-private fun Seccion(titulo: String, contenido: @Composable () -> Unit) {
+internal fun Seccion(titulo: String, contenido: @Composable () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         contenido()

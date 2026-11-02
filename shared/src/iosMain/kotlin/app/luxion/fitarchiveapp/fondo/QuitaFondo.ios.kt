@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import platform.CoreImage.CIContext
 import platform.CoreImage.CIImage
+import platform.CoreImage.createCGImage
 import platform.Foundation.NSData
 import platform.Foundation.NSError
 import platform.Foundation.NSOperatingSystemVersion
@@ -69,7 +70,7 @@ private class QuitaFondoVision : QuitaFondo {
                 throw QuitaFondoException(QuitaFondoException.Motivo.SIN_SUJETO, "No se detecto ninguna prenda")
             }
             val error2 = alloc<ObjCObjectVar<NSError?>>()
-            observacion.generateMaskedImageForInstances(
+            observacion.generateMaskedImageOfInstances(
                 observacion.allInstances,
                 fromRequestHandler = handler,
                 croppedToInstancesExtent = true,

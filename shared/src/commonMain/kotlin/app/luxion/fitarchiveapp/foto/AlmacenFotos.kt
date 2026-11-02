@@ -7,6 +7,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 interface AlmacenFotos {
     /** Escribe la imagen y devuelve la ruta que se guarda en `Garment.photoPath`. */
     suspend fun guardar(foto: FotoCapturada): String
+
+    /** Borra el archivo de [ruta]; no falla si ya no existe. */
+    suspend fun borrar(ruta: String)
 }
 
 @Composable
