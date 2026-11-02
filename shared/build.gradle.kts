@@ -36,15 +36,11 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
-            implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
-        }
-        commonTest.dependencies {
-            implementation(kotlin("test"))
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
