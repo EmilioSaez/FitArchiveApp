@@ -2,6 +2,7 @@ package app.luxion.fitarchiveapp.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -26,7 +27,11 @@ import kotlinx.coroutines.launch
 import app.luxion.fitarchiveapp.data.MeasurementsRepository
 
 @Composable
-fun MedidasScreen(repositorio: MeasurementsRepository, modifier: Modifier = Modifier) {
+fun MedidasScreen(
+    repositorio: MeasurementsRepository,
+    modifier: Modifier = Modifier,
+    contenidoExtra: @Composable ColumnScope.() -> Unit = {},
+) {
     val textos = remember { mutableStateMapOf<Campo, String>().apply { putAll(null.aTextos()) } }
     var cargado by remember { mutableStateOf(false) }
     LaunchedEffect(repositorio) {
@@ -79,5 +84,6 @@ fun MedidasScreen(repositorio: MeasurementsRepository, modifier: Modifier = Modi
             modifier = Modifier.fillMaxWidth(),
         ) { Text("Guardar medidas") }
         if (guardado) Text("Medidas guardadas.", color = MaterialTheme.colorScheme.primary)
+        contenidoExtra()
     }
 }
