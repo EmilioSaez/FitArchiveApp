@@ -103,7 +103,7 @@ private fun WardrobeSnapshot.toManifest(createdAt: Long, photos: List<PhotoEntry
     outfits = outfits.map { OutfitDto(it.id, it.name, it.occasion?.name, it.favorite, it.createdAt) },
     outfitGarments = outfitGarments.map { OutfitGarmentDto(it.outfitId, it.garmentId, it.x, it.y, it.scale, it.zIndex) },
     measurements = measurements?.let {
-        MeasurementsDto(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt)
+        MeasurementsDto(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt, it.footCm)
     },
     calendar = calendar.map { CalendarDayDto(it.date, it.outfitId, it.note) },
     trips = trips.map { TripDto(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
@@ -132,7 +132,7 @@ private fun BackupManifest.toSnapshot() = WardrobeSnapshot(
     },
     outfits = outfits.map { Outfit(it.id, it.name, it.occasion?.let { o -> parse<Occasion>(o, "ocasión") }, it.favorite, it.createdAt) },
     outfitGarments = outfitGarments.map { OutfitGarment(it.outfitId, it.garmentId, it.x, it.y, it.scale, it.zIndex) },
-    measurements = measurements?.let { Measurements(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt) },
+    measurements = measurements?.let { Measurements(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt, it.footCm) },
     calendar = calendar.map { CalendarDay(it.date, it.outfitId, it.note) },
     trips = trips.map { Trip(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
     tripOutfits = tripOutfits.map { TripOutfitLink(it.tripId, it.outfitId) },

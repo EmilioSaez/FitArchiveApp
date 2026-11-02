@@ -65,7 +65,7 @@ class SqlWardrobeBackupStore(
             snapshot.measurements?.let {
                 db.measurementsQueries.upsert(
                     it.heightCm?.toDouble(), it.bustCm?.toDouble(), it.waistCm?.toDouble(), it.hipCm?.toDouble(),
-                    it.shouldersCm?.toDouble(), it.armCm?.toDouble(), it.legCm?.toDouble(), it.updatedAt,
+                    it.shouldersCm?.toDouble(), it.armCm?.toDouble(), it.legCm?.toDouble(), it.footCm?.toDouble(), it.updatedAt,
                 )
             }
             snapshot.calendar.forEach { db.calendarDayQueries.upsert(it.date, it.outfitId, it.note) }

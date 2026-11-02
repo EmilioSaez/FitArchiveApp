@@ -45,6 +45,8 @@ data class Measurements(
     val armCm: Float?,
     val legCm: Float?,
     val updatedAt: Long,
+    /** Largo del pie en cm (para predecir la talla de calzado). */
+    val footCm: Float? = null,
 )
 
 /** [date] en ISO-8601 (yyyy-MM-dd). */

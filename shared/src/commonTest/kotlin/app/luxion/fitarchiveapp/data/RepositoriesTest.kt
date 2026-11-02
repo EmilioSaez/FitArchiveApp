@@ -177,7 +177,7 @@ class RepositoriesTest {
     fun measurementsSaveStampsUpdatedAtAndReplaces() = runTest {
         assertNull(repos.measurements.get())
         assertNull(repos.measurements.observe().first())
-        val m = Measurements(165f, 90f, 70f, 95f, null, null, 80f, updatedAt = 0)
+        val m = Measurements(165f, 90f, 70f, 95f, null, null, 80f, updatedAt = 0, footCm = 24.5f)
         clock = 5_000
         repos.measurements.save(m)
         assertEquals(m.copy(updatedAt = 5_000), repos.measurements.get())
@@ -185,6 +185,7 @@ class RepositoriesTest {
         repos.measurements.save(m.copy(waistCm = 72f, heightCm = null))
         val saved = repos.measurements.observe().first()!!
         assertEquals(72f, saved.waistCm)
+        assertEquals(24.5f, saved.footCm)
         assertNull(saved.heightCm)
         assertEquals(6_000, saved.updatedAt)
         repos.measurements.clear()
