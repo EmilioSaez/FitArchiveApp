@@ -16,7 +16,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T07 Quitar fondo en el móvil — Lógica — T06 (Android: ML Kit, compilado; iOS: Vision, sin validar: no compilado en Windows)
 - [x] T08 Formulario añadir prenda (tipo, color, estación, uso, marca, talla) — UI — T04, T06
 - [ ] T09 Detectar color principal — Lógica — T07
-- [ ] T10 Armario con pestañas por tipo — UI — T04
+- [x] T10 Armario con pestañas por tipo — UI — T04
 - [ ] T11 Pestañas por color y estación — UI — T10
 - [ ] T12 Filtro multicriterio — UI — T10
 - [ ] T13 Detalle de prenda: editar y eliminar con confirmación — UI — T08

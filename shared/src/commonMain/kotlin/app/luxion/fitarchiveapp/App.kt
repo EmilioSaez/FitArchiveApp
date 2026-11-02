@@ -1,7 +1,6 @@
 package app.luxion.fitarchiveapp
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -12,12 +11,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.data.Repositories
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
-import app.luxion.fitarchiveapp.ui.anadir.BotonAnadirPrenda
+import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
 import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
@@ -68,14 +65,11 @@ fun App(repositories: Repositories) {
                 Destino.Perfil -> MedidasScreen(repositories.measurements, Modifier.padding(padding)) {
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                 }
-                // T10 sustituye el contenido; el botón es el punto de entrada de T08.
-                Destino.Armario -> Box(Modifier.fillMaxSize().padding(padding)) {
-                    PantallaVacia(destino.titulo)
-                    BotonAnadirPrenda(
-                        onClick = { anadiendo = true },
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                    )
-                }
+                Destino.Armario -> ArmarioScreen(
+                    repositories.garments,
+                    onAnadirPrenda = { anadiendo = true },
+                    modifier = Modifier.padding(padding),
+                )
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
             }
         }
