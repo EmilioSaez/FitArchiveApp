@@ -19,3 +19,9 @@ INSERT OR REPLACE INTO CalendarDay (date, outfit_id, note) VALUES (?, ?, ?);
 
 deleteByDate:
 DELETE FROM CalendarDay WHERE date = ?;
+
+selectAll:
+SELECT * FROM CalendarDay ORDER BY date;
+
+deleteAll:
+DELETE FROM CalendarDay;

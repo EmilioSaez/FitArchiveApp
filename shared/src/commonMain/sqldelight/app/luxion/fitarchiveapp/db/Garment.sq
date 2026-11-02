@@ -66,3 +66,11 @@ DELETE FROM Garment WHERE id = ?;
 
 lastInsertId:
 SELECT last_insert_rowid();
+
+-- Copia de seguridad: inserta conservando el id.
+insertWithId:
+INSERT INTO Garment (id, photo_path, type, color, season, usage, brand, size, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM Garment;

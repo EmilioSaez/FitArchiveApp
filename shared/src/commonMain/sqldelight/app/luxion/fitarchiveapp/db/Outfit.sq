@@ -51,3 +51,16 @@ INSERT OR REPLACE INTO OutfitGarment (outfit_id, garment_id, x, y, scale, z_inde
 
 deleteGarments:
 DELETE FROM OutfitGarment WHERE outfit_id = ?;
+
+-- Copia de seguridad: inserta conservando el id.
+insertWithId:
+INSERT INTO Outfit (id, name, occasion, favorite, created_at) VALUES (?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM Outfit;
+
+selectAllGarments:
+SELECT * FROM OutfitGarment ORDER BY outfit_id, garment_id;
+
+deleteAllGarments:
+DELETE FROM OutfitGarment;

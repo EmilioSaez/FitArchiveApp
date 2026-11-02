@@ -14,6 +14,7 @@ android-targetSdk = "36"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+mlkit-subject-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version = "16.0.0-beta1" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.16.0" }
 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
