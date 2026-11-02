@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.MeasurementsRepository
+import app.luxion.fitarchiveapp.data.UsoRepository
 import app.luxion.fitarchiveapp.foto.AlmacenFotos
 import app.luxion.fitarchiveapp.foto.cargarImagen
 import app.luxion.fitarchiveapp.foto.rememberAlmacenFotos
@@ -56,6 +57,7 @@ import kotlinx.coroutines.launch
 fun DetallePrendaScreen(
     garments: GarmentRepository,
     measurements: MeasurementsRepository,
+    usos: UsoRepository,
     prendaId: Long,
     onVolver: () -> Unit,
     onAbrirPerfil: () -> Unit,
@@ -97,6 +99,7 @@ fun DetallePrendaScreen(
                 onEliminar = { confirmando = true },
                 onAlternarLimpieza = { scope.launch { garments.setDirty(actual.id, !actual.dirty) } },
                 measurements = measurements,
+                usos = usos,
                 onAbrirPerfil = onAbrirPerfil,
             )
         }
@@ -131,6 +134,7 @@ private fun DetalleContenido(
     onEliminar: () -> Unit,
     onAlternarLimpieza: () -> Unit,
     measurements: MeasurementsRepository,
+    usos: UsoRepository,
     onAbrirPerfil: () -> Unit,
 ) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
@@ -177,7 +181,9 @@ private fun DetalleContenido(
             Dato("Uso", prenda.usage.etiqueta())
             Dato("Marca", prenda.brand ?: "—")
             Dato("Talla", prenda.size ?: "—")
-            Dato("Veces usada", prenda.totalWears.toString())
+
+            HorizontalDivider()
+            HistorialUsos(prenda, usos)
             HorizontalDivider()
 
             SeccionTalla(prenda, measurements, onAbrirPerfil)

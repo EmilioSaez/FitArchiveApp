@@ -5,6 +5,7 @@ import app.luxion.fitarchiveapp.backup.TripOutfitLink
 import app.luxion.fitarchiveapp.backup.WardrobeBackupStore
 import app.luxion.fitarchiveapp.backup.WardrobeSnapshot
 import app.luxion.fitarchiveapp.db.FitArchiveDatabase
+import app.luxion.fitarchiveapp.model.WearRecord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -29,6 +30,7 @@ class SqlWardrobeBackupStore(
                     .map { TripOutfitLink(it.trip_id, it.outfit_id) },
                 tripGarments = db.tripQueries.selectAllPacking().executeAsList()
                     .map { TripGarmentLink(it.trip_id, it.garment_id, it.packed == 1L) },
+                wears = db.wearLogQueries.selectAll().executeAsList().map { WearRecord(it.date, it.garment_id) },
             )
         }
     }
@@ -36,6 +38,7 @@ class SqlWardrobeBackupStore(
     override suspend fun replaceAll(snapshot: WardrobeSnapshot) = withContext(context) {
         db.transaction {
             // Hijos antes que padres, para no depender de ON DELETE CASCADE.
+            db.wearLogQueries.deleteAll()
             db.tripQueries.deleteAllGarments()
             db.tripQueries.deleteAllOutfits()
             db.tripQueries.deleteAll()
@@ -70,6 +73,7 @@ class SqlWardrobeBackupStore(
                 )
             }
             snapshot.calendar.forEach { db.calendarDayQueries.upsert(it.date, it.outfitId, it.note) }
+            snapshot.wears.forEach { db.wearLogQueries.insert(it.date, it.garmentId) }
             snapshot.trips.forEach {
                 db.tripQueries.insertWithId(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt)
             }

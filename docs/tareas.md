@@ -45,7 +45,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 
 ## v0.4 Organización
 - [x] T32 Calendario: asignar outfits a días — UI — T19
-- [ ] T33 Historial y contador de usos — Lógica — T32
+- [x] T33 Historial y contador de usos — Lógica — T32
 - [x] T34 Limpia/sucia — UI — T13
 - [ ] T35 Sucia automática tras N usos — Lógica — T33, T34
 - [x] T36 Clasificación por uso en pestañas y filtro — UI — T12

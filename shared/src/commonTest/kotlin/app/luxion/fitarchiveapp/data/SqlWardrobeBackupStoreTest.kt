@@ -17,6 +17,7 @@ import app.luxion.fitarchiveapp.model.OutfitGarment
 import app.luxion.fitarchiveapp.model.Season
 import app.luxion.fitarchiveapp.model.Trip
 import app.luxion.fitarchiveapp.model.Usage
+import app.luxion.fitarchiveapp.model.WearRecord
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -39,6 +40,7 @@ private fun sample() = WardrobeSnapshot(
     trips = listOf(Trip(20, "Roma", "Italia", "2026-12-01", "2026-12-05", 9), Trip(21, "Sin fechas", null, null, null, 10)),
     tripOutfits = listOf(TripOutfitLink(20, 10)),
     tripGarments = listOf(TripGarmentLink(20, 1, true), TripGarmentLink(20, 5, false)),
+    wears = listOf(WearRecord("2026-11-02", 1), WearRecord("2026-11-02", 5)),
 )
 
 /** Orden estable para comparar sin depender del orden de las consultas. */
@@ -50,6 +52,7 @@ private fun WardrobeSnapshot.sorted() = copy(
     trips = trips.sortedBy { it.id },
     tripOutfits = tripOutfits.sortedWith(compareBy({ it.tripId }, { it.outfitId })),
     tripGarments = tripGarments.sortedWith(compareBy({ it.tripId }, { it.garmentId })),
+    wears = wears.sortedWith(compareBy({ it.date }, { it.garmentId })),
 )
 
 private class MemoryPhotos(val files: MutableMap<String, ByteArray> = mutableMapOf()) : PhotoStore {
