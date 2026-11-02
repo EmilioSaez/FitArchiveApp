@@ -53,7 +53,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T38 Pruebas v0.4 — QA — T32–T37
 
 ## v0.5 Sugerencias
-- [ ] T39 Servicio del tiempo (ubicación o ciudad) — Lógica — T02
+- [x] T39 Servicio del tiempo (ubicación o ciudad) — Lógica — T02
 - [ ] T40 Reglas de combinación de colores — Lógica — T03
 - [ ] T41 Motor de sugerencias — Lógica — T35, T36, T39, T40
 - [ ] T42 Aprender estilo de likes y outfits guardados — Lógica — T14, T41

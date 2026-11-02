@@ -40,7 +40,7 @@ No recopilamos datos en ningún servidor propio. No tenemos acceso a tu armario,
 **Ubicación (opcional).** Se usa únicamente para saber el tiempo de tu zona y sugerirte outfits. Si no das el permiso, puedes **elegir una ciudad a mano** y todo funciona igual. Puedes retirar el permiso cuando quieras desde los ajustes del móvil.
 
 ### Consulta del tiempo (servicio externo)
-Para mostrar el tiempo, la app envía a un servicio meteorológico externo ([PENDIENTE: nombre del servicio y enlace a su política de privacidad]) las **coordenadas aproximadas** o la **ciudad** elegida, junto con la dirección IP inevitable en cualquier conexión a internet. No se envía ninguna foto, prenda, medida ni identificador tuyo. Ese servicio tiene su propia política de privacidad. Si no quieres esta consulta, no concedas la ubicación y no uses la sugerencia por tiempo.
+Para mostrar el tiempo, la app envía a un servicio meteorológico externo (Open-Meteo, https://open-meteo.com/en/terms#privacy) las **coordenadas aproximadas** o la **ciudad** elegida, junto con la dirección IP inevitable en cualquier conexión a internet. No se envía ninguna foto, prenda, medida ni identificador tuyo. Ese servicio tiene su propia política de privacidad. Si no quieres esta consulta, no concedas la ubicación y no uses la sugerencia por tiempo.
 
 ### Copias de seguridad: exportar e importar
 Puedes exportar tu armario a un archivo y volver a importarlo, por ejemplo al cambiar de móvil. **Tú decides dónde guardas ese archivo** (tu móvil, tu nube personal, un correo…). FitArchive no lo envía a ningún sitio ni lo guarda. Ten en cuenta que el archivo contiene tus fotos y medidas: guárdalo en un lugar de confianza. Al importar, solo se lee el archivo que eliges.
@@ -95,7 +95,7 @@ We do not collect data on any server of our own. We have no access to your wardr
 **Location (optional).** Used only to find the weather where you are and suggest outfits. If you don't grant it, you can **pick a city manually** and everything works the same. You can withdraw the permission at any time in your phone settings.
 
 ### Weather lookup (external service)
-To show the weather, the app sends your **approximate coordinates** or the **city** you chose to an external weather service ([PENDIENTE: service name and link to its privacy policy]), along with the IP address that any internet connection inevitably involves. No photos, garments, measurements or personal identifiers are sent. That service has its own privacy policy. If you don't want this lookup, don't grant location and don't use weather-based suggestions.
+To show the weather, the app sends your **approximate coordinates** or the **city** you chose to an external weather service (Open-Meteo, https://open-meteo.com/en/terms#privacy), along with the IP address that any internet connection inevitably involves. No photos, garments, measurements or personal identifiers are sent. That service has its own privacy policy. If you don't want this lookup, don't grant location and don't use weather-based suggestions.
 
 ### Backups: export and import
 You can export your wardrobe to a file and import it again, for example when changing phones. **You decide where to keep that file** (your phone, your personal cloud, email…). FitArchive does not send or store it anywhere. Note that the file contains your photos and measurements, so keep it somewhere you trust. When importing, only the file you pick is read.
