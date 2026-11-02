@@ -1,0 +1,22 @@
+# T21: crea un outfit (camiseta + pantalón) desde el editor y lo guarda. Supone el armario de prueba de T15/T21
+# (una camiseta y un pantalón). Env: NOMBRE.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Outfits"
+- tapOn: "Nuevo outfit"
+- assertVisible: "Nuevo outfit"
+- tapOn: "Arriba"
+- tapOn:
+    point: "18%,60%"
+- assertVisible: "Arriba ✓"
+- tapOn: "Abajo"
+- tapOn:
+    point: "18%,55%"
+- assertVisible: "Abajo ✓"
+- tapOn: "Nombre"
+- inputText: "${NOMBRE}"
+- hideKeyboard
+- tapOn: "Casual"
+- tapOn: "Guardar"
+- assertVisible: "Mis outfits"
+- assertVisible: "${NOMBRE}"

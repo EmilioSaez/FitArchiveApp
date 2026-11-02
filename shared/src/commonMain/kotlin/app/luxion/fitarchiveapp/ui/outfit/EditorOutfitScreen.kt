@@ -2,6 +2,9 @@ package app.luxion.fitarchiveapp.ui.outfit
 
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -79,7 +82,7 @@ fun EditorOutfitScreen(
 
     val compartir = rememberCompartirOutfit()
 
-    Column(modifier.fillMaxSize().padding(top = 8.dp)) {
+    Column(modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars).padding(top = 8.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onTerminado) { Text("Cancelar") }
             Text(

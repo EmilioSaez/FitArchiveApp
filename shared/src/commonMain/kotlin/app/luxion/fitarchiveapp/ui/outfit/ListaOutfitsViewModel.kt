@@ -73,6 +73,8 @@ class ListaOutfitsViewModel(
         accion("No se pudo eliminar el outfit") { outfits.delete(outfit.id) }
     }
 
+    fun mostrarError(mensaje: String) = _estado.update { it.copy(error = mensaje) }
+
     fun descartarError() = _estado.update { it.copy(error = null) }
 
     private fun accion(mensajeError: String, bloque: suspend () -> Unit) {

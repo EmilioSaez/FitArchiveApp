@@ -207,4 +207,29 @@ class ListaOutfitsViewModelTest {
         assertNotNull(estado.error)
         assertFalse(estado.puedeGuardar)
     }
+
+    @Test
+    fun mostrarErrorYDescartarlo() = runTest(UnconfinedTestDispatcher()) {
+        val e = entorno(backgroundScope)
+        e.vm.mostrarError("No se pudo compartir el outfit")
+        assertEquals("No se pudo compartir el outfit", e.vm.estado.value.error)
+        e.vm.descartarError()
+        assertNull(e.vm.estado.value.error)
+    }
+
+    @Test
+    fun editarOutfitConPrendaEliminadaLaDescartaYConservaElResto() = runTest(UnconfinedTestDispatcher()) {
+        val e = entorno(backgroundScope)
+        val camiseta = e.armario.add(prenda(GarmentType.TSHIRT))
+        val falda = e.armario.add(prenda(GarmentType.SKIRT))
+        val id = e.guardar("Look", 10, camiseta, falda)
+        e.armario.delete(falda)
+
+        val editor = EditorOutfitViewModel(e.outfits, e.armario, backgroundScope, id) { 99L }
+        val cargado = editor.estado.first { !it.cargando }
+        assertEquals(listOf(camiseta), cargado.elegidas.values.map { it.prenda.id })
+
+        editor.guardar()
+        assertEquals(listOf(camiseta), assertNotNull(e.outfits.get(id)).garments.map { it.garmentId })
+    }
 }

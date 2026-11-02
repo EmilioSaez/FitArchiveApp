@@ -94,4 +94,11 @@ class ColocacionTest {
     }
 
     private fun Caja.dentroDelLienzo() = x >= 0 && y >= 0 && x + w <= LIENZO_ANCHO && y + h <= LIENZO_ALTO
+
+    @Test
+    fun vestidoConservaChaquetaYCalzado() {
+        val capas = capasOrdenadas(setOf(Slot.DRESS, Slot.TOP, Slot.BOTTOM, Slot.OUTER, Slot.SHOES))
+        val slots = capas.filterIsInstance<Capa.Prenda>().map { it.slot }
+        assertEquals(listOf(Slot.SHOES, Slot.DRESS, Slot.OUTER), slots)
+    }
 }

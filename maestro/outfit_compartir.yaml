@@ -1,0 +1,10 @@
+# T21 (B3): "Compartir" desde la lista abre el selector del sistema con la imagen (vista previa visible).
+# Comprobar a mano que no hay `Permission Denial` de FileProvider en logcat. Cerrar con Atrás.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Outfits"
+- tapOn: "Compartir"
+- extendedWaitUntil:
+    visible: "Sharing image|Compartiendo imagen"
+    timeout: 10000
+- back
