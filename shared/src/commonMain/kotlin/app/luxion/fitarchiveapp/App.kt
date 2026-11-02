@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +29,9 @@ import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.screens.PantallaVacia
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
 import app.luxion.fitarchiveapp.weather.SeleccionCiudad
 import app.luxion.fitarchiveapp.weather.ServicioTiempoOpenMeteo
@@ -41,6 +45,10 @@ fun App(repositories: Repositories) {
         if (cargando) {
             PantallaCarga(onTerminado = { cargando = false })
             return@FitArchiveTheme
+        }
+        // Cada día que pasa con un outfit asignado suma un uso a sus prendas (T33).
+        LaunchedEffect(Unit) {
+            runCatching { repositories.usos.registrarHasta(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
         }
         var destino by remember { mutableStateOf(Destino.Hoy) }
         var anadiendo by remember { mutableStateOf(false) }
@@ -59,6 +67,7 @@ fun App(repositories: Repositories) {
             DetallePrendaScreen(
                 repositories.garments,
                 repositories.measurements,
+                repositories.usos,
                 id,
                 onVolver = { detalleId = null },
                 onAbrirPerfil = {

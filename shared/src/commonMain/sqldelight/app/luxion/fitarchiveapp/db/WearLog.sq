@@ -1,0 +1,31 @@
+-- Historial de usos (T33): un registro por prenda y día en que se llevó (date en ISO-8601).
+-- Sirve también de marca para no contar dos veces el mismo día.
+CREATE TABLE WearLog (
+    date TEXT NOT NULL,
+    garment_id INTEGER NOT NULL REFERENCES Garment(id) ON DELETE CASCADE,
+    PRIMARY KEY (date, garment_id)
+);
+
+CREATE INDEX wear_log_garment ON WearLog(garment_id);
+
+-- Fechas en que se usó la prenda, la más reciente primero.
+selectDatesByGarment:
+SELECT date FROM WearLog WHERE garment_id = ? ORDER BY date DESC;
+
+-- Prendas de outfits asignados a días anteriores a :today que aún no se han contado.
+selectPending:
+SELECT c.date AS date, og.garment_id AS garment_id
+FROM CalendarDay c
+JOIN OutfitGarment og ON og.outfit_id = c.outfit_id
+WHERE c.date < :today
+  AND NOT EXISTS (SELECT 1 FROM WearLog w WHERE w.date = c.date AND w.garment_id = og.garment_id)
+ORDER BY c.date, og.garment_id;
+
+insert:
+INSERT OR IGNORE INTO WearLog (date, garment_id) VALUES (?, ?);
+
+selectAll:
+SELECT * FROM WearLog ORDER BY date, garment_id;
+
+deleteAll:
+DELETE FROM WearLog;

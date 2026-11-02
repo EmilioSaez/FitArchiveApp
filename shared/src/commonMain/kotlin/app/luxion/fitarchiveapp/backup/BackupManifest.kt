@@ -22,6 +22,8 @@ data class BackupManifest(
     val trips: List<TripDto> = emptyList(),
     val tripOutfits: List<TripOutfitDto> = emptyList(),
     val tripGarments: List<TripGarmentDto> = emptyList(),
+    /** Historial de usos (T33); ausente en copias anteriores. */
+    val wears: List<WearDto> = emptyList(),
     /** Fotos, en el mismo orden en que aparecen sus bytes tras el manifiesto. */
     val photos: List<PhotoEntryDto> = emptyList(),
 ) {
@@ -106,6 +108,9 @@ data class TripOutfitDto(val tripId: Long, val outfitId: Long)
 
 @Serializable
 data class TripGarmentDto(val tripId: Long, val garmentId: Long, val packed: Boolean = false)
+
+@Serializable
+data class WearDto(val date: String, val garmentId: Long)
 
 /** Foto de la prenda [garmentId]; [size] es su longitud en bytes. */
 @Serializable

@@ -58,6 +58,12 @@ data class CalendarDay(
     val note: String?,
 )
 
+/** Día en que se usó una prenda (T33); [date] en ISO-8601. */
+data class WearRecord(
+    val date: String,
+    val garmentId: Long,
+)
+
 data class Trip(
     val id: Long,
     val name: String,

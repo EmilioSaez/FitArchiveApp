@@ -16,6 +16,7 @@ class Repositories(
     val measurements: MeasurementsRepository = SqlMeasurementsRepository(db, context, now)
     val calendar: CalendarRepository = SqlCalendarRepository(db, context)
     val trips: TripRepository = SqlTripRepository(db, context)
+    val usos: UsoRepository = SqlUsoRepository(db, context)
 }
 
 internal const val NOMBRE_BD = "fitarchive.db"
