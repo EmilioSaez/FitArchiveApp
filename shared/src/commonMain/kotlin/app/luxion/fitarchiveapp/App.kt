@@ -18,9 +18,10 @@ import app.luxion.fitarchiveapp.fondo.crearQuitaFondo
 import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
-import app.luxion.fitarchiveapp.ui.avatar.AvatarPreviewScreen
 import app.luxion.fitarchiveapp.ui.detalle.DetallePrendaScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
+import app.luxion.fitarchiveapp.ui.outfit.EditorOutfitScreen
+import app.luxion.fitarchiveapp.ui.outfit.OutfitsScreen
 import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
@@ -57,6 +58,11 @@ fun App(repositories: Repositories) {
             DetallePrendaScreen(repositories.garments, id, onVolver = { detalleId = null })
             return@FitArchiveTheme
         }
+        var editandoOutfit by remember { mutableStateOf(false) }
+        if (editandoOutfit) {
+            EditorOutfitScreen(repositories.outfits, repositories.garments, onTerminado = { editandoOutfit = false })
+            return@FitArchiveTheme
+        }
         val ubicacion = rememberProveedorUbicacion()
         val almacenCiudad = rememberAlmacenCiudad()
         val seleccionCiudad = remember(ubicacion, almacenCiudad) {
@@ -87,7 +93,7 @@ fun App(repositories: Repositories) {
                     onAbrirPrenda = { detalleId = it.id },
                     modifier = Modifier.padding(padding),
                 )
-                Destino.Outfits -> AvatarPreviewScreen(Modifier.padding(padding)) // T18 lo sustituye por el editor
+                Destino.Outfits -> OutfitsScreen(onNuevoOutfit = { editandoOutfit = true }, Modifier.padding(padding)) // T19 añade aquí la lista
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
             }
         }

@@ -125,3 +125,32 @@ fun capasOrdenadas(slotsOcupados: Set<Slot>): List<Capa> {
     val prendas = if (Slot.DRESS in slotsOcupados) slotsOcupados - Slot.TOP - Slot.BOTTOM else slotsOcupados
     return (CapaAvatar.entries.map { Capa.Avatar(it) } + prendas.map { Capa.Prenda(it) }).sortedBy { it.z }
 }
+
+/**
+ * Ajuste manual de una prenda sobre su colocación base: desplazamiento ([dx], [dy]) en unidades del
+ * lienzo y [escala] multiplicativa respecto al tamaño *contain* (se escala desde el centro).
+ * Se persiste tal cual en `OutfitGarment.x/y/scale`.
+ */
+data class AjustePrenda(val dx: Float = 0f, val dy: Float = 0f, val escala: Float = 1f) {
+    /** Lo deja dentro de los límites de [caja]: el centro de la prenda no sale de la caja y la escala va de 0,5x a 1,5x. */
+    fun limitado(caja: Caja) = AjustePrenda(
+        dx = dx.coerceIn(-caja.w / 2f, caja.w / 2f),
+        dy = dy.coerceIn(-caja.h / 2f, caja.h / 2f),
+        escala = escala.coerceIn(ESCALA_MIN, ESCALA_MAX),
+    )
+
+    companion object {
+        const val ESCALA_MIN = 0.5f
+        const val ESCALA_MAX = 1.5f
+        val Ninguno = AjustePrenda()
+    }
+}
+
+/** Aplica [ajuste] a la colocación base [base]: escala desde su centro y luego desplaza. */
+fun ajustar(base: Rect, ajuste: AjustePrenda): Rect {
+    val w = base.w * ajuste.escala
+    val h = base.h * ajuste.escala
+    val cx = base.x + base.w / 2f + ajuste.dx
+    val cy = base.y + base.h / 2f + ajuste.dy
+    return Rect(cx - w / 2f, cy - h / 2f, w, h)
+}
