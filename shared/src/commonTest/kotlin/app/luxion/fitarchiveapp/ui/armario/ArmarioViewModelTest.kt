@@ -100,6 +100,40 @@ class ArmarioViewModelTest {
     }
 
     @Test
+    fun agrupaPorUso() = runTest(UnconfinedTestDispatcher()) {
+        val repo = GarmentRepositoryEnMemoria()
+        val vm = ArmarioViewModel(repo, backgroundScope)
+        repo.add(prenda(GarmentType.SHIRT, uso = Usage.WORK))
+        repo.add(prenda(GarmentType.JACKET, uso = Usage.WORK))
+        repo.add(prenda(GarmentType.DRESS, uso = Usage.PARTY))
+
+        vm.seleccionarAgrupacion(Agrupacion.PorUso)
+        val estado = vm.estado.first { it.agrupacion == Agrupacion.PorUso }
+        assertEquals(Usage.entries.size, estado.pestanas.size)
+        assertEquals(2, estado.conteos[Usage.WORK.ordinal])
+        assertEquals(1, estado.conteos[Usage.PARTY.ordinal])
+        assertEquals(0, estado.conteos[Usage.SPORT.ordinal])
+        // Cada prenda tiene un único uso: las pestañas suman el total.
+        assertEquals(estado.total, estado.conteos.sum())
+        assertTrue(Agrupacion.PorUso in Agrupacion.todas)
+    }
+
+    @Test
+    fun filtroPorUsoSeCombinaConAgrupacionPorUso() = runTest(UnconfinedTestDispatcher()) {
+        val repo = GarmentRepositoryEnMemoria()
+        val vm = ArmarioViewModel(repo, backgroundScope)
+        repo.add(prenda(GarmentType.SHIRT, uso = Usage.WORK))
+        repo.add(prenda(GarmentType.JACKET, uso = Usage.CASUAL))
+
+        vm.seleccionarAgrupacion(Agrupacion.PorUso)
+        vm.aplicarFiltro(GarmentFilter(usage = Usage.WORK))
+        val estado = vm.estado.first { it.total == 1 && it.agrupacion == Agrupacion.PorUso }
+        assertEquals(1, estado.conteos[Usage.WORK.ordinal])
+        assertEquals(0, estado.conteos[Usage.CASUAL.ordinal])
+        assertEquals(2, estado.totalArmario)
+    }
+
+    @Test
     fun filtroCombinaVariosCriterios() = runTest(UnconfinedTestDispatcher()) {
         val repo = GarmentRepositoryEnMemoria()
         val vm = ArmarioViewModel(repo, backgroundScope)
