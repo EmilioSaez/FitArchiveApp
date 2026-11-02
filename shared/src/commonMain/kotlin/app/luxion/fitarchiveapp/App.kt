@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import app.luxion.fitarchiveapp.data.Repositories
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
+import app.luxion.fitarchiveapp.ui.avatar.AvatarPreviewScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
 import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
@@ -70,6 +71,7 @@ fun App(repositories: Repositories) {
                     onAnadirPrenda = { anadiendo = true },
                     modifier = Modifier.padding(padding),
                 )
+                Destino.Outfits -> AvatarPreviewScreen(Modifier.padding(padding)) // T18 lo sustituye por el editor
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
             }
         }
