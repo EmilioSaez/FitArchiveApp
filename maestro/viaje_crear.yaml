@@ -1,0 +1,36 @@
+# Viajes (T37): validación del formulario (fechas como texto) y alta de un viaje. Parte de la lista de viajes vacía.
+# Env: DESTINO (p.ej. Lisboa), IDA / VUELTA (AAAA-MM-DD, p.ej. 2026-12-10 / 2026-12-14), DIAS (texto de duración, p.ej. "5 días")
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Viajes"
+- assertVisible: "Aún no tienes viajes"
+- tapOn: "Nuevo viaje"
+- tapOn: "Guardar"
+- assertVisible: "Ponle un nombre o un destino al viaje"
+- tapOn: "Destino"
+- inputText: "${DESTINO}"
+# Fecha inexistente, formato incorrecto, vuelta sin ida y vuelta anterior a la ida
+- tapOn: "Ida.*"
+- inputText: "2026-02-30"
+- tapOn: "Guardar"
+- assertVisible: "Fecha de inicio no válida.*"
+- eraseText: 20
+- inputText: "10/12/2026"
+- tapOn: "Guardar"
+- assertVisible: "Fecha de inicio no válida.*"
+- eraseText: 20
+- tapOn: "Vuelta.*"
+- inputText: "${VUELTA}"
+- tapOn: "Guardar"
+- assertVisible: "Indica también la fecha de inicio"
+- tapOn: "Ida.*"
+- inputText: "2099-01-01"
+- tapOn: "Guardar"
+- assertVisible: "La vuelta no puede ser antes de la ida"
+- eraseText: 20
+- inputText: "${IDA}"
+- tapOn: "Guardar"
+# Al crearlo se abre el detalle
+- assertVisible: "${DESTINO}"
+- assertVisible: "${IDA} → ${VUELTA} · ${DIAS}"
+- assertVisible: "La maleta está vacía.*"

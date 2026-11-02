@@ -1,0 +1,33 @@
+# Limpia/sucia (T34) y sucia automática (T35) desde el detalle de la 1ª prenda de la pestaña Camisetas.
+# Probar tras calendario_usos (la camiseta ya llegó a su umbral y está sucia). Comprueba el umbral, limpiar/ensuciar a mano y la insignia del Armario.
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Armario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Armario"
+- tapOn:
+    point: "25%,25%"
+- scrollUntilVisible:
+    element: "Marcar como limpia"
+- assertVisible: "Sucia"
+- tapOn: "Marcar como limpia"
+- assertVisible: "Limpia"
+- assertVisible: "Marcar como sucia"
+- assertVisible: "Desde el último lavado"
+# Umbral por prenda: baja hasta "solo a mano" y sube de nuevo
+- scroll
+- tapOn: "−"
+- tapOn: "−"
+- assertVisible: "Sucia: solo a mano"
+- tapOn: "+"
+- assertVisible: "Sucia tras 1 uso"
+- tapOn: "Marcar como sucia"
+- assertVisible: "Marcar como limpia"
+- scrollUntilVisible:
+    element: "← Armario"
+    direction: UP
+- tapOn: "← Armario"
+- assertVisible: "Sucia"

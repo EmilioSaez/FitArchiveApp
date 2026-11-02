@@ -1,0 +1,34 @@
+# Calendario (T32): asignar outfit a hoy, nota en otro día, cambiar de mes, persistencia. Parte del calendario vacío.
+# Env: OUTFIT
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Calendario"
+- assertVisible: "Hoy"
+# Casilla de hoy: la de borde grueso es la 2 del mes de las pruebas (nov 2026); ajustar punto si cambia el mes
+- tapOn:
+    point: "10%,31%"
+- assertVisible: "Sin outfit asignado"
+- tapOn: "${OUTFIT}"
+- assertVisible: "Outfit: ${OUTFIT}"
+- tapOn: "Cerrar"
+- tapOn:
+    point: "24%,31%"
+- tapOn: "Nota"
+- inputText: "Cumple"
+- tapOn: "Guardar"
+- launchApp
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Calendario"
+- extendedWaitUntil:
+    visible: "${OUTFIT}|Look.*"
+    timeout: 5000
+- tapOn: "›"
+- tapOn: "Hoy"
+- tapOn:
+    point: "10%,31%"
+- tapOn: "Quitar outfit"
+- assertVisible: "Sin outfit asignado"
+- tapOn: "Cerrar"
