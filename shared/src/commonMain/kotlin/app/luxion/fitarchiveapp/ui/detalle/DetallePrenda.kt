@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -91,8 +92,7 @@ fun DetallePrendaScreen(
                 onVolver = onVolver,
                 onEditar = { editando = true },
                 onEliminar = { confirmando = true },
-                measurements = measurements,
-                onAbrirPerfil = onAbrirPerfil,
+                onAlternarLimpieza = { scope.launch { garments.setDirty(actual.id, !actual.dirty) } },
             )
         }
     }
@@ -124,8 +124,7 @@ private fun DetalleContenido(
     onVolver: () -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
-    measurements: MeasurementsRepository,
-    onAbrirPerfil: () -> Unit,
+    onAlternarLimpieza: () -> Unit,
 ) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -175,8 +174,8 @@ private fun DetalleContenido(
             HorizontalDivider()
 
             // Huecos reservados: T30 rellena el resultado de talla y T34 el estado limpia/sucia.
-            SeccionTalla(prenda, measurements, onAbrirPerfil)
-            HuecoEstadoLimpieza(prenda)
+            HuecoResultadoTalla(prenda)
+            HuecoEstadoLimpieza(prenda, onAlternarLimpieza)
 
             HorizontalDivider()
             OutlinedButton(onClick = onEditar, modifier = Modifier.fillMaxWidth()) { Text("Editar") }
@@ -187,10 +186,23 @@ private fun DetalleContenido(
     }
 }
 
-/** Hueco para el estado limpia/sucia (T34) y su control. Vacío hasta entonces. */
+/** Hueco para el resultado de talla (T30): talla ideal y etiqueta de corte. Vacío hasta entonces. */
 @Composable
 @Suppress("UNUSED_PARAMETER")
-private fun HuecoEstadoLimpieza(prenda: Garment) {
+private fun HuecoResultadoTalla(prenda: Garment) {
+}
+
+/** Estado limpia/sucia (T34) con un control para alternarlo. Al marcar limpia se reinicia el contador de usos. */
+@Composable
+private fun HuecoEstadoLimpieza(prenda: Garment, onAlternar: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Dato("Estado", if (prenda.dirty) "Sucia" else "Limpia")
+        if (prenda.dirty) {
+            Button(onClick = onAlternar, modifier = Modifier.fillMaxWidth()) { Text("Marcar como limpia") }
+        } else {
+            OutlinedButton(onClick = onAlternar, modifier = Modifier.fillMaxWidth()) { Text("Marcar como sucia") }
+        }
+    }
 }
 
 @Composable

@@ -298,7 +298,20 @@ internal fun FotoPrenda(
                 modifier = Modifier.fillMaxSize(),
             )
         }
-        if (onAlternarFavorita != null) TextButton(
+        if (prenda.dirty) {
+            Text(
+                "Sucia",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(6.dp)
+                    .clip(MaterialTheme.shapes.extraSmall)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
+        TextButton(
             onClick = onAlternarFavorita,
             modifier = Modifier.align(Alignment.TopEnd).semantics {
                 contentDescription = if (prenda.favorite) "Quitar de favoritas" else "Marcar como favorita"

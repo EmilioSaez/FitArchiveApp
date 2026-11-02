@@ -120,6 +120,17 @@ class RepositoriesTest {
         assertTrue(repos.garments.get(id)!!.dirty)
     }
 
+    @Test
+    fun setDirtyTogglesAndFiltersGarments() = runTest {
+        val a = repos.garments.add(garment())
+        val b = repos.garments.add(garment(GarmentType.JEANS))
+        repos.garments.setDirty(a, true)
+        assertEquals(listOf(a), repos.garments.observeFiltered(GarmentFilter(dirty = true)).first().map { it.id })
+        assertEquals(listOf(b), repos.garments.observeFiltered(GarmentFilter(dirty = false)).first().map { it.id })
+        repos.garments.setDirty(a, false)
+        assertTrue(repos.garments.observeFiltered(GarmentFilter(dirty = true)).first().isEmpty())
+    }
+
     // --- Outfits ---
 
     @Test
