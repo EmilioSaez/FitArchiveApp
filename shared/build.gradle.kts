@@ -36,6 +36,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.sqldelight.coroutines)
             implementation(libs.ktor.client.core)
@@ -67,4 +68,9 @@ sqldelight {
             packageName.set("app.luxion.fitarchiveapp.db")
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "app.luxion.fitarchiveapp.resources"
+    generateResClass = always
 }
