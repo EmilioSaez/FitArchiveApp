@@ -68,8 +68,17 @@ fun App(repositories: Repositories) {
             return@FitArchiveTheme
         }
         var editandoOutfit by remember { mutableStateOf(false) }
+        var outfitEditadoId by remember { mutableStateOf<Long?>(null) }
         if (editandoOutfit) {
-            EditorOutfitScreen(repositories.outfits, repositories.garments, onTerminado = { editandoOutfit = false })
+            EditorOutfitScreen(
+                repositories.outfits,
+                repositories.garments,
+                onTerminado = {
+                    editandoOutfit = false
+                    outfitEditadoId = null
+                },
+                outfitId = outfitEditadoId,
+            )
             return@FitArchiveTheme
         }
         val ubicacion = rememberProveedorUbicacion()
@@ -102,7 +111,16 @@ fun App(repositories: Repositories) {
                     onAbrirPrenda = { detalleId = it.id },
                     modifier = Modifier.padding(padding),
                 )
-                Destino.Outfits -> OutfitsScreen(onNuevoOutfit = { editandoOutfit = true }, Modifier.padding(padding)) // T19 añade aquí la lista
+                Destino.Outfits -> OutfitsScreen(
+                    repositories.outfits,
+                    repositories.garments,
+                    onNuevoOutfit = { editandoOutfit = true },
+                    onAbrirOutfit = {
+                        outfitEditadoId = it.id
+                        editandoOutfit = true
+                    },
+                    modifier = Modifier.padding(padding),
+                )
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
             }
         }
