@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -88,6 +89,7 @@ fun DetallePrendaScreen(
                 onVolver = onVolver,
                 onEditar = { editando = true },
                 onEliminar = { confirmando = true },
+                onAlternarLimpieza = { scope.launch { garments.setDirty(actual.id, !actual.dirty) } },
             )
         }
     }
@@ -119,6 +121,7 @@ private fun DetalleContenido(
     onVolver: () -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
+    onAlternarLimpieza: () -> Unit,
 ) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -169,7 +172,7 @@ private fun DetalleContenido(
 
             // Huecos reservados: T30 rellena el resultado de talla y T34 el estado limpia/sucia.
             HuecoResultadoTalla(prenda)
-            HuecoEstadoLimpieza(prenda)
+            HuecoEstadoLimpieza(prenda, onAlternarLimpieza)
 
             HorizontalDivider()
             OutlinedButton(onClick = onEditar, modifier = Modifier.fillMaxWidth()) { Text("Editar") }
@@ -186,10 +189,17 @@ private fun DetalleContenido(
 private fun HuecoResultadoTalla(prenda: Garment) {
 }
 
-/** Hueco para el estado limpia/sucia (T34) y su control. Vacío hasta entonces. */
+/** Estado limpia/sucia (T34) con un control para alternarlo. Al marcar limpia se reinicia el contador de usos. */
 @Composable
-@Suppress("UNUSED_PARAMETER")
-private fun HuecoEstadoLimpieza(prenda: Garment) {
+private fun HuecoEstadoLimpieza(prenda: Garment, onAlternar: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Dato("Estado", if (prenda.dirty) "Sucia" else "Limpia")
+        if (prenda.dirty) {
+            Button(onClick = onAlternar, modifier = Modifier.fillMaxWidth()) { Text("Marcar como limpia") }
+        } else {
+            OutlinedButton(onClick = onAlternar, modifier = Modifier.fillMaxWidth()) { Text("Marcar como sucia") }
+        }
+    }
 }
 
 @Composable
