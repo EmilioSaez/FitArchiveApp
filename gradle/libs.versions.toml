@@ -13,6 +13,7 @@ android-targetSdk = "36"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.16.0" }
 
 sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }

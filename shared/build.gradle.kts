@@ -43,9 +43,14 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.android.driver)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.core.ktx)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
