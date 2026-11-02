@@ -54,13 +54,13 @@ UPDATE Garment SET favorite = ? WHERE id = ?;
 setDirty:
 UPDATE Garment SET dirty = :dirty, wears_since_wash = CASE WHEN :dirty = 0 THEN 0 ELSE wears_since_wash END WHERE id = :id;
 
--- Suma un uso; pasa a sucia al alcanzar wash_after_wears.
+-- Suma un uso; :dirty es el estado resultante (lo calcula Garment.sucioTrasUso, T35).
 registerWear:
 UPDATE Garment SET
     total_wears = total_wears + 1,
     wears_since_wash = wears_since_wash + 1,
-    dirty = CASE WHEN dirty = 1 OR (wash_after_wears IS NOT NULL AND wears_since_wash + 1 >= wash_after_wears) THEN 1 ELSE 0 END
-WHERE id = ?;
+    dirty = :dirty
+WHERE id = :id;
 
 deleteById:
 DELETE FROM Garment WHERE id = ?;

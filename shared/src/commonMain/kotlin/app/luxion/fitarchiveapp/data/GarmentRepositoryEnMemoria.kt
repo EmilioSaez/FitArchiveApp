@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.data
 
 import app.luxion.fitarchiveapp.model.Garment
+import app.luxion.fitarchiveapp.model.sucioTrasUso
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -47,12 +48,10 @@ class GarmentRepositoryEnMemoria(inicial: List<Garment> = emptyList()) : Garment
         modificar(id) { it.copy(dirty = dirty, wearsSinceWash = if (dirty) it.wearsSinceWash else 0) }
 
     override suspend fun registerWear(id: Long) = modificar(id) {
-        val usos = it.wearsSinceWash + 1
-        val limite = it.washAfterWears
         it.copy(
-            wearsSinceWash = usos,
+            wearsSinceWash = it.wearsSinceWash + 1,
             totalWears = it.totalWears + 1,
-            dirty = it.dirty || (limite != null && usos >= limite),
+            dirty = it.sucioTrasUso(),
         )
     }
 

@@ -4,11 +4,13 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.luxion.fitarchiveapp.db.FitArchiveDatabase
+import app.luxion.fitarchiveapp.db.GarmentQueries
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
 import app.luxion.fitarchiveapp.model.Season
 import app.luxion.fitarchiveapp.model.Usage
+import app.luxion.fitarchiveapp.model.sucioTrasUso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -41,7 +43,7 @@ interface GarmentRepository {
     /** Al marcar limpia se reinicia el contador de usos desde el lavado. */
     suspend fun setDirty(id: Long, dirty: Boolean)
 
-    /** Suma un uso; si alcanza `washAfterWears` la prenda pasa a sucia. */
+    /** Suma un uso; si alcanza `usosParaLavar` (propio o del tipo) la prenda pasa a sucia. */
     suspend fun registerWear(id: Long)
 
     /** Elimina la prenda y, en cascada, sus apariciones en outfits y maletas. */
@@ -121,7 +123,15 @@ internal class SqlGarmentRepository(
     override suspend fun setDirty(id: Long, dirty: Boolean) =
         withContext(context) { queries.setDirty(dirty = dirty.toDb(), id = id); Unit }
 
-    override suspend fun registerWear(id: Long) = withContext(context) { queries.registerWear(id); Unit }
+    override suspend fun registerWear(id: Long) = withContext(context) {
+        db.transaction { queries.registrarUso(id) }
+    }
 
     override suspend fun delete(id: Long) = withContext(context) { queries.deleteById(id); Unit }
+}
+
+/** Suma un uso a la prenda y la marca sucia si toca (T35). Debe llamarse dentro de una transacción. */
+internal fun GarmentQueries.registrarUso(id: Long) {
+    val prenda = selectById(id).executeAsOneOrNull()?.toModel() ?: return
+    registerWear(dirty = prenda.sucioTrasUso().toDb(), id = id)
 }

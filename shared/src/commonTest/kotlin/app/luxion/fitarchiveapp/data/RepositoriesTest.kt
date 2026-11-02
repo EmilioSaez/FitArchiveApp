@@ -9,6 +9,7 @@ import app.luxion.fitarchiveapp.model.Measurements
 import app.luxion.fitarchiveapp.model.Occasion
 import app.luxion.fitarchiveapp.model.Outfit
 import app.luxion.fitarchiveapp.model.OutfitGarment
+import app.luxion.fitarchiveapp.model.SOLO_MANUAL
 import app.luxion.fitarchiveapp.model.Season
 import app.luxion.fitarchiveapp.model.Trip
 import app.luxion.fitarchiveapp.model.TripGarment
@@ -113,7 +114,7 @@ class RepositoriesTest {
 
     @Test
     fun garmentWithoutThresholdOnlyDirtyManually() = runTest {
-        val id = repos.garments.add(garment())
+        val id = repos.garments.add(garment(washAfterWears = SOLO_MANUAL))
         repeat(10) { repos.garments.registerWear(id) }
         assertFalse(repos.garments.get(id)!!.dirty)
         repos.garments.setDirty(id, true)

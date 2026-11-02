@@ -44,6 +44,8 @@ import app.luxion.fitarchiveapp.foto.AlmacenFotos
 import app.luxion.fitarchiveapp.foto.cargarImagen
 import app.luxion.fitarchiveapp.foto.rememberAlmacenFotos
 import app.luxion.fitarchiveapp.model.Garment
+import app.luxion.fitarchiveapp.model.SOLO_MANUAL
+import app.luxion.fitarchiveapp.model.usosParaLavar
 import app.luxion.fitarchiveapp.ui.anadir.BorradorPrenda
 import app.luxion.fitarchiveapp.ui.anadir.FormularioPrenda
 import app.luxion.fitarchiveapp.ui.anadir.etiqueta
@@ -98,6 +100,7 @@ fun DetallePrendaScreen(
                 onEditar = { editando = true },
                 onEliminar = { confirmando = true },
                 onAlternarLimpieza = { scope.launch { garments.setDirty(actual.id, !actual.dirty) } },
+                onCambiarUsosParaLavar = { n -> scope.launch { garments.update(actual.copy(washAfterWears = n)) } },
                 measurements = measurements,
                 usos = usos,
                 onAbrirPerfil = onAbrirPerfil,
@@ -133,6 +136,7 @@ private fun DetalleContenido(
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
     onAlternarLimpieza: () -> Unit,
+    onCambiarUsosParaLavar: (Int) -> Unit,
     measurements: MeasurementsRepository,
     usos: UsoRepository,
     onAbrirPerfil: () -> Unit,
@@ -187,7 +191,7 @@ private fun DetalleContenido(
             HorizontalDivider()
 
             SeccionTalla(prenda, measurements, onAbrirPerfil)
-            HuecoEstadoLimpieza(prenda, onAlternarLimpieza)
+            HuecoEstadoLimpieza(prenda, onAlternarLimpieza, onCambiarUsosParaLavar)
 
             HorizontalDivider()
             OutlinedButton(onClick = onEditar, modifier = Modifier.fillMaxWidth()) { Text("Editar") }
@@ -200,7 +204,7 @@ private fun DetalleContenido(
 
 /** Estado limpia/sucia (T34) con un control para alternarlo. Al marcar limpia se reinicia el contador de usos. */
 @Composable
-private fun HuecoEstadoLimpieza(prenda: Garment, onAlternar: () -> Unit) {
+private fun HuecoEstadoLimpieza(prenda: Garment, onAlternar: () -> Unit, onCambiarUsos: (Int) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Dato("Estado", if (prenda.dirty) "Sucia" else "Limpia")
         if (prenda.dirty) {
@@ -208,8 +212,28 @@ private fun HuecoEstadoLimpieza(prenda: Garment, onAlternar: () -> Unit) {
         } else {
             OutlinedButton(onClick = onAlternar, modifier = Modifier.fillMaxWidth()) { Text("Marcar como sucia") }
         }
+        UsosParaLavar(prenda.usosParaLavar() ?: SOLO_MANUAL, onCambiarUsos)
     }
 }
+
+/** Ajuste (T35) de los usos tras los que la prenda pasa sola a sucia; 0 = solo a mano. */
+@Composable
+private fun UsosParaLavar(usos: Int, onCambiar: (Int) -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            when (usos) {
+                SOLO_MANUAL -> "Sucia: solo a mano"
+                1 -> "Sucia tras 1 uso"
+                else -> "Sucia tras $usos usos"
+            },
+            Modifier.weight(1f),
+        )
+        TextButton(onClick = { onCambiar(usos - 1) }, enabled = usos > SOLO_MANUAL) { Text("−") }
+        TextButton(onClick = { onCambiar(usos + 1) }, enabled = usos < MAX_USOS_PARA_LAVAR) { Text("+") }
+    }
+}
+
+private const val MAX_USOS_PARA_LAVAR = 30
 
 @Composable
 private fun Dato(etiqueta: String, valor: String) {
