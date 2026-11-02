@@ -1,1 +1,2 @@
 "NSCameraUsageDescription" = "FitArchive usa la cámara para que fotografíes tus prendas y añadirlas a tu armario. Las fotos se quedan en tu móvil.";
+"NSLocationWhenInUseUsageDescription" = "FitArchive usa tu ubicación aproximada solo para consultar el tiempo y sugerirte outfits. Es opcional: puedes elegir una ciudad.";

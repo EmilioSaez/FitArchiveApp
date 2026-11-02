@@ -14,10 +14,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import app.luxion.fitarchiveapp.data.MedidasRepositoryEnMemoria
 import app.luxion.fitarchiveapp.ui.navigation.Destino
+import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.screens.PantallaVacia
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
+import app.luxion.fitarchiveapp.weather.SeleccionCiudad
+import app.luxion.fitarchiveapp.weather.ServicioTiempoOpenMeteo
+import app.luxion.fitarchiveapp.weather.rememberAlmacenCiudad
+import app.luxion.fitarchiveapp.weather.rememberProveedorUbicacion
 
 @Composable
 fun App() {
@@ -29,6 +35,11 @@ fun App() {
         }
         var destino by remember { mutableStateOf(Destino.Hoy) }
         val medidasRepo = remember { MedidasRepositoryEnMemoria() }
+        val ubicacion = rememberProveedorUbicacion()
+        val almacenCiudad = rememberAlmacenCiudad()
+        val seleccionCiudad = remember(ubicacion, almacenCiudad) {
+            SeleccionCiudad(ServicioTiempoOpenMeteo(ClienteHttpKtor(), ubicacion), almacenCiudad)
+        }
         Scaffold(
             bottomBar = {
                 NavigationBar {
@@ -45,7 +56,9 @@ fun App() {
             },
         ) { padding ->
             when (destino) {
-                Destino.Perfil -> MedidasScreen(medidasRepo, Modifier.padding(padding))
+                Destino.Perfil -> MedidasScreen(medidasRepo, Modifier.padding(padding)) {
+                    SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
+                }
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
             }
         }
