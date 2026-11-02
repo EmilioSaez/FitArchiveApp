@@ -18,3 +18,51 @@ CREATE TABLE Garment (
 CREATE INDEX garment_type ON Garment(type);
 CREATE INDEX garment_color ON Garment(color);
 CREATE INDEX garment_season ON Garment(season);
+
+selectAll:
+SELECT * FROM Garment ORDER BY created_at DESC, id DESC;
+
+selectById:
+SELECT * FROM Garment WHERE id = ?;
+
+selectFavorites:
+SELECT * FROM Garment WHERE favorite = 1 ORDER BY created_at DESC, id DESC;
+
+-- Filtros opcionales: NULL = sin filtrar por ese criterio.
+selectFiltered:
+SELECT * FROM Garment
+WHERE (:type IS NULL OR type = :type)
+  AND (:color IS NULL OR color = :color)
+  AND (:season IS NULL OR season = :season)
+  AND (:usage IS NULL OR usage = :usage)
+  AND (:favorite IS NULL OR favorite = :favorite)
+  AND (:dirty IS NULL OR dirty = :dirty)
+ORDER BY created_at DESC, id DESC;
+
+insert:
+INSERT INTO Garment (photo_path, type, color, season, usage, brand, size, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE Garment SET photo_path = ?, type = ?, color = ?, season = ?, usage = ?, brand = ?, size = ?, favorite = ?, dirty = ?, wears_since_wash = ?, total_wears = ?, wash_after_wears = ?
+WHERE id = ?;
+
+setFavorite:
+UPDATE Garment SET favorite = ? WHERE id = ?;
+
+setDirty:
+UPDATE Garment SET dirty = :dirty, wears_since_wash = CASE WHEN :dirty = 0 THEN 0 ELSE wears_since_wash END WHERE id = :id;
+
+-- Suma un uso; pasa a sucia al alcanzar wash_after_wears.
+registerWear:
+UPDATE Garment SET
+    total_wears = total_wears + 1,
+    wears_since_wash = wears_since_wash + 1,
+    dirty = CASE WHEN dirty = 1 OR (wash_after_wears IS NOT NULL AND wears_since_wash + 1 >= wash_after_wears) THEN 1 ELSE 0 END
+WHERE id = ?;
+
+deleteById:
+DELETE FROM Garment WHERE id = ?;
+
+lastInsertId:
+SELECT last_insert_rowid();

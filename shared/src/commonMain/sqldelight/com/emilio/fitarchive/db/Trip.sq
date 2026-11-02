@@ -20,3 +20,42 @@ CREATE TABLE TripGarment (
     packed INTEGER NOT NULL DEFAULT 0 CHECK (packed IN (0, 1)),
     PRIMARY KEY (trip_id, garment_id)
 );
+
+selectAll:
+SELECT * FROM Trip ORDER BY start_date IS NULL, start_date DESC, id DESC;
+
+selectById:
+SELECT * FROM Trip WHERE id = ?;
+
+insert:
+INSERT INTO Trip (name, destination, start_date, end_date, created_at) VALUES (?, ?, ?, ?, ?);
+
+update:
+UPDATE Trip SET name = ?, destination = ?, start_date = ?, end_date = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM Trip WHERE id = ?;
+
+lastInsertId:
+SELECT last_insert_rowid();
+
+selectOutfitIds:
+SELECT outfit_id FROM TripOutfit WHERE trip_id = ? ORDER BY outfit_id;
+
+insertOutfit:
+INSERT OR IGNORE INTO TripOutfit (trip_id, outfit_id) VALUES (?, ?);
+
+deleteOutfit:
+DELETE FROM TripOutfit WHERE trip_id = ? AND outfit_id = ?;
+
+selectPacking:
+SELECT * FROM TripGarment WHERE trip_id = ? ORDER BY garment_id;
+
+insertGarment:
+INSERT OR IGNORE INTO TripGarment (trip_id, garment_id, packed) VALUES (?, ?, 0);
+
+setPacked:
+UPDATE TripGarment SET packed = ? WHERE trip_id = ? AND garment_id = ?;
+
+deleteGarment:
+DELETE FROM TripGarment WHERE trip_id = ? AND garment_id = ?;
