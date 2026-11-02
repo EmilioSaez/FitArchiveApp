@@ -13,7 +13,7 @@ data class Garment(
     val dirty: Boolean,
     val wearsSinceWash: Int,
     val totalWears: Int,
-    /** Usos tras los que la prenda pasa sola a sucia; null = solo manual. */
+    /** Usos tras los que la prenda pasa sola a sucia; null = el valor por defecto del tipo (T35), 0 = solo manual. */
     val washAfterWears: Int?,
     val createdAt: Long,
     /** Corte (T29): corrige la talla recomendada. */

@@ -6,6 +6,7 @@ import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
 import app.luxion.fitarchiveapp.model.Outfit
 import app.luxion.fitarchiveapp.model.OutfitGarment
+import app.luxion.fitarchiveapp.model.SOLO_MANUAL
 import app.luxion.fitarchiveapp.model.Season
 import app.luxion.fitarchiveapp.model.Usage
 import kotlinx.coroutines.flow.first
@@ -18,9 +19,9 @@ import kotlin.test.assertTrue
 class UsoRepositoryTest {
     private val repos = Repositories(createTestDatabase())
 
-    private suspend fun prenda(washAfterWears: Int? = null) = repos.garments.add(
+    private suspend fun prenda(washAfterWears: Int? = SOLO_MANUAL, type: GarmentType = GarmentType.TSHIRT) = repos.garments.add(
         Garment(
-            id = 0, photoPath = "p.png", type = GarmentType.TSHIRT, color = GarmentColor.BLACK, season = Season.SUMMER,
+            id = 0, photoPath = "p.png", type = type, color = GarmentColor.BLACK, season = Season.SUMMER,
             usage = Usage.CASUAL, brand = null, size = null, favorite = false, dirty = false, wearsSinceWash = 0,
             totalWears = 0, washAfterWears = washAfterWears, createdAt = 1,
         ),
@@ -116,5 +117,26 @@ class UsoRepositoryTest {
         repos.garments.delete(a)
 
         assertEquals(emptyList(), repos.usos.observeFechas(a).first())
+    }
+
+    @Test
+    fun garmentWithoutOwnThresholdUsesTypeDefault() = runTest {
+        val camiseta = prenda(washAfterWears = null)
+        val abrigo = prenda(washAfterWears = null, type = GarmentType.COAT)
+        val o = outfitCon(camiseta, abrigo)
+        repos.calendar.set(CalendarDay("2026-11-01", o, null))
+        repos.usos.registrarHasta("2026-11-02")
+
+        assertTrue(repos.garments.get(camiseta)!!.dirty)
+        assertFalse(repos.garments.get(abrigo)!!.dirty)
+    }
+
+    @Test
+    fun ownThresholdOverridesTypeDefault() = runTest {
+        val a = prenda(washAfterWears = 2)
+        val o = outfitCon(a)
+        repos.calendar.set(CalendarDay("2026-11-01", o, null))
+        repos.usos.registrarHasta("2026-11-02")
+        assertFalse(repos.garments.get(a)!!.dirty)
     }
 }

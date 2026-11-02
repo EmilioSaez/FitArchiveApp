@@ -35,7 +35,7 @@ internal class SqlUsoRepository(
             val pendientes = queries.selectPending(hoy).executeAsList()
             pendientes.forEach {
                 queries.insert(it.date, it.garment_id)
-                db.garmentQueries.registerWear(it.garment_id)
+                db.garmentQueries.registrarUso(it.garment_id)
             }
             pendientes.size
         }
