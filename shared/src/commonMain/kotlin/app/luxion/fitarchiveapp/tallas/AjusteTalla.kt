@@ -41,9 +41,12 @@ data class OpcionesAjuste(
     val margenAjustada: Double = 1.0,
     val margenHolgada: Double = 3.0,
     val semiAnchoPunto: Double = 2.0,
-    /** Calzado: las tallas avanzan ~0,65 cm, así que los márgenes son más finos. */
+    /**
+     * Calzado: las tallas avanzan ~0,65 cm, así que los márgenes son más finos. Un número más
+     * (≈ 0,65 cm de sobra) sigue siendo "bien"; dos números más (≈ 1,3 cm) ya es holgado.
+     */
     val margenAjustadaPie: Double = 0.3,
-    val margenHolgadaPie: Double = 1.0,
+    val margenHolgadaPie: Double = 0.7,
     val semiAnchoPuntoPie: Double = 0.4,
     /** Al elegir la talla ideal, quedarse corta pesa más que quedarse grande. */
     val pesoAjustada: Double = 2.0,
@@ -89,11 +92,14 @@ data class MedidasUsuaria(
 
     companion object {
         fun de(m: Measurements?) = MedidasUsuaria(
-            pecho = m?.bustCm?.toDouble(),
-            cintura = m?.waistCm?.toDouble(),
-            cadera = m?.hipCm?.toDouble(),
-            pie = m?.footCm?.toDouble(),
+            pecho = m?.bustCm.positiva(),
+            cintura = m?.waistCm.positiva(),
+            cadera = m?.hipCm.positiva(),
+            pie = m?.footCm.positiva(),
         )
+
+        /** Un 0 o un negativo (copia de seguridad antigua o corrupta) cuenta como medida ausente. */
+        private fun Float?.positiva(): Double? = this?.toDouble()?.takeIf { it > 0.0 }
     }
 }
 
@@ -168,12 +174,20 @@ object AjusteTalla {
         val generica = tablas[ID_GENERICA]
 
         val delaMarca = elegir(deMarca, claves, talla)
-        val (tabla, prenda) = delaMarca ?: elegir(generica, claves, talla)
-            ?: return ResultadoAjuste(EstadoAjuste.SIN_TABLA)
+        val deGenerica = elegir(generica, claves, talla)
+        // Una marca con tabla del tipo pero sin esa talla (p. ej. "M" en pantalones H&M, que son
+        // numéricos) no puede valorar la prenda: si la genérica sí tiene la talla, se usa ella.
+        val marcaTieneTalla = talla == null || delaMarca?.second?.talla(talla.trim()) != null
+        val elegida = when {
+            delaMarca != null && marcaTieneTalla -> delaMarca
+            delaMarca != null && talla != null && deGenerica?.second?.talla(talla.trim()) != null -> deGenerica
+            else -> delaMarca ?: deGenerica
+        } ?: return ResultadoAjuste(EstadoAjuste.SIN_TABLA)
+        val (tabla, prenda) = elegida
         val base = ResultadoAjuste(
             estado = EstadoAjuste.SIN_MEDIDAS,
             tablaUsada = tabla.marca,
-            esGenerica = delaMarca == null,
+            esGenerica = tabla !== deMarca,
             clavePrenda = prenda.clave,
             corte = opciones.corte,
         )
@@ -181,7 +195,7 @@ object AjusteTalla {
         val hayMedidas = prenda.tallas.any { t -> t.medidas.keys.any { medidas[it] != null } }
         if (!hayMedidas) return base
 
-        val ideal = prenda.tallas
+        val ideal = candidatas(prenda, talla)
             .map { it to puntuacion(it, medidas, opciones) }
             .minWithOrNull(compareBy({ it.second.first }, { it.second.second }))
             ?.first?.etiqueta
@@ -194,6 +208,19 @@ object AjusteTalla {
         }.toMap()
         if (zonas.isEmpty()) return base.copy(tallaIdeal = ideal)
         return base.copy(estado = EstadoAjuste.OK, porZona = zonas, global = global(zonas.values), tallaIdeal = ideal)
+    }
+
+    private fun esNumerica(etiqueta: String) = etiqueta.isNotEmpty() && etiqueta.all { it.isDigit() }
+
+    /**
+     * Tallas entre las que buscar la ideal. Una tabla puede traer la misma prenda en letras (M) y en
+     * numeración (38, 40): se recomienda en el sistema de la talla de la prenda, o en el de la primera
+     * talla de la tabla si no se indicó o no existe. Así "38" no recibe "S" como ideal ni "M" recibe "40".
+     */
+    private fun candidatas(prenda: TablaPrenda, talla: String?): List<TallaMarca> {
+        val referencia = talla?.let { prenda.talla(it.trim()) } ?: prenda.tallas.first()
+        val numerica = esNumerica(referencia.etiqueta)
+        return prenda.tallas.filter { esNumerica(it.etiqueta) == numerica }
     }
 
     /** Global: si algo aprieta, ajustada; si no, y algo sobra, holgada; si no, bien. */

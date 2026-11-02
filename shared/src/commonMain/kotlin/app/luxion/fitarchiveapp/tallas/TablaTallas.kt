@@ -44,7 +44,8 @@ data class TablaPrenda(
     val clave: String,
     val tallas: List<TallaMarca>,
 ) {
-    fun talla(etiqueta: String): TallaMarca? = tallas.firstOrNull { it.etiqueta == etiqueta }
+    fun talla(etiqueta: String): TallaMarca? =
+        tallas.firstOrNull { it.etiqueta == etiqueta } ?: tallas.firstOrNull { it.etiqueta.equals(etiqueta, ignoreCase = true) }
 }
 
 /** Tabla de tallas de una marca (o la genérica europea). Puede estar vacía (`prendas` vacío). */

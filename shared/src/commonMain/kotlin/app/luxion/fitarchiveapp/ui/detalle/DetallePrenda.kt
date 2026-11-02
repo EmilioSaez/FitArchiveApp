@@ -93,6 +93,8 @@ fun DetallePrendaScreen(
                 onEditar = { editando = true },
                 onEliminar = { confirmando = true },
                 onAlternarLimpieza = { scope.launch { garments.setDirty(actual.id, !actual.dirty) } },
+                measurements = measurements,
+                onAbrirPerfil = onAbrirPerfil,
             )
         }
     }
@@ -125,6 +127,8 @@ private fun DetalleContenido(
     onEditar: () -> Unit,
     onEliminar: () -> Unit,
     onAlternarLimpieza: () -> Unit,
+    measurements: MeasurementsRepository,
+    onAbrirPerfil: () -> Unit,
 ) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -173,8 +177,7 @@ private fun DetalleContenido(
             Dato("Veces usada", prenda.totalWears.toString())
             HorizontalDivider()
 
-            // Huecos reservados: T30 rellena el resultado de talla y T34 el estado limpia/sucia.
-            HuecoResultadoTalla(prenda)
+            SeccionTalla(prenda, measurements, onAbrirPerfil)
             HuecoEstadoLimpieza(prenda, onAlternarLimpieza)
 
             HorizontalDivider()
@@ -184,12 +187,6 @@ private fun DetalleContenido(
             }
         }
     }
-}
-
-/** Hueco para el resultado de talla (T30): talla ideal y etiqueta de corte. Vacío hasta entonces. */
-@Composable
-@Suppress("UNUSED_PARAMETER")
-private fun HuecoResultadoTalla(prenda: Garment) {
 }
 
 /** Estado limpia/sucia (T34) con un control para alternarlo. Al marcar limpia se reinicia el contador de usos. */

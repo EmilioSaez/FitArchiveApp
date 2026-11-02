@@ -7,6 +7,7 @@ import app.luxion.fitarchiveapp.model.Season
 import app.luxion.fitarchiveapp.model.Usage
 import app.luxion.fitarchiveapp.ui.anadir.BorradorPrenda
 import app.luxion.fitarchiveapp.ui.anadir.sugerenciasDeMarca
+import app.luxion.fitarchiveapp.ui.anadir.tallasPara
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -80,5 +81,13 @@ class BorradorPrendaTest {
         assertEquals(Fit.OVERSIZE, BorradorPrenda.desde(g).fit)
         val editado = BorradorPrenda.desde(g).copy(fit = Fit.SLIM).aplicarA(g)!!
         assertEquals(g.copy(fit = Fit.SLIM), editado)
+    }
+
+    @Test
+    fun tallasSegunElTipo() {
+        assertTrue("M" in tallasPara(GarmentType.TSHIRT) && "38" in tallasPara(GarmentType.JEANS))
+        assertTrue("XXL" in tallasPara(null))
+        assertEquals((35..46).map { it.toString() }, tallasPara(GarmentType.SHOES))
+        assertFalse("M" in tallasPara(GarmentType.SHOES))
     }
 }

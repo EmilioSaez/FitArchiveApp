@@ -41,7 +41,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T28 Algoritmo de ajuste y talla ideal — Lógica — T22, T27
 - [x] T29 Etiqueta de corte (slim/normal/oversize) — Lógica — T28
 - [x] T30 Resultado de talla en el detalle — UI — T13, T28
-- [ ] T31 Pruebas del algoritmo con casos reales — QA — T28–T30
+- [x] T31 Pruebas del algoritmo con casos reales — QA — T28–T30
 
 ## v0.4 Organización
 - [ ] T32 Calendario: asignar outfits a días — UI — T19
