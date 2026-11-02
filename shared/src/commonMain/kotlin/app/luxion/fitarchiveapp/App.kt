@@ -15,18 +15,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.luxion.fitarchiveapp.data.MedidasRepositoryEnMemoria
-import app.luxion.fitarchiveapp.data.rememberRepositories
+import app.luxion.fitarchiveapp.data.Repositories
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.anadir.BotonAnadirPrenda
 import app.luxion.fitarchiveapp.ui.navigation.Destino
+import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.screens.PantallaVacia
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
+import app.luxion.fitarchiveapp.weather.SeleccionCiudad
+import app.luxion.fitarchiveapp.weather.ServicioTiempoOpenMeteo
+import app.luxion.fitarchiveapp.weather.rememberAlmacenCiudad
+import app.luxion.fitarchiveapp.weather.rememberProveedorUbicacion
 
 @Composable
-fun App() {
+fun App(repositories: Repositories) {
     FitArchiveTheme {
         var cargando by remember { mutableStateOf(true) }
         if (cargando) {
@@ -34,12 +39,15 @@ fun App() {
             return@FitArchiveTheme
         }
         var destino by remember { mutableStateOf(Destino.Hoy) }
-        val medidasRepo = remember { MedidasRepositoryEnMemoria() }
-        val repos = rememberRepositories()
         var anadiendo by remember { mutableStateOf(false) }
         if (anadiendo) {
-            AnadirPrendaFlow(repos.garments, onTerminado = { anadiendo = false })
+            AnadirPrendaFlow(repositories.garments, onTerminado = { anadiendo = false })
             return@FitArchiveTheme
+        }
+        val ubicacion = rememberProveedorUbicacion()
+        val almacenCiudad = rememberAlmacenCiudad()
+        val seleccionCiudad = remember(ubicacion, almacenCiudad) {
+            SeleccionCiudad(ServicioTiempoOpenMeteo(ClienteHttpKtor(), ubicacion), almacenCiudad)
         }
         Scaffold(
             bottomBar = {
@@ -57,7 +65,9 @@ fun App() {
             },
         ) { padding ->
             when (destino) {
-                Destino.Perfil -> MedidasScreen(medidasRepo, Modifier.padding(padding))
+                Destino.Perfil -> MedidasScreen(repositories.measurements, Modifier.padding(padding)) {
+                    SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
+                }
                 // T10 sustituye el contenido; el botón es el punto de entrada de T08.
                 Destino.Armario -> Box(Modifier.fillMaxSize().padding(padding)) {
                     PantallaVacia(destino.titulo)

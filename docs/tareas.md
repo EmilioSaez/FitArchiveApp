@@ -13,7 +13,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 ## v0.1 Armario básico
 - [ ] T05 Pantalla de carga con puertas del armario — UI — T02
 - [x] T06 Hacer foto o elegir de galería — UI — T02
-- [ ] T07 Quitar fondo en el móvil — Lógica — T06
+- [x] T07 Quitar fondo en el móvil — Lógica — T06 (Android: ML Kit, compilado; iOS: Vision, sin validar: no compilado en Windows)
 - [x] T08 Formulario añadir prenda (tipo, color, estación, uso, marca, talla) — UI — T04, T06
 - [ ] T09 Detectar color principal — Lógica — T07
 - [ ] T10 Armario con pestañas por tipo — UI — T04
@@ -37,7 +37,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [~] T24 Tablas Mango y H&M — Contenido — — (parcial: H&M camiseta y pantalón hecho; Mango pendiente de guía oficial)
 - [x] T25 Tablas Brownie, Scalpers, Hollister, Brandy Melville — Contenido — —
 - [x] T26 Tabla genérica europea — Contenido — —
-- [ ] T27 Formato común de tablas y carga — Datos — T03, T23–T26
+- [x] T27 Formato común de tablas y carga — Datos — T03, T23–T26
 - [ ] T28 Algoritmo de ajuste y talla ideal — Lógica — T22, T27
 - [ ] T29 Etiqueta de corte (slim/normal/oversize) — Lógica — T28
 - [ ] T30 Resultado de talla en el detalle — UI — T13, T28
