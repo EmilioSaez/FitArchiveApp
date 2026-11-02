@@ -1,5 +1,8 @@
 package app.luxion.fitarchiveapp
 
 import androidx.compose.ui.window.ComposeUIViewController
+import app.luxion.fitarchiveapp.data.crearRepositories
 
-fun MainViewController() = ComposeUIViewController { App() }
+private val repositories by lazy { crearRepositories() }
+
+fun MainViewController() = ComposeUIViewController { App(repositories) }

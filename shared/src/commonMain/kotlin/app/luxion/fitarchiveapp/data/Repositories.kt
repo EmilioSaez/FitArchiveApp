@@ -17,3 +17,5 @@ class Repositories(
     val calendar: CalendarRepository = SqlCalendarRepository(db, context)
     val trips: TripRepository = SqlTripRepository(db, context)
 }
+
+internal const val NOMBRE_BD = "fitarchive.db"

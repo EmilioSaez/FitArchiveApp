@@ -7,5 +7,7 @@
 	<!-- Selector de fotos del sistema (PHPicker): no requiere NSPhotoLibraryUsageDescription -->
 	<key>NSCameraUsageDescription</key>
 	<string>FitArchive usa la cámara para que fotografíes tus prendas y añadirlas a tu armario. Las fotos se quedan en tu móvil.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>FitArchive usa tu ubicación aproximada solo para consultar el tiempo y sugerirte outfits. Es opcional: puedes elegir una ciudad.</string>
 </dict>
 </plist>

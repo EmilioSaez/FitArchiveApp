@@ -59,3 +59,25 @@ UPDATE TripGarment SET packed = ? WHERE trip_id = ? AND garment_id = ?;
 
 deleteGarment:
 DELETE FROM TripGarment WHERE trip_id = ? AND garment_id = ?;
+
+-- Copia de seguridad: inserta conservando el id.
+insertWithId:
+INSERT INTO Trip (id, name, destination, start_date, end_date, created_at) VALUES (?, ?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM Trip;
+
+selectAllOutfits:
+SELECT * FROM TripOutfit ORDER BY trip_id, outfit_id;
+
+deleteAllOutfits:
+DELETE FROM TripOutfit;
+
+selectAllPacking:
+SELECT * FROM TripGarment ORDER BY trip_id, garment_id;
+
+insertGarmentWithState:
+INSERT INTO TripGarment (trip_id, garment_id, packed) VALUES (?, ?, ?);
+
+deleteAllGarments:
+DELETE FROM TripGarment;
