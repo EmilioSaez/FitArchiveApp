@@ -28,6 +28,7 @@ Notas:
 
 Decisiones:
 - **Ubicación**: solo `ACCESS_COARSE_LOCATION`; no se pide `ACCESS_FINE_LOCATION` ni ubicación en segundo plano. El tiempo no necesita precisión.
+- **Servicio del tiempo**: Open-Meteo (api.open-meteo.com y geocoding-api.open-meteo.com), gratuito y sin clave de API. Recibe coordenadas aproximadas (redondeadas a 1 decimal, ~11 km) o la ciudad buscada, más la IP inevitable. Política: https://open-meteo.com/en/terms#privacy
 - **Internet**: `INTERNET` es un permiso normal (sin diálogo); necesario para la consulta del tiempo.
 - **Galería**: usar el selector de fotos del sistema (Photo Picker / `ActivityResultContracts.PickVisualMedia`). Así **no** se declaran `READ_MEDIA_IMAGES` ni `READ_EXTERNAL_STORAGE`, y la política puede decir que solo se accede a las fotos elegidas.
 - **Exportar/importar copia**: usar el selector de documentos del sistema (`CreateDocument` / `OpenDocument`); no requiere permisos de almacenamiento.
@@ -42,6 +43,6 @@ Textos de justificación previa (diálogo propio antes del permiso del sistema, 
 Si se deniega un permiso, la app sigue funcionando: sin cámara, elegir de galería; sin ubicación, elegir ciudad.
 
 ## Fichas de las tiendas (Google Play / App Store)
-- Declarar: sin cuenta, sin recopilación de datos por el desarrollador, sin analítica, sin anuncios, sin compartir datos con terceros salvo la consulta del tiempo ([PENDIENTE: confirmar servicio] recibe coordenadas aproximadas o ciudad).
+- Declarar: sin cuenta, sin recopilación de datos por el desarrollador, sin analítica, sin anuncios, sin compartir datos con terceros salvo la consulta del tiempo (Open-Meteo, sin clave de API, recibe coordenadas aproximadas o ciudad).
 - URL de la política de privacidad: [PENDIENTE: URL pública donde se alojará `politica-privacidad.md`].
 - Revisar este documento si se añade cualquier SDK o permiso nuevo.
