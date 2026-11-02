@@ -10,3 +10,13 @@ CREATE TABLE Measurements (
     leg_cm REAL,
     updated_at INTEGER NOT NULL
 );
+
+select:
+SELECT * FROM Measurements WHERE id = 1;
+
+upsert:
+INSERT OR REPLACE INTO Measurements (id, height_cm, bust_cm, waist_cm, hip_cm, shoulders_cm, arm_cm, leg_cm, updated_at)
+VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?);
+
+delete:
+DELETE FROM Measurements;

@@ -18,3 +18,36 @@ CREATE TABLE OutfitGarment (
 );
 
 CREATE INDEX outfit_garment_garment ON OutfitGarment(garment_id);
+
+selectAll:
+SELECT * FROM Outfit ORDER BY created_at DESC, id DESC;
+
+selectById:
+SELECT * FROM Outfit WHERE id = ?;
+
+selectFavorites:
+SELECT * FROM Outfit WHERE favorite = 1 ORDER BY created_at DESC, id DESC;
+
+insert:
+INSERT INTO Outfit (name, occasion, favorite, created_at) VALUES (?, ?, ?, ?);
+
+update:
+UPDATE Outfit SET name = ?, occasion = ?, favorite = ? WHERE id = ?;
+
+setFavorite:
+UPDATE Outfit SET favorite = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM Outfit WHERE id = ?;
+
+lastInsertId:
+SELECT last_insert_rowid();
+
+selectGarments:
+SELECT * FROM OutfitGarment WHERE outfit_id = ? ORDER BY z_index, garment_id;
+
+insertGarment:
+INSERT OR REPLACE INTO OutfitGarment (outfit_id, garment_id, x, y, scale, z_index) VALUES (?, ?, ?, ?, ?, ?);
+
+deleteGarments:
+DELETE FROM OutfitGarment WHERE outfit_id = ?;

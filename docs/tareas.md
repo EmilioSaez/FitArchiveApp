@@ -8,11 +8,11 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T01 Framework (Kotlin Multiplatform) y proyecto — Base — PR #1
 - [x] T02 Navegación y tema visual base (colores, tipografía editorial) — UI — T01
 - [x] T03 Modelo de datos y BD local: prenda, outfit, medidas, día de calendario, viaje — Datos — T01
-- [ ] T04 Capa de acceso a datos con tests — Datos — T03
+- [x] T04 Capa de acceso a datos con tests — Datos — T03
 
 ## v0.1 Armario básico
-- [x] T05 Pantalla de carga con puertas del armario — UI — T02
-- [ ] T06 Hacer foto o elegir de galería — UI — T02
+- [ ] T05 Pantalla de carga con puertas del armario — UI — T02
+- [x] T06 Hacer foto o elegir de galería — UI — T02
 - [ ] T07 Quitar fondo en el móvil — Lógica — T06
 - [ ] T08 Formulario añadir prenda (tipo, color, estación, uso, marca, talla) — UI — T04, T06
 - [ ] T09 Detectar color principal — Lógica — T07
@@ -53,7 +53,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T38 Pruebas v0.4 — QA — T32–T37
 
 ## v0.5 Sugerencias
-- [ ] T39 Servicio del tiempo (ubicación o ciudad) — Lógica — T02
+- [x] T39 Servicio del tiempo (ubicación o ciudad) — Lógica — T02
 - [ ] T40 Reglas de combinación de colores — Lógica — T03
 - [ ] T41 Motor de sugerencias — Lógica — T35, T36, T39, T40
 - [ ] T42 Aprender estilo de likes y outfits guardados — Lógica — T14, T41
@@ -61,7 +61,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T44 Pruebas v0.5 — QA — T39–T43
 
 ## v1.0 Lanzamiento
-- [ ] T45 Exportar/importar copia — Datos — T03
+- [x] T45 Exportar/importar copia — Datos — T03
 - [ ] T46 Pulir estética de revista — Diseño — T44
 - [ ] T47 Rendimiento con armarios grandes — Lógica — T44
 - [x] T48 Icono y fichas de tiendas — Contenido — —

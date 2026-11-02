@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.sqldelight)
 }
 
@@ -16,6 +17,7 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+        withHostTest {}
     }
 
     listOf(
@@ -34,12 +36,27 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.sqldelight.coroutines)
+            implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
+        getByName("androidHostTest").dependencies {
+            implementation(libs.sqldelight.sqlite.driver)
         }
         androidMain.dependencies {
+            implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.android.driver)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.core.ktx)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
+            implementation(libs.ktor.client.darwin)
         }
     }
 }
