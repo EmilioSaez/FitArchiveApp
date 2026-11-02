@@ -1,0 +1,15 @@
+# Filtro multicriterio: Rojo + Invierno debe dejar solo el jersey rojo. Requiere las 3 prendas de prueba.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Filtrar"
+- tapOn: "Rojo"
+- scrollUntilVisible:
+    element: "Invierno"
+- tapOn: "Invierno"
+- scrollUntilVisible:
+    element: "Aplicar"
+- tapOn: "Aplicar"
+- assertVisible: "Filtrar [(]2[)]"
+- assertVisible: "1 de 3 prendas"
+- tapOn: "Limpiar"
+- assertVisible: "3 prendas"

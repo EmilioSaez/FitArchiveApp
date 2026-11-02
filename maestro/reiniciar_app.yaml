@@ -1,0 +1,7 @@
+# Cierra y relanza la app SIN borrar datos (comprueba persistencia).
+appId: app.luxion.fitarchiveapp
+---
+- stopApp
+- launchApp:
+    clearState: false
+- tapOn: "Armario"

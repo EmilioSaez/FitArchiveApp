@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.data
 
 import app.luxion.fitarchiveapp.model.CalendarDay
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -29,6 +30,7 @@ internal fun app.luxion.fitarchiveapp.db.Garment.toModel() = Garment(
     usage = enumFromDb<Usage>(usage),
     brand = brand,
     size = size,
+    fit = enumFromDb<Fit>(fit),
     favorite = favorite == 1L,
     dirty = dirty == 1L,
     wearsSinceWash = wears_since_wash.toInt(),
@@ -63,6 +65,7 @@ internal fun app.luxion.fitarchiveapp.db.Measurements.toModel() = Measurements(
     armCm = arm_cm?.toFloat(),
     legCm = leg_cm?.toFloat(),
     updatedAt = updated_at,
+    footCm = foot_cm?.toFloat(),
 )
 
 internal fun app.luxion.fitarchiveapp.db.CalendarDay.toModel() = CalendarDay(

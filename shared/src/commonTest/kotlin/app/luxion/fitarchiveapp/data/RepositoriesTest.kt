@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.data
 
 import app.luxion.fitarchiveapp.model.CalendarDay
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -68,6 +69,16 @@ class RepositoriesTest {
         assertEquals(listOf(a, b), ids(GarmentFilter(type = GarmentType.TSHIRT)))
         assertEquals(listOf(a), ids(GarmentFilter(type = GarmentType.TSHIRT, color = GarmentColor.BLACK)))
         assertTrue(ids(GarmentFilter(season = Season.MID_SEASON)).isEmpty())
+    }
+
+    @Test
+    fun fitDefaultsToNormalAndIsPersistedAndUpdated() = runTest {
+        val id = repos.garments.add(garment())
+        assertEquals(Fit.NORMAL, repos.garments.get(id)!!.fit)
+        val id2 = repos.garments.add(garment().copy(fit = Fit.SLIM))
+        assertEquals(Fit.SLIM, repos.garments.get(id2)!!.fit)
+        repos.garments.update(repos.garments.get(id)!!.copy(fit = Fit.OVERSIZE))
+        assertEquals(Fit.OVERSIZE, repos.garments.get(id)!!.fit)
     }
 
     @Test
@@ -188,7 +199,7 @@ class RepositoriesTest {
     fun measurementsSaveStampsUpdatedAtAndReplaces() = runTest {
         assertNull(repos.measurements.get())
         assertNull(repos.measurements.observe().first())
-        val m = Measurements(165f, 90f, 70f, 95f, null, null, 80f, updatedAt = 0)
+        val m = Measurements(165f, 90f, 70f, 95f, null, null, 80f, updatedAt = 0, footCm = 24.5f)
         clock = 5_000
         repos.measurements.save(m)
         assertEquals(m.copy(updatedAt = 5_000), repos.measurements.get())
@@ -196,6 +207,7 @@ class RepositoriesTest {
         repos.measurements.save(m.copy(waistCm = 72f, heightCm = null))
         val saved = repos.measurements.observe().first()!!
         assertEquals(72f, saved.waistCm)
+        assertEquals(24.5f, saved.footCm)
         assertNull(saved.heightCm)
         assertEquals(6_000, saved.updatedAt)
         repos.measurements.clear()

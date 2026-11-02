@@ -274,11 +274,12 @@ private fun <T> Grupo(titulo: String, valores: List<T>, elegido: T?, etiqueta: (
 }
 
 @Composable
-private fun FotoPrenda(
+internal fun FotoPrenda(
     prenda: Garment,
     onClick: () -> Unit,
-    onAlternarFavorita: () -> Unit,
-    modifier: Modifier = Modifier) {
+    onAlternarFavorita: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
     Box(
         modifier

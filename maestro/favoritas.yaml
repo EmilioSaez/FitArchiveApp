@@ -1,0 +1,18 @@
+# Favorita: marca el jersey desde la cuadrícula y filtra "Solo favoritas" (esperado: 1 de 2 prendas).
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Tipo"
+- tapOn:
+    text: "Jerséis.*"
+- tapOn: "Marcar como favorita"
+- tapOn: "Filtrar"
+- scrollUntilVisible:
+    element: "Solo favoritas"
+- tapOn:
+    point: "88%,95%"
+- scrollUntilVisible:
+    element: "Aplicar"
+- tapOn: "Aplicar"
+- assertVisible: "1 de 2 prendas"
+- tapOn: "Limpiar"
+- assertVisible: "2 prendas"

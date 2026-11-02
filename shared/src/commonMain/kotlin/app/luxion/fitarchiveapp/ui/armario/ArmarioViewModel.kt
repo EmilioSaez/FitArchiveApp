@@ -6,6 +6,7 @@ import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
 import app.luxion.fitarchiveapp.model.Season
+import app.luxion.fitarchiveapp.model.Usage
 import app.luxion.fitarchiveapp.ui.anadir.etiqueta
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,8 +57,14 @@ sealed interface Agrupacion {
             Season.entries.map { s -> Pestana(s.name, s.etiqueta()) { it.season == s } }
     }
 
+    data object PorUso : Agrupacion {
+        override val titulo = "Uso"
+        override val pestanas: List<Pestana> =
+            Usage.entries.map { u -> Pestana(u.name, u.etiqueta()) { it.usage == u } }
+    }
+
     companion object {
-        val todas: List<Agrupacion> = listOf(PorTipo, PorColor, PorEstacion)
+        val todas: List<Agrupacion> = listOf(PorTipo, PorColor, PorEstacion, PorUso)
     }
 }
 

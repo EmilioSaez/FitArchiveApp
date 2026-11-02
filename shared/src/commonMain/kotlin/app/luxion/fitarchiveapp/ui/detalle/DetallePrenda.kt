@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.data.GarmentRepository
+import app.luxion.fitarchiveapp.data.MeasurementsRepository
 import app.luxion.fitarchiveapp.foto.AlmacenFotos
 import app.luxion.fitarchiveapp.foto.cargarImagen
 import app.luxion.fitarchiveapp.foto.rememberAlmacenFotos
@@ -51,8 +52,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetallePrendaScreen(
     garments: GarmentRepository,
+    measurements: MeasurementsRepository,
     prendaId: Long,
     onVolver: () -> Unit,
+    onAbrirPerfil: () -> Unit,
     modifier: Modifier = Modifier,
     almacen: AlmacenFotos = rememberAlmacenFotos(),
 ) {

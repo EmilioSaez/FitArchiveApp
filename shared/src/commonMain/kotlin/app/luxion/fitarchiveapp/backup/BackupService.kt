@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.backup
 
 import app.luxion.fitarchiveapp.model.CalendarDay
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -96,14 +97,14 @@ private fun WardrobeSnapshot.toManifest(createdAt: Long, photos: List<PhotoEntry
     createdAt = createdAt,
     garments = garments.map {
         GarmentDto(
-            it.id, it.type.name, it.color.name, it.season.name, it.usage.name, it.brand, it.size,
+            it.id, it.type.name, it.color.name, it.season.name, it.usage.name, it.brand, it.size, it.fit.name,
             it.favorite, it.dirty, it.wearsSinceWash, it.totalWears, it.washAfterWears, it.createdAt,
         )
     },
     outfits = outfits.map { OutfitDto(it.id, it.name, it.occasion?.name, it.favorite, it.createdAt) },
     outfitGarments = outfitGarments.map { OutfitGarmentDto(it.outfitId, it.garmentId, it.x, it.y, it.scale, it.zIndex) },
     measurements = measurements?.let {
-        MeasurementsDto(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt)
+        MeasurementsDto(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt, it.footCm)
     },
     calendar = calendar.map { CalendarDayDto(it.date, it.outfitId, it.note) },
     trips = trips.map { TripDto(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
@@ -125,14 +126,14 @@ private fun BackupManifest.toSnapshot() = WardrobeSnapshot(
             color = parse<GarmentColor>(it.color, "color"),
             season = parse<Season>(it.season, "estación"),
             usage = parse<Usage>(it.usage, "uso"),
-            brand = it.brand, size = it.size, favorite = it.favorite, dirty = it.dirty,
+            brand = it.brand, size = it.size, fit = parse<Fit>(it.fit, "corte"), favorite = it.favorite, dirty = it.dirty,
             wearsSinceWash = it.wearsSinceWash, totalWears = it.totalWears,
             washAfterWears = it.washAfterWears, createdAt = it.createdAt,
         )
     },
     outfits = outfits.map { Outfit(it.id, it.name, it.occasion?.let { o -> parse<Occasion>(o, "ocasión") }, it.favorite, it.createdAt) },
     outfitGarments = outfitGarments.map { OutfitGarment(it.outfitId, it.garmentId, it.x, it.y, it.scale, it.zIndex) },
-    measurements = measurements?.let { Measurements(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt) },
+    measurements = measurements?.let { Measurements(it.heightCm, it.bustCm, it.waistCm, it.hipCm, it.shouldersCm, it.armCm, it.legCm, it.updatedAt, it.footCm) },
     calendar = calendar.map { CalendarDay(it.date, it.outfitId, it.note) },
     trips = trips.map { Trip(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
     tripOutfits = tripOutfits.map { TripOutfitLink(it.tripId, it.outfitId) },
