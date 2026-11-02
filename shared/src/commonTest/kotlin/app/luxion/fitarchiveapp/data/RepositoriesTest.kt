@@ -158,6 +158,19 @@ class RepositoriesTest {
         assertTrue(repos.outfits.get(id)!!.garments.isEmpty())
     }
 
+    @Test
+    fun deletingGarmentRemovesItFromTripPackingAndKeepsTheTrip() = runTest {
+        val trip = repos.trips.create(Trip(0, "Viaje", null, null, null, 1))
+        val g = repos.garments.add(garment())
+        val otra = repos.garments.add(garment())
+        repos.trips.addGarment(trip, g)
+        repos.trips.addGarment(trip, otra)
+        repos.garments.delete(g)
+        assertEquals(listOf(otra), repos.trips.observePacking(trip).first().map { it.garmentId })
+        assertNull(repos.garments.get(g))
+        assertEquals(trip, repos.trips.get(trip)?.id)
+    }
+
     // --- Medidas ---
 
     @Test

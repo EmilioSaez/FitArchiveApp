@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.data.GarmentRepository
@@ -59,6 +61,7 @@ fun ArmarioScreen(
         onSeleccionarPestana = viewModel::seleccionarPestana,
         onAnadirPrenda = onAnadirPrenda,
         onAbrirPrenda = onAbrirPrenda,
+        onAlternarFavorita = viewModel::alternarFavorita,
         modifier = modifier,
     )
 }
@@ -69,6 +72,7 @@ internal fun ArmarioContenido(
     onSeleccionarPestana: (Int) -> Unit,
     onAnadirPrenda: () -> Unit,
     onAbrirPrenda: (Garment) -> Unit,
+    onAlternarFavorita: (Garment) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize()) {
@@ -127,7 +131,7 @@ internal fun ArmarioContenido(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(estado.prendas, key = { it.id }) { prenda ->
-                    FotoPrenda(prenda, onClick = { onAbrirPrenda(prenda) })
+                    FotoPrenda(prenda, onClick = { onAbrirPrenda(prenda) }, onAlternarFavorita = { onAlternarFavorita(prenda) })
                 }
             }
         }
@@ -135,7 +139,11 @@ internal fun ArmarioContenido(
 }
 
 @Composable
-private fun FotoPrenda(prenda: Garment, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun FotoPrenda(
+    prenda: Garment,
+    onClick: () -> Unit,
+    onAlternarFavorita: () -> Unit,
+    modifier: Modifier = Modifier) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
     Box(
         modifier
@@ -152,6 +160,18 @@ private fun FotoPrenda(prenda: Garment, onClick: () -> Unit, modifier: Modifier 
                 contentDescription = prenda.brand,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
+            )
+        }
+        TextButton(
+            onClick = onAlternarFavorita,
+            modifier = Modifier.align(Alignment.TopEnd).semantics {
+                contentDescription = if (prenda.favorite) "Quitar de favoritas" else "Marcar como favorita"
+            },
+        ) {
+            Text(
+                if (prenda.favorite) "♥" else "♡",
+                style = MaterialTheme.typography.titleLarge,
+                color = if (prenda.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             )
         }
     }

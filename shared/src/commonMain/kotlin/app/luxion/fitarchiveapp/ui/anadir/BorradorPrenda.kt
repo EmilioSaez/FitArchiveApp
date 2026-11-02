@@ -49,6 +49,30 @@ data class BorradorPrenda(
 ) {
     val completo: Boolean get() = type != null && color != null && season != null && usage != null
 
+    companion object {
+        /** Borrador con los datos de una prenda existente, para editarla. */
+        fun desde(g: Garment) = BorradorPrenda(
+            type = g.type, color = g.color, season = g.season, usage = g.usage,
+            brand = g.brand.orEmpty(), size = g.size,
+        )
+    }
+
+    /**
+     * Prenda editada: copia de [original] con los campos del formulario; id, foto, favorito y
+     * contadores no cambian. Null si falta algún campo obligatorio.
+     */
+    fun aplicarA(original: Garment): Garment? {
+        if (!completo) return null
+        return original.copy(
+            type = type!!,
+            color = color!!,
+            season = season!!,
+            usage = usage!!,
+            brand = brand.trim().ifEmpty { null },
+            size = size,
+        )
+    }
+
     /** Crea la prenda nueva; null si falta algún campo obligatorio. El id lo asigna el repositorio. */
     fun aPrenda(photoPath: String, createdAt: Long): Garment? {
         if (!completo) return null

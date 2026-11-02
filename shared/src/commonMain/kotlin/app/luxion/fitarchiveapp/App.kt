@@ -12,10 +12,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import app.luxion.fitarchiveapp.color.detectarColorDeFoto
 import app.luxion.fitarchiveapp.data.Repositories
+import app.luxion.fitarchiveapp.fondo.crearQuitaFondo
+import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
 import app.luxion.fitarchiveapp.ui.avatar.AvatarPreviewScreen
+import app.luxion.fitarchiveapp.ui.detalle.DetallePrendaScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
 import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
@@ -39,7 +43,18 @@ fun App(repositories: Repositories) {
         var destino by remember { mutableStateOf(Destino.Hoy) }
         var anadiendo by remember { mutableStateOf(false) }
         if (anadiendo) {
-            AnadirPrendaFlow(repositories.garments, onTerminado = { anadiendo = false })
+            val quitaFondo = remember { crearQuitaFondo() }
+            AnadirPrendaFlow(
+                repositories.garments,
+                onTerminado = { anadiendo = false },
+                quitarFondo = { foto -> FotoCapturada(quitaFondo.quitar(foto).bytesPng) },
+                detectarColor = ::detectarColorDeFoto,
+            )
+            return@FitArchiveTheme
+        }
+        var detalleId by remember { mutableStateOf<Long?>(null) }
+        detalleId?.let { id ->
+            DetallePrendaScreen(repositories.garments, id, onVolver = { detalleId = null })
             return@FitArchiveTheme
         }
         val ubicacion = rememberProveedorUbicacion()
@@ -69,6 +84,7 @@ fun App(repositories: Repositories) {
                 Destino.Armario -> ArmarioScreen(
                     repositories.garments,
                     onAnadirPrenda = { anadiendo = true },
+                    onAbrirPrenda = { detalleId = it.id },
                     modifier = Modifier.padding(padding),
                 )
                 Destino.Outfits -> AvatarPreviewScreen(Modifier.padding(padding)) // T18 lo sustituye por el editor

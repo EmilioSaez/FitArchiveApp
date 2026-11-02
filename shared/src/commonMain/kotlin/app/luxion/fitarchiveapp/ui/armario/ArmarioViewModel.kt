@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Familias de prendas que se muestran como pestañas; cada una agrupa varios [GarmentType]. */
 enum class PestanaTipo(val titulo: String, val tipos: Set<GarmentType>) {
@@ -31,14 +32,23 @@ sealed interface Agrupacion {
     val pestanas: List<Pestana>
 
     data object PorTipo : Agrupacion {
-        override val pestanas: List<Pestana> = PestanaTipo.entries.map { Pestana(it.name, it.titulo, it.tipos) }
+        override val pestanas: List<Pestana> =
+            PestanaTipo.entries.map { Pestana(it.name, it.titulo, it.tipos) } + PESTANA_FAVORITAS
     }
 }
 
 /** Una pestaña: [tipos] es el criterio de pertenencia (T11 añadirá colores/estaciones). */
-data class Pestana(val id: String, val titulo: String, val tipos: Set<GarmentType>) {
-    fun admite(prenda: Garment) = prenda.type in tipos
+data class Pestana(
+    val id: String,
+    val titulo: String,
+    val tipos: Set<GarmentType>,
+    val soloFavoritas: Boolean = false,
+) {
+    fun admite(prenda: Garment) = prenda.type in tipos && (!soloFavoritas || prenda.favorite)
 }
+
+/** Pestaña "Favoritas": prendas con like de cualquier tipo. */
+private val PESTANA_FAVORITAS = Pestana("FAVORITAS", "Favoritas", GarmentType.entries.toSet(), soloFavoritas = true)
 
 data class ArmarioUiState(
     val cargando: Boolean = true,
@@ -61,8 +71,8 @@ data class ArmarioUiState(
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ArmarioViewModel(
-    repositorio: GarmentRepository,
-    scope: CoroutineScope,
+    private val repositorio: GarmentRepository,
+    private val scope: CoroutineScope,
     agrupacion: Agrupacion = Agrupacion.PorTipo,
 ) {
     private val pestanaActual = MutableStateFlow(0)
@@ -86,6 +96,11 @@ class ArmarioViewModel(
 
     fun seleccionarPestana(indice: Int) {
         pestanaActual.value = indice
+    }
+
+    /** Alterna el like de la prenda; el Flow del repositorio refresca la cuadrícula al instante. */
+    fun alternarFavorita(prenda: Garment) {
+        scope.launch { repositorio.setFavorite(prenda.id, !prenda.favorite) }
     }
 
     fun aplicarFiltro(nuevo: GarmentFilter) {
