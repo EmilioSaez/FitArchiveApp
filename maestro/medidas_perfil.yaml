@@ -1,0 +1,31 @@
+# Guarda las medidas del cuerpo "M" de docs/pruebas-tallas.md en Perfil (T31).
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- tapOn: "Perfil"
+- tapOn: "Altura (cm)"
+- eraseText: 10
+- inputText: "165"
+- hideKeyboard
+- tapOn: "Pecho (cm)"
+- eraseText: 10
+- inputText: "90"
+- hideKeyboard
+- tapOn: "Cintura (cm)"
+- eraseText: 10
+- inputText: "72"
+- hideKeyboard
+- tapOn: "Cadera (cm)"
+- eraseText: 10
+- inputText: "98"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Pie (cm)"
+- tapOn: "Pie (cm)"
+- eraseText: 10
+- inputText: "24.5"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Guardar medidas"
+- tapOn: "Guardar medidas"
+- assertVisible: "Medidas guardadas."

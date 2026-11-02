@@ -1,0 +1,13 @@
+# Abre la 1ª prenda de la pestaña Tipo actual y comprueba el bloque de talla del detalle (T31).
+# Env: ETIQUETA (p.ej. "Te queda bien|Ajustada|Holgada"), IDEAL (p.ej. "Talla ideal en H&M: S")
+# Con el cuerpo de maestro/medidas_perfil.yaml: camiseta H&M S normal → "Te queda bien", "Talla ideal en H&M: S".
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- tapOn: "Armario"
+- tapOn:
+    point: "26%,35%"
+- scrollUntilVisible:
+    element: "Corte: .*"
+- assertVisible: "${ETIQUETA}"
+- assertVisible: "${IDEAL}"

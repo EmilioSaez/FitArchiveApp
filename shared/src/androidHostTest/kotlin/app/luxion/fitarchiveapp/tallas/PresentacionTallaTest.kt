@@ -92,4 +92,16 @@ class PresentacionTallaTest {
         assertEquals("Ajustada", ui.titulo)
         assertEquals("M", ui.tallaIdeal)
     }
+
+    @Test
+    fun laTallaIdealDeLaGenericaNoMuestraElNombreCrudo() {
+        val ui = PresentacionTalla.presentar(
+            ResultadoAjuste(
+                EstadoAjuste.TALLA_NO_ENCONTRADA, tallaIdeal = "39", tablaUsada = "generica", esGenerica = true,
+            ),
+            "Zara",
+            tablas,
+        ) as TallaUi.Aviso
+        assertEquals("Talla ideal (tabla genérica): 39", ui.textoTallaIdeal)
+    }
 }

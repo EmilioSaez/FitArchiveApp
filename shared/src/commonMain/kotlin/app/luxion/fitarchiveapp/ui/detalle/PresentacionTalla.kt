@@ -77,14 +77,17 @@ object PresentacionTalla {
         return when {
             tabla == null -> "Sin tabla de $nombre: usamos la genérica europea, orientativo."
             tabla.estaVacia -> "Tabla de $nombre pendiente de datos: usamos la genérica europea, orientativo."
-            else -> "$nombre no tiene este tipo de prenda en su tabla: usamos la genérica europea, orientativo."
+            else -> "$nombre no tiene este tipo de prenda o esa talla en su tabla: usamos la genérica europea, orientativo."
         }
     }
 
     fun presentar(r: ResultadoAjuste, marca: String?, tablas: Map<String, TablaTallas>): TallaUi {
         val nota = nota(r, marca, tablas)
         val tablaNombre = r.tablaUsada?.takeIf { it.isNotBlank() } ?: "la tabla"
-        val ideal = r.tallaIdeal?.let { "Talla ideal en $tablaNombre: $it" }
+        // La tabla genérica se llama "generica" en su JSON: se muestra como "genérica".
+        val ideal = r.tallaIdeal?.let {
+            if (r.esGenerica) "Talla ideal (tabla genérica): $it" else "Talla ideal en $tablaNombre: $it"
+        }
         return when (r.estado) {
             EstadoAjuste.NO_APLICA -> TallaUi.Oculta
             EstadoAjuste.SIN_MEDIDAS -> TallaUi.SinMedidas

@@ -208,7 +208,10 @@ internal fun FormularioPrenda(
         }
 
         Seccion("Tipo *") {
-            Opciones(GarmentType.entries, borrador.type, { it.etiqueta() }) { borrador = borrador.copy(type = it) }
+            Opciones(GarmentType.entries, borrador.type, { it.etiqueta() }) { tipo ->
+                // Cambiar de tipo descarta la talla si ese tipo no la ofrece (p. ej. "M" al pasar a calzado).
+                borrador = borrador.copy(type = tipo, size = borrador.size?.takeIf { it in tallasPara(tipo) })
+            }
         }
         Seccion("Color *") {
             FlowRow(
@@ -246,7 +249,7 @@ internal fun FormularioPrenda(
         }
         Seccion("Talla") {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TALLAS.forEach { t ->
+                tallasPara(borrador.type).forEach { t ->
                     val elegida = borrador.size == t
                     FilterChip(
                         selected = elegida,

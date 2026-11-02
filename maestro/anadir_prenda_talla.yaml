@@ -1,0 +1,40 @@
+# Añade una prenda de galería con marca, talla y corte (T31). Relanza la app y va al Armario (vacío o no).
+# Env: FOTO_X (punto horizontal del selector, p.ej. 16%), TIPO, ESTACION, USO, MARCA, TALLA, CORTE (Slim|Normal|Oversize)
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- tapOn: "Armario"
+- tapOn:
+    text: "Añadir mi primera prenda|[+] Añadir"
+- tapOn: "Elegir de la galería"
+- waitForAnimationToEnd
+- tapOn:
+    point: "${FOTO_X},62%"
+- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "Guardar prenda|Tipo.*"
+    timeout: 60000
+- tapOn: "${TIPO}"
+- scrollUntilVisible:
+    element: "${ESTACION}"
+- tapOn: "${ESTACION}"
+- scrollUntilVisible:
+    element: "${USO}"
+- tapOn: "${USO}"
+- scrollUntilVisible:
+    element: "Opcional"
+- tapOn: "Opcional"
+- inputText: "${MARCA}"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "${TALLA}"
+- tapOn: "${TALLA}"
+- scrollUntilVisible:
+    element: "${CORTE}"
+- tapOn: "${CORTE}"
+- scrollUntilVisible:
+    element: "Guardar prenda"
+- tapOn: "Guardar prenda"
+- extendedWaitUntil:
+    visible: "Armario"
+    timeout: 10000
