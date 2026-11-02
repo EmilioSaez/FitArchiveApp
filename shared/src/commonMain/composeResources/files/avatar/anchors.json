@@ -1,0 +1,381 @@
+{
+  "canvas": {
+    "width": 400,
+    "height": 1000,
+    "centerX": 200
+  },
+  "landmarks": {
+    "headTop": [
+      200,
+      44
+    ],
+    "chin": [
+      200,
+      142
+    ],
+    "neckBase": [
+      200,
+      168
+    ],
+    "shoulderL": [
+      141,
+      190
+    ],
+    "shoulderR": [
+      259,
+      190
+    ],
+    "bust": [
+      200,
+      262
+    ],
+    "waist": [
+      200,
+      352
+    ],
+    "hip": [
+      200,
+      456
+    ],
+    "crotch": [
+      200,
+      482
+    ],
+    "kneeL": [
+      166,
+      690
+    ],
+    "kneeR": [
+      234,
+      690
+    ],
+    "ankleL": [
+      177,
+      902
+    ],
+    "ankleR": [
+      223,
+      902
+    ],
+    "handL": [
+      91,
+      500
+    ],
+    "handR": [
+      309,
+      500
+    ],
+    "floor": 968
+  },
+  "layers": [
+    {
+      "id": "hair_back",
+      "z": 0,
+      "kind": "avatar"
+    },
+    {
+      "id": "body",
+      "z": 10,
+      "kind": "avatar"
+    },
+    {
+      "id": "face",
+      "z": 12,
+      "kind": "avatar"
+    },
+    {
+      "id": "arms",
+      "z": 14,
+      "kind": "avatar"
+    },
+    {
+      "id": "shoes",
+      "z": 20,
+      "kind": "garment",
+      "category": "calzado"
+    },
+    {
+      "id": "bottom",
+      "z": 30,
+      "kind": "garment",
+      "category": "abajo"
+    },
+    {
+      "id": "top",
+      "z": 40,
+      "kind": "garment",
+      "category": "arriba"
+    },
+    {
+      "id": "dress",
+      "z": 45,
+      "kind": "garment",
+      "category": "vestido",
+      "excludes": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "id": "outer",
+      "z": 50,
+      "kind": "garment",
+      "category": "arriba (abrigo/chaqueta)"
+    },
+    {
+      "id": "acc_waist",
+      "z": 60,
+      "kind": "accessory"
+    },
+    {
+      "id": "acc_neck",
+      "z": 62,
+      "kind": "accessory"
+    },
+    {
+      "id": "hair_front",
+      "z": 70,
+      "kind": "avatar"
+    },
+    {
+      "id": "acc_face",
+      "z": 72,
+      "kind": "accessory"
+    },
+    {
+      "id": "acc_head",
+      "z": 80,
+      "kind": "accessory"
+    },
+    {
+      "id": "acc_hand",
+      "z": 90,
+      "kind": "accessory"
+    }
+  ],
+  "fit": {
+    "rule": "contain",
+    "note": "Escalar la imagen de la prenda (recortada, sin fondo) para que quepa en la caja manteniendo proporcion y alinearla segun 'align'."
+  },
+  "slots": {
+    "top": {
+      "align": "top-center",
+      "boxes": {
+        "sin_mangas_corto": {
+          "x": 120,
+          "y": 172,
+          "w": 160,
+          "h": 260
+        },
+        "manga_corta": {
+          "x": 106,
+          "y": 172,
+          "w": 188,
+          "h": 270
+        },
+        "manga_larga": {
+          "x": 88,
+          "y": 172,
+          "w": 224,
+          "h": 340
+        },
+        "largo_cadera": {
+          "x": 88,
+          "y": 172,
+          "w": 224,
+          "h": 410
+        }
+      }
+    },
+    "outer": {
+      "align": "top-center",
+      "boxes": {
+        "chaqueta": {
+          "x": 84,
+          "y": 170,
+          "w": 232,
+          "h": 330
+        },
+        "abrigo": {
+          "x": 80,
+          "y": 170,
+          "w": 240,
+          "h": 560
+        }
+      }
+    },
+    "bottom": {
+      "align": "top-center",
+      "boxes": {
+        "shorts": {
+          "x": 140,
+          "y": 350,
+          "w": 120,
+          "h": 130
+        },
+        "falda_mini": {
+          "x": 136,
+          "y": 350,
+          "w": 128,
+          "h": 150
+        },
+        "falda_midi": {
+          "x": 134,
+          "y": 350,
+          "w": 132,
+          "h": 310
+        },
+        "falda_larga": {
+          "x": 132,
+          "y": 350,
+          "w": 136,
+          "h": 550
+        },
+        "pantalon_corto": {
+          "x": 140,
+          "y": 350,
+          "w": 120,
+          "h": 300
+        },
+        "pantalon_largo": {
+          "x": 138,
+          "y": 350,
+          "w": 124,
+          "h": 550
+        }
+      }
+    },
+    "dress": {
+      "align": "top-center",
+      "boxes": {
+        "corto": {
+          "x": 106,
+          "y": 172,
+          "w": 188,
+          "h": 330
+        },
+        "midi": {
+          "x": 104,
+          "y": 172,
+          "w": 192,
+          "h": 500
+        },
+        "largo": {
+          "x": 102,
+          "y": 172,
+          "w": 196,
+          "h": 730
+        }
+      }
+    },
+    "shoes": {
+      "align": "bottom-center",
+      "note": "Foto con el par: caja 'par'. Foto de un solo zapato: footR; footL es el reflejo horizontal.",
+      "boxes": {
+        "par": {
+          "x": 148,
+          "y": 900,
+          "w": 104,
+          "h": 72
+        },
+        "bota_alta": {
+          "x": 148,
+          "y": 760,
+          "w": 104,
+          "h": 212
+        }
+      },
+      "footR": {
+        "x": 206,
+        "y": 900,
+        "w": 44,
+        "h": 72
+      },
+      "footL": {
+        "x": 150,
+        "y": 900,
+        "w": 44,
+        "h": 72
+      }
+    },
+    "acc_head": {
+      "align": "bottom-center",
+      "boxes": {
+        "sombrero_gorro": {
+          "x": 138,
+          "y": 8,
+          "w": 124,
+          "h": 76
+        },
+        "diadema": {
+          "x": 158,
+          "y": 36,
+          "w": 84,
+          "h": 30
+        }
+      }
+    },
+    "acc_face": {
+      "align": "center",
+      "boxes": {
+        "gafas": {
+          "x": 160,
+          "y": 76,
+          "w": 80,
+          "h": 28
+        },
+        "pendientes": {
+          "x": 150,
+          "y": 100,
+          "w": 100,
+          "h": 50
+        }
+      }
+    },
+    "acc_neck": {
+      "align": "top-center",
+      "boxes": {
+        "collar": {
+          "x": 168,
+          "y": 150,
+          "w": 64,
+          "h": 70
+        },
+        "panuelo": {
+          "x": 156,
+          "y": 150,
+          "w": 88,
+          "h": 90
+        }
+      }
+    },
+    "acc_waist": {
+      "align": "center",
+      "boxes": {
+        "cinturon": {
+          "x": 146,
+          "y": 335,
+          "w": 108,
+          "h": 36
+        }
+      }
+    },
+    "acc_hand": {
+      "align": "top-center",
+      "boxes": {
+        "bolso_mano_der": {
+          "x": 268,
+          "y": 470,
+          "w": 110,
+          "h": 150
+        },
+        "bolso_hombro_izq": {
+          "x": 40,
+          "y": 230,
+          "w": 90,
+          "h": 170
+        }
+      }
+    }
+  }
+}
