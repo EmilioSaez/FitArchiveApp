@@ -54,6 +54,7 @@ kotlin {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
+            implementation(libs.mlkit.subject.segmentation)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
