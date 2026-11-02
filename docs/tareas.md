@@ -27,7 +27,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T16 Diseñar avatar 2D con capas — Diseño — —
 - [x] T17 Prendas sobre el avatar por capas — Lógica — T07, T16
 - [x] T18 Editor de outfit — UI — T17
-- [ ] T19 Lista de outfits guardados — UI — T18
+- [x] T19 Lista de outfits guardados — UI — T18
 - [ ] T20 Exportar outfit como imagen y compartir — Lógica — T18
 - [ ] T21 Pruebas v0.2 — QA — T16–T20
 
