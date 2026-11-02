@@ -1,0 +1,12 @@
+-- Una sola fila (id = 1): medidas de la usuaria en cm.
+CREATE TABLE Measurements (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+    height_cm REAL,
+    bust_cm REAL,
+    waist_cm REAL,
+    hip_cm REAL,
+    shoulders_cm REAL,
+    arm_cm REAL,
+    leg_cm REAL,
+    updated_at INTEGER NOT NULL
+);

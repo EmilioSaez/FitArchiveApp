@@ -1,0 +1,8 @@
+-- Look de un día. date en ISO-8601 (yyyy-MM-dd).
+CREATE TABLE CalendarDay (
+    date TEXT NOT NULL PRIMARY KEY,
+    outfit_id INTEGER REFERENCES Outfit(id) ON DELETE SET NULL,
+    note TEXT
+);
+
+CREATE INDEX calendar_day_outfit ON CalendarDay(outfit_id);

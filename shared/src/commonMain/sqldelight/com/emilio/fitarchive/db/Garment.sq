@@ -1,0 +1,20 @@
+CREATE TABLE Garment (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    photo_path TEXT NOT NULL,
+    type TEXT NOT NULL,
+    color TEXT NOT NULL,
+    season TEXT NOT NULL,
+    usage TEXT NOT NULL,
+    brand TEXT,
+    size TEXT,
+    favorite INTEGER NOT NULL DEFAULT 0 CHECK (favorite IN (0, 1)),
+    dirty INTEGER NOT NULL DEFAULT 0 CHECK (dirty IN (0, 1)),
+    wears_since_wash INTEGER NOT NULL DEFAULT 0,
+    total_wears INTEGER NOT NULL DEFAULT 0,
+    wash_after_wears INTEGER,
+    created_at INTEGER NOT NULL
+);
+
+CREATE INDEX garment_type ON Garment(type);
+CREATE INDEX garment_color ON Garment(color);
+CREATE INDEX garment_season ON Garment(season);
