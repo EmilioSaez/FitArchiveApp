@@ -55,6 +55,24 @@ class AndroidPhotoStoreTest {
     }
 
     @Test
+    fun extensionFollowsRealImageFormat() = runTest {
+        val png = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1)
+        val jpeg = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte(), 0xE0.toByte())
+        assertTrue(store.save(1, png).endsWith(".png"))
+        assertTrue(store.save(1, jpeg).endsWith(".jpg"))
+    }
+
+    @Test
+    fun legacyJpgPathWithPngContentStillReads() = runTest {
+        // Fotos guardadas antes del cambio: PNG con alfa dentro de prenda_<uuid>.jpg.
+        val png = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1)
+        val legacy = File(dir, "prendas/prenda_abc.jpg").apply { parentFile!!.mkdirs(); writeBytes(png) }
+        assertContentEquals(png, store.read(legacy.absolutePath))
+        // Y al restaurarla en una copia se guarda con la extensión correcta.
+        assertTrue(store.save(2, store.read(legacy.absolutePath)!!).endsWith(".png"))
+    }
+
+    @Test
     fun noTempFilesLeftBehind() = runTest {
         store.save(1, byteArrayOf(1))
         assertTrue(File(dir, "fotos").listFiles()!!.none { it.name.endsWith(".tmp") })

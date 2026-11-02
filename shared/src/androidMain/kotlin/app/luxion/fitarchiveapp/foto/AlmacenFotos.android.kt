@@ -21,7 +21,7 @@ actual fun rememberAlmacenFotos(): AlmacenFotos {
 private class AlmacenFotosAndroid(private val context: Context) : AlmacenFotos {
     override suspend fun guardar(foto: FotoCapturada): String = withContext(Dispatchers.IO) {
         val dir = File(context.filesDir, "prendas").apply { mkdirs() }
-        val archivo = File(dir, "prenda_${UUID.randomUUID()}.jpg")
+        val archivo = File(dir, "prenda_${UUID.randomUUID()}.${extensionDeImagen(foto.bytes)}")
         archivo.writeBytes(foto.bytes)
         archivo.absolutePath
     }

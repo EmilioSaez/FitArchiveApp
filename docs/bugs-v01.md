@@ -26,12 +26,15 @@ Entorno: emulador Android API 36 (Medium_Phone), `androidApp` debug. Fotos de pr
 - **B1. Primera vez, la foto se guarda sin quitar el fondo ni detectar color.** La primera segmentación ocurre mientras Google Play services aún descarga el módulo de ML Kit (`MlKitException: Waiting for the subject segmentation optional module to be downloaded`, código `UNAVAILABLE`). `AnadirPrendaFlow` traga el error (`runCatching…getOrDefault(original)`) y sigue con la foto original. Repro: instalar, `pm clear`, añadir prenda de galería inmediatamente. Fix: `conReintentos` en `QuitaFondo.android.kt` (hasta 45 intentos, 2 s) mientras el error sea `UNAVAILABLE`; test `ReintentosTest`. Limitación: el reintento solo está verificado con test unitario; en el emulador el módulo ya estaba descargado al reinstalar, así que no se reprodujo la descarga con el fix. Mientras tanto se ve el indicador de progreso.
 - **B2. "Hacer foto" no abre la cámara.** Faltaba `android.permission.CAMERA` en `androidApp/src/main/AndroidManifest.xml`; el diálogo de justificación aparecía, pero al pulsar "Continuar" Android no mostraba el permiso (`No requestable permission in the request`) y se volvía a la pantalla anterior sin aviso. Fix: añadidos `uses-permission CAMERA` y `uses-feature camera required=false` (según `docs/permisos.md`).
 
-## Observaciones sin corregir (menores, fuera de alcance)
+## Observaciones menores corregidas (rama `feature/fix-bugs-v01`)
 
-- **O1. Botón "Aplicar" del filtro fuera de pantalla.** En la hoja de filtro hay que hacer scroll hasta el final para ver "Aplicar"; si se cierra con atrás/arrastrando, el filtro se pierde sin aviso. Sugerencia: botón fijo abajo.
-- **O2. Corazón de favorita poco visible sobre prendas oscuras/azules** en la cuadrícula (♡ negro sobre azul). Sugerencia: fondo semitransparente o contorno blanco.
-- **O3. Extensión `.jpg` con contenido PNG.** `AlmacenFotos` guarda el recorte (PNG con alfa) como `prenda_<uuid>.jpg`. Se decodifica bien, pero es engañoso; `AndroidPhotoStore` (copia) también usa `.jpg`. Renombrar a `.png` afecta al formato de copia (T45), por eso no se toca aquí.
-- **O4. Si ML Kit no llega a descargarse (sin red 90 s) la foto se guarda sin recorte y sin aviso.** Falta un mensaje ("No pudimos quitar el fondo") con opción de reintentar.
+- **O1. Botón "Aplicar" del filtro fuera de pantalla. ✅ Corregida.** La hoja se abre entera (`skipPartiallyExpanded`) y "Limpiar"/"Aplicar" quedan fijos abajo; solo los criterios hacen scroll. Flujo `maestro/filtro_aplicar_fijo.yaml`.
+- **O2. Corazón de favorita poco visible. ✅ Corregida.** Disco semitransparente de superficie tras el corazón (`FotoPrenda`). Flujo `maestro/favorita_visible.yaml`.
+- **O3. Extensión `.jpg` con contenido PNG. ✅ Corregida.** `extensionDeImagen(bytes)` elige `png`/`jpg` según la firma real y la usan `AlmacenFotos` y `PhotoStore` (Android e iOS). Compatibilidad: las fotos ya guardadas como `.jpg` (con PNG dentro) se siguen leyendo y decodificando, porque ni la lectura ni la decodificación dependen del nombre; la copia de seguridad guarda rutas tal cual y al restaurar usa la extensión correcta. Tests: `ExtensionImagenTest`, `AndroidPhotoStoreTest` (extensión por formato, ruta `.jpg` heredada con PNG).
+- **O4. Sin aviso si falla el recorte de fondo. ✅ Corregida.** Si `quitarFondo` falla se muestra "No pudimos quitar el fondo" con "Reintentar" y "Usar original" (cerrar vuelve a elegir foto). Flujo `maestro/recorte_fallido.yaml` (verificado forzando el fallo en un build temporal, ya revertido).
+
+## Observaciones pendientes
+
 - **O5. Splash del sistema** muestra el icono por defecto de Android antes de las puertas (pendiente de T48).
 - El selector de fotos de Android permite elegir varias imágenes con "Done"; solo se usa una.
 

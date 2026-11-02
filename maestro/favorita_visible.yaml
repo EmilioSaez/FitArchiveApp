@@ -1,0 +1,7 @@
+# O2: el corazón de favorita tiene disco de fondo; marcar y desmarcar cambia su descripción. Requiere una prenda en la pestaña activa.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Marcar como favorita"
+- assertVisible: "Quitar de favoritas"
+- tapOn: "Quitar de favoritas"
+- assertVisible: "Marcar como favorita"

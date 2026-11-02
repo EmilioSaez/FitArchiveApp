@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.backup
 
+import app.luxion.fitarchiveapp.foto.extensionDeImagen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -9,7 +10,7 @@ import kotlin.time.Clock
 /**
  * Fotos en el almacenamiento privado de la app ([baseDir], normalmente `context.filesDir`).
  *
- * Las rutas que devuelve [save] son relativas a [baseDir] (`fotos/prenda_<id>_<ms>.jpg`);
+ * Las rutas que devuelve [save] son relativas a [baseDir] (`fotos/prenda_<id>_<ms>.<ext>`, con la extensión del formato real: png o jpg);
  * [read] y [delete] aceptan también rutas absolutas.
  */
 class AndroidPhotoStore(
@@ -26,7 +27,7 @@ class AndroidPhotoStore(
 
     override suspend fun save(garmentId: Long, bytes: ByteArray): String = withContext(context) {
         // Nombre único: no pisa la foto anterior de la prenda hasta que la importación se confirma.
-        val relative = "$PHOTOS_DIR/prenda_${garmentId}_${now()}.jpg"
+        val relative = "$PHOTOS_DIR/prenda_${garmentId}_${now()}.${extensionDeImagen(bytes)}"
         val target = File(baseDir, relative)
         target.parentFile?.mkdirs()
         val tmp = File(target.parentFile, target.name + ".tmp")
