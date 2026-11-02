@@ -49,6 +49,7 @@ class SqlWardrobeBackupStore(
                 db.garmentQueries.insertWithId(
                     id = it.id, photo_path = it.photoPath, type = it.type.name, color = it.color.name,
                     season = it.season.name, usage = it.usage.name, brand = it.brand, size = it.size,
+                    fit = it.fit.name,
                     favorite = it.favorite.toDb(), dirty = it.dirty.toDb(),
                     wears_since_wash = it.wearsSinceWash.toLong(), total_wears = it.totalWears.toLong(),
                     wash_after_wears = it.washAfterWears?.toLong(), created_at = it.createdAt,
@@ -65,7 +66,7 @@ class SqlWardrobeBackupStore(
             snapshot.measurements?.let {
                 db.measurementsQueries.upsert(
                     it.heightCm?.toDouble(), it.bustCm?.toDouble(), it.waistCm?.toDouble(), it.hipCm?.toDouble(),
-                    it.shouldersCm?.toDouble(), it.armCm?.toDouble(), it.legCm?.toDouble(), it.updatedAt,
+                    it.shouldersCm?.toDouble(), it.armCm?.toDouble(), it.legCm?.toDouble(), it.footCm?.toDouble(), it.updatedAt,
                 )
             }
             snapshot.calendar.forEach { db.calendarDayQueries.upsert(it.date, it.outfitId, it.note) }

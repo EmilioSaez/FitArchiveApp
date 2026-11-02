@@ -22,6 +22,7 @@ import app.luxion.fitarchiveapp.tallas.AjusteTalla
 import app.luxion.fitarchiveapp.tallas.CargadorTallas
 import app.luxion.fitarchiveapp.tallas.EtiquetaAjuste
 import app.luxion.fitarchiveapp.tallas.MedidasUsuaria
+import app.luxion.fitarchiveapp.tallas.OpcionesAjuste
 import app.luxion.fitarchiveapp.tallas.TablaTallas
 
 /** Resultado de talla en el detalle de la prenda (T30). */
@@ -36,8 +37,8 @@ internal fun SeccionTalla(
     }
     val medidas by remember(measurements) { measurements.observe() }.collectAsState(initial = null)
     val cargadas = tablas ?: return
-    val ui = remember(prenda.brand, prenda.type, prenda.size, medidas, cargadas) {
-        val r = AjusteTalla.calcular(MedidasUsuaria.de(medidas), prenda.brand, prenda.type, prenda.size, cargadas)
+    val ui = remember(prenda.brand, prenda.type, prenda.size, prenda.fit, medidas, cargadas) {
+        val r = AjusteTalla.calcular(MedidasUsuaria.de(medidas), prenda.brand, prenda.type, prenda.size, cargadas, OpcionesAjuste(corte = prenda.fit))
         PresentacionTalla.presentar(r, prenda.brand, cargadas)
     }
 
@@ -61,6 +62,7 @@ internal fun SeccionTalla(
         is TallaUi.Resultado -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Titulo()
             Text(ui.titulo, style = MaterialTheme.typography.headlineSmall, color = colorEtiqueta(ui.etiqueta))
+            Text(ui.textoCorte, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ui.zonas.forEach { z ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(z.zona, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

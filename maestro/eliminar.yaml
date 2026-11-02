@@ -1,0 +1,17 @@
+# Elimina la camiseta (1ª de la pestaña Camisetas): cancelar conserva, confirmar borra.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Tipo"
+- tapOn:
+    text: "Camisetas.*"
+- tapOn:
+    point: "30%,35%"
+- scrollUntilVisible:
+    element: "Eliminar prenda"
+- tapOn: "Eliminar prenda"
+- assertVisible: "¿Eliminar esta prenda?"
+- tapOn: "Cancelar"
+- assertVisible: "Eliminar prenda"
+- tapOn: "Eliminar prenda"
+- tapOn: "Eliminar"
+- assertVisible: "2 prendas"

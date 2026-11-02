@@ -1,0 +1,7 @@
+# Estado inicial limpio: borra datos y abre el Armario vacío.
+appId: app.luxion.fitarchiveapp
+---
+- launchApp:
+    clearState: true
+- tapOn: "Armario"
+- assertVisible: "Tu armario está vacío"

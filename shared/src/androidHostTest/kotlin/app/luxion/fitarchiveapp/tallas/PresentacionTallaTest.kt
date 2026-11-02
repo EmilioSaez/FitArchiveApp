@@ -37,6 +37,7 @@ class PresentacionTallaTest {
             tablaUsada = "Zara",
         )
         val ui = assertIs<TallaUi.Resultado>(PresentacionTalla.presentar(r, "Zara", tablas))
+        assertEquals("Corte: normal", ui.textoCorte)
         assertEquals("Ajustada", ui.titulo)
         assertEquals(listOf("Pecho", "Cadera"), ui.zonas.map { it.zona })
         assertEquals("Talla ideal en Zara: L", ui.textoTallaIdeal)

@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui.detalle
 
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.tallas.AjusteTalla
 import app.luxion.fitarchiveapp.tallas.EstadoAjuste
 import app.luxion.fitarchiveapp.tallas.EtiquetaAjuste
@@ -25,6 +26,8 @@ sealed interface TallaUi {
         val etiqueta: EtiquetaAjuste,
         val titulo: String,
         val zonas: List<ZonaUi>,
+        /** "Corte: normal" (el corte con el que se calculó). */
+        val textoCorte: String,
         val tallaIdeal: String?,
         /** "Talla ideal en Zara: M"; null si no hay talla ideal. */
         val textoTallaIdeal: String?,
@@ -45,6 +48,12 @@ object PresentacionTalla {
         Medida.CINTURA -> "Cintura"
         Medida.CADERA -> "Cadera"
         Medida.PIE -> "Pie"
+    }
+
+    fun textoCorte(f: Fit): String = when (f) {
+        Fit.SLIM -> "slim"
+        Fit.NORMAL -> "normal"
+        Fit.OVERSIZE -> "oversize"
     }
 
     private fun textoZona(e: EtiquetaAjuste): String = when (e) {
@@ -91,6 +100,7 @@ object PresentacionTalla {
                 TallaUi.Resultado(
                     etiqueta = global,
                     titulo = textoEtiqueta(global),
+                    textoCorte = "Corte: ${textoCorte(r.corte)}",
                     zonas = r.porZona.entries.sortedBy { it.key.ordinal }
                         .map { (m, e) -> ZonaUi(nombreZona(m), e, textoZona(e)) },
                     tallaIdeal = r.tallaIdeal,

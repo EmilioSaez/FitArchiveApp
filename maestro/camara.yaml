@@ -1,0 +1,7 @@
+# Cámara: abre la app de cámara del sistema (en emulador puede no haber cámara).
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "[+] Añadir"
+- tapOn: "Hacer foto"
+- waitForAnimationToEnd
+- takeScreenshot: camara

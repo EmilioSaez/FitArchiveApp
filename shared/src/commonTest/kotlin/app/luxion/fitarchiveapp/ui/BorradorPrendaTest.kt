@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui
 
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
 import app.luxion.fitarchiveapp.model.Season
@@ -69,5 +70,15 @@ class BorradorPrendaTest {
     fun editarSinCampoObligatorioNoGuarda() {
         val g = completo.aPrenda("f.jpg", 1)!!
         assertNull(BorradorPrenda.desde(g).copy(color = null).aplicarA(g))
+    }
+
+    @Test
+    fun elCorteEsNormalPorDefectoYSeConserva() {
+        assertEquals(Fit.NORMAL, completo.aPrenda("f.jpg", 1)!!.fit)
+        val g = completo.copy(fit = Fit.OVERSIZE).aPrenda("f.jpg", 1)!!
+        assertEquals(Fit.OVERSIZE, g.fit)
+        assertEquals(Fit.OVERSIZE, BorradorPrenda.desde(g).fit)
+        val editado = BorradorPrenda.desde(g).copy(fit = Fit.SLIM).aplicarA(g)!!
+        assertEquals(g.copy(fit = Fit.SLIM), editado)
     }
 }

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
 import app.luxion.fitarchiveapp.foto.FotoCapturada
+import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmentation
 import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
@@ -13,8 +14,31 @@ import java.io.ByteArrayOutputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+
+internal fun modeloDescargandose(e: Throwable): Boolean =
+    e is MlKitException && e.errorCode == MlKitException.UNAVAILABLE
+
+/** Ejecuta [bloque]; si falla con un error reintentable, espera [espera] ms y repite hasta [maximo] intentos. */
+internal suspend fun <T> conReintentos(
+    maximo: Int = 45,
+    espera: Long = 2_000,
+    esReintentable: (Throwable) -> Boolean,
+    bloque: suspend () -> T,
+): T {
+    var intento = 1
+    while (true) {
+        try {
+            return bloque()
+        } catch (e: Exception) {
+            if (intento >= maximo || !esReintentable(e)) throw e
+        }
+        intento++
+        delay(espera)
+    }
+}
 
 actual fun crearQuitaFondo(): QuitaFondo = QuitaFondoMlKit()
 
@@ -33,10 +57,14 @@ private class QuitaFondoMlKit : QuitaFondo {
     override suspend fun quitar(foto: FotoCapturada): ImagenSinFondo {
         val entrada = withContext(Dispatchers.Default) { decodificar(foto.bytes) }
         val recorte = try {
-            val resultado = suspendCancellableCoroutine { cont ->
-                segmentador.process(InputImage.fromBitmap(entrada, 0))
-                    .addOnSuccessListener { cont.resume(it) }
-                    .addOnFailureListener { cont.resumeWithException(it) }
+            // La primera vez el modelo se descarga en segundo plano: ML Kit falla con UNAVAILABLE
+            // hasta que termina; reintentamos en vez de guardar la foto sin recortar.
+            val resultado = conReintentos(esReintentable = ::modeloDescargandose) {
+                suspendCancellableCoroutine { cont ->
+                    segmentador.process(InputImage.fromBitmap(entrada, 0))
+                        .addOnSuccessListener { cont.resume(it) }
+                        .addOnFailureListener { cont.resumeWithException(it) }
+                }
             }
             resultado.foregroundBitmap
         } catch (e: Exception) {

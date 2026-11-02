@@ -7,6 +7,7 @@ CREATE TABLE Garment (
     usage TEXT NOT NULL,
     brand TEXT,
     size TEXT,
+    fit TEXT NOT NULL DEFAULT 'NORMAL' CHECK (fit IN ('SLIM', 'NORMAL', 'OVERSIZE')),
     favorite INTEGER NOT NULL DEFAULT 0 CHECK (favorite IN (0, 1)),
     dirty INTEGER NOT NULL DEFAULT 0 CHECK (dirty IN (0, 1)),
     wears_since_wash INTEGER NOT NULL DEFAULT 0,
@@ -40,11 +41,11 @@ WHERE (:type IS NULL OR type = :type)
 ORDER BY created_at DESC, id DESC;
 
 insert:
-INSERT INTO Garment (photo_path, type, color, season, usage, brand, size, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Garment (photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
-UPDATE Garment SET photo_path = ?, type = ?, color = ?, season = ?, usage = ?, brand = ?, size = ?, favorite = ?, dirty = ?, wears_since_wash = ?, total_wears = ?, wash_after_wears = ?
+UPDATE Garment SET photo_path = ?, type = ?, color = ?, season = ?, usage = ?, brand = ?, size = ?, fit = ?, favorite = ?, dirty = ?, wears_since_wash = ?, total_wears = ?, wash_after_wears = ?
 WHERE id = ?;
 
 setFavorite:
@@ -69,8 +70,8 @@ SELECT last_insert_rowid();
 
 -- Copia de seguridad: inserta conservando el id.
 insertWithId:
-INSERT INTO Garment (id, photo_path, type, color, season, usage, brand, size, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Garment (id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteAll:
 DELETE FROM Garment;

@@ -42,6 +42,7 @@ data class GarmentDto(
     val usage: String,
     val brand: String? = null,
     val size: String? = null,
+    val fit: String = "NORMAL",
     val favorite: Boolean = false,
     val dirty: Boolean = false,
     val wearsSinceWash: Int = 0,
@@ -79,6 +80,8 @@ data class MeasurementsDto(
     val armCm: Float? = null,
     val legCm: Float? = null,
     val updatedAt: Long,
+    /** Ausente en copias anteriores a T22c. */
+    val footCm: Float? = null,
 )
 
 @Serializable

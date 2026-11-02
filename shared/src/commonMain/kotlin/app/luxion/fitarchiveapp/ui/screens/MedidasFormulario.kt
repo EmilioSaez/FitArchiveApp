@@ -10,6 +10,7 @@ internal enum class Campo(val etiqueta: String, val ayuda: String, val min: Floa
     Hombros("Hombros", "Mide de un extremo de los hombros al otro, por la espalda, de hueso a hueso.", 25f, 80f),
     Brazos("Brazos", "Del hueso del hombro a la muñeca, con el brazo relajado y ligeramente doblado.", 40f, 100f),
     Piernas("Piernas", "Del interior de la entrepierna al suelo, de pie y descalza (largo de pierna).", 50f, 130f),
+    Pie("Pie", "Apoya el pie descalzo en un papel contra la pared y marca del talón a la punta del dedo más largo; mide esa distancia (largo del pie).", 15f, 35f),
 }
 
 /** Texto -> cm. Vacío = sin dato (null). Acepta coma decimal. */
@@ -40,6 +41,7 @@ internal fun Measurements?.aTextos(): Map<Campo, String> = mapOf(
     Campo.Hombros to this?.shouldersCm.comoTexto(),
     Campo.Brazos to this?.armCm.comoTexto(),
     Campo.Piernas to this?.legCm.comoTexto(),
+    Campo.Pie to this?.footCm.comoTexto(),
 )
 
 /** Medidas a guardar a partir de las lecturas; los campos inválidos cuentan como vacíos. `updatedAt` lo fija el repositorio. */
@@ -54,5 +56,6 @@ internal fun Map<Campo, Lectura>.aMedidas(): Measurements {
         armCm = v(Campo.Brazos),
         legCm = v(Campo.Piernas),
         updatedAt = 0L,
+        footCm = v(Campo.Pie),
     )
 }

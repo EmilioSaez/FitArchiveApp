@@ -7,6 +7,9 @@ enum class Season { WINTER, SUMMER, MID_SEASON }
 
 enum class Usage { WORK, GOING_OUT, CASUAL, SPORT, PARTY }
 
+/** Corte de la prenda: cómo cae respecto a su talla. Corrige la predicción de talla (T29). */
+enum class Fit { SLIM, NORMAL, OVERSIZE }
+
 enum class Occasion { WORK, DATE, PARTY, CASUAL, SPORT }
 
 enum class GarmentColor { BLACK, WHITE, GREY, BEIGE, BROWN, RED, BURGUNDY, PINK, ORANGE, YELLOW, GREEN, BLUE, NAVY, PURPLE, MULTI }

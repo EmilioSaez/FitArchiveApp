@@ -51,6 +51,7 @@ import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.foto.decodificarImagen
 import app.luxion.fitarchiveapp.foto.rememberAlmacenFotos
 import app.luxion.fitarchiveapp.foto.rememberSelectorFoto
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
 import app.luxion.fitarchiveapp.model.Season
@@ -232,6 +233,11 @@ internal fun FormularioPrenda(
                     )
                 }
             }
+        }
+
+        Seccion("Corte") {
+            // Siempre hay uno elegido (por defecto Normal); corrige la talla recomendada.
+            Opciones(Fit.entries, borrador.fit, { it.etiqueta() }) { borrador = borrador.copy(fit = it) }
         }
 
         HorizontalDivider()
