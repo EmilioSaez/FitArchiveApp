@@ -139,4 +139,17 @@ class UsoRepositoryTest {
         repos.usos.registrarHasta("2026-11-02")
         assertFalse(repos.garments.get(a)!!.dirty)
     }
+
+    @Test
+    fun todosDevuelveElHistorialCompleto() = runTest {
+        val a = prenda()
+        val b = prenda()
+        repos.calendar.set(CalendarDay("2026-11-01", outfitCon(a, b), null))
+        repos.usos.registrarHasta("2026-11-02")
+
+        assertEquals(
+            listOf(app.luxion.fitarchiveapp.model.WearRecord("2026-11-01", a), app.luxion.fitarchiveapp.model.WearRecord("2026-11-01", b)),
+            repos.usos.todos(),
+        )
+    }
 }

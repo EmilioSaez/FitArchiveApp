@@ -3,6 +3,7 @@ package app.luxion.fitarchiveapp.data
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.luxion.fitarchiveapp.db.FitArchiveDatabase
+import app.luxion.fitarchiveapp.model.WearRecord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -12,6 +13,9 @@ import kotlin.coroutines.CoroutineContext
 interface UsoRepository {
     /** Fechas en que se usó la prenda, la más reciente primero. */
     fun observeFechas(garmentId: Long): Flow<List<String>>
+
+    /** Todo el historial de usos, por fecha ascendente (lo consume el motor de sugerencias para rotar prendas). */
+    suspend fun todos(): List<WearRecord>
 
     /**
      * Cuenta los días del calendario anteriores a [hoy] con outfit asignado: suma un uso
@@ -29,6 +33,10 @@ internal class SqlUsoRepository(
 
     override fun observeFechas(garmentId: Long) =
         queries.selectDatesByGarment(garmentId).asFlow().mapToList(context)
+
+    override suspend fun todos(): List<WearRecord> = withContext(context) {
+        queries.selectAll().executeAsList().map { WearRecord(it.date, it.garment_id) }
+    }
 
     override suspend fun registrarHasta(hoy: String): Int = withContext(context) {
         db.transactionWithResult {
