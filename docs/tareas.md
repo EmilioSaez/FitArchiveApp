@@ -14,7 +14,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [ ] T05 Pantalla de carga con puertas del armario — UI — T02
 - [x] T06 Hacer foto o elegir de galería — UI — T02
 - [ ] T07 Quitar fondo en el móvil — Lógica — T06
-- [ ] T08 Formulario añadir prenda (tipo, color, estación, uso, marca, talla) — UI — T04, T06
+- [x] T08 Formulario añadir prenda (tipo, color, estación, uso, marca, talla) — UI — T04, T06
 - [ ] T09 Detectar color principal — Lógica — T07
 - [ ] T10 Armario con pestañas por tipo — UI — T04
 - [ ] T11 Pestañas por color y estación — UI — T10
