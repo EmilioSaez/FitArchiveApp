@@ -16,6 +16,8 @@ data class Garment(
     /** Usos tras los que la prenda pasa sola a sucia; null = solo manual. */
     val washAfterWears: Int?,
     val createdAt: Long,
+    /** Corte (T29): corrige la talla recomendada. */
+    val fit: Fit = Fit.NORMAL,
 )
 
 data class Outfit(

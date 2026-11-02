@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.backup
 
 import app.luxion.fitarchiveapp.model.CalendarDay
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -96,7 +97,7 @@ private fun WardrobeSnapshot.toManifest(createdAt: Long, photos: List<PhotoEntry
     createdAt = createdAt,
     garments = garments.map {
         GarmentDto(
-            it.id, it.type.name, it.color.name, it.season.name, it.usage.name, it.brand, it.size,
+            it.id, it.type.name, it.color.name, it.season.name, it.usage.name, it.brand, it.size, it.fit.name,
             it.favorite, it.dirty, it.wearsSinceWash, it.totalWears, it.washAfterWears, it.createdAt,
         )
     },
@@ -125,7 +126,7 @@ private fun BackupManifest.toSnapshot() = WardrobeSnapshot(
             color = parse<GarmentColor>(it.color, "color"),
             season = parse<Season>(it.season, "estación"),
             usage = parse<Usage>(it.usage, "uso"),
-            brand = it.brand, size = it.size, favorite = it.favorite, dirty = it.dirty,
+            brand = it.brand, size = it.size, fit = parse<Fit>(it.fit, "corte"), favorite = it.favorite, dirty = it.dirty,
             wearsSinceWash = it.wearsSinceWash, totalWears = it.totalWears,
             washAfterWears = it.washAfterWears, createdAt = it.createdAt,
         )

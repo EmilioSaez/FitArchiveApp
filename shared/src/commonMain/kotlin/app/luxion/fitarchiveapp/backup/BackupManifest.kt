@@ -42,6 +42,7 @@ data class GarmentDto(
     val usage: String,
     val brand: String? = null,
     val size: String? = null,
+    val fit: String = "NORMAL",
     val favorite: Boolean = false,
     val dirty: Boolean = false,
     val wearsSinceWash: Int = 0,

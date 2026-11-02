@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.backup
 
 import app.luxion.fitarchiveapp.model.CalendarDay
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -36,7 +37,7 @@ private class FakePhotos(val files: MutableMap<String, ByteArray> = mutableMapOf
 
 private fun garment(id: Long, path: String, brand: String? = null) = Garment(
     id, path, GarmentType.DRESS, GarmentColor.BURGUNDY, Season.WINTER, Usage.PARTY, brand, "M",
-    favorite = true, dirty = true, wearsSinceWash = 2, totalWears = 9, washAfterWears = 3, createdAt = 1000L + id,
+    favorite = true, dirty = true, wearsSinceWash = 2, totalWears = 9, washAfterWears = 3, createdAt = 1000L + id, fit = Fit.OVERSIZE,
 )
 
 private fun sample() = WardrobeSnapshot(

@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.tallas
 
+import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.GarmentType
 import app.luxion.fitarchiveapp.model.Measurements
 import java.io.File
@@ -174,5 +175,76 @@ class AjusteTallaTest {
     fun desdeMeasurements() {
         val m = Measurements(165f, 90f, 72f, 98f, null, null, null, 0L)
         assertEquals(MedidasUsuaria(90.0, 72.0, 98.0, null), MedidasUsuaria.de(m))
+    }
+
+    // --- T29: corte ---
+
+    private fun conCorte(m: MedidasUsuaria, tipo: GarmentType, talla: String?, corte: Fit, marca: String? = null) =
+        AjusteTalla.calcular(m, marca, tipo, talla, tablas, OpcionesAjuste(corte = corte))
+
+    @Test
+    fun corteNormalEsIgualQueSinCorte() {
+        val m = m1.copy(pecho = 100.0)
+        assertEquals(
+            calcular(m, null, GarmentType.SHIRT, "M"),
+            conCorte(m, GarmentType.SHIRT, "M", Fit.NORMAL),
+        )
+        assertEquals(Fit.NORMAL, calcular(m, null, GarmentType.SHIRT, "M").corte)
+    }
+
+    @Test
+    fun oversizeRecomiendaUnaTallaMenos() {
+        // Pecho 90 → M (86-94) en genérica; oversize desplaza +4 → S (82-90 → 86-94).
+        assertEquals("M", conCorte(m1, GarmentType.TSHIRT, "M", Fit.NORMAL).tallaIdeal)
+        val r = conCorte(m1, GarmentType.TSHIRT, "M", Fit.OVERSIZE)
+        assertEquals("S", r.tallaIdeal)
+        assertEquals(Fit.OVERSIZE, r.corte)
+    }
+
+    @Test
+    fun slimRecomiendaUnaTallaMas() {
+        val m = MedidasUsuaria(pecho = 93.0, cintura = 74.0)
+        val normal = conCorte(m, GarmentType.TSHIRT, "M", Fit.NORMAL).tallaIdeal
+        val slim = conCorte(m, GarmentType.TSHIRT, "M", Fit.SLIM).tallaIdeal
+        // La tabla genérica trae letras y numeración EU; gana la de centro más cercano.
+        assertEquals("40", normal)
+        assertEquals("42", slim)
+    }
+
+    @Test
+    fun oversizeToleraMasEstrechezYHolgura() {
+        val r = tablas.getValue("generica-eu").prenda("camiseta")!!.talla("M")!![Medida.PECHO]!! // 86-94
+        fun et(c: Double, corte: Fit) =
+            AjusteTalla.etiquetar(c, r, Medida.PECHO, OpcionesAjuste(corte = corte))
+        // Apretada con corte normal (95,1 > 94+1), bien en oversize.
+        assertEquals(EtiquetaAjuste.AJUSTADA, et(95.1, Fit.NORMAL))
+        assertEquals(EtiquetaAjuste.BIEN, et(95.1, Fit.OVERSIZE))
+        assertEquals(EtiquetaAjuste.BIEN, et(100.0, Fit.OVERSIZE))
+        assertEquals(EtiquetaAjuste.AJUSTADA, et(100.1, Fit.OVERSIZE))
+        // Holgada con corte normal (82,9 < 86-3), bien en oversize.
+        assertEquals(EtiquetaAjuste.HOLGADA, et(82.9, Fit.NORMAL))
+        assertEquals(EtiquetaAjuste.BIEN, et(81.0, Fit.OVERSIZE))
+        assertEquals(EtiquetaAjuste.HOLGADA, et(80.9, Fit.OVERSIZE))
+    }
+
+    @Test
+    fun slimEsMasEstricto() {
+        val r = tablas.getValue("generica-eu").prenda("camiseta")!!.talla("M")!![Medida.PECHO]!! // 86-94
+        fun et(c: Double, corte: Fit) =
+            AjusteTalla.etiquetar(c, r, Medida.PECHO, OpcionesAjuste(corte = corte))
+        // Slim: rango 84-92, márgenes 0 → 92,1 ya aprieta y 83,9 ya sobra; con corte normal siguen bien.
+        assertEquals(EtiquetaAjuste.BIEN, et(92.1, Fit.NORMAL))
+        assertEquals(EtiquetaAjuste.AJUSTADA, et(92.1, Fit.SLIM))
+        assertEquals(EtiquetaAjuste.BIEN, et(83.9, Fit.NORMAL))
+        assertEquals(EtiquetaAjuste.HOLGADA, et(83.9, Fit.SLIM))
+        assertEquals(EtiquetaAjuste.BIEN, et(84.0, Fit.SLIM))
+    }
+
+    @Test
+    fun elCorteNoAfectaAlCalzado() {
+        val m = MedidasUsuaria(pie = 24.0)
+        val normal = conCorte(m, GarmentType.SHOES, "38", Fit.NORMAL)
+        assertEquals(normal.porZona, conCorte(m, GarmentType.SHOES, "38", Fit.OVERSIZE).porZona)
+        assertEquals(normal.tallaIdeal, conCorte(m, GarmentType.SHOES, "38", Fit.SLIM).tallaIdeal)
     }
 }
