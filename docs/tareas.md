@@ -33,7 +33,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 
 ## v0.3 Tallas
 - [ ] T22 Pantalla de medidas con guía — UI — T04
-- [ ] T23 Tablas Zara, Pull&Bear, Bershka, Stradivarius, Massimo Dutti — Contenido — —
+- [~] T23 Tablas Zara, Pull&Bear, Bershka, Stradivarius, Massimo Dutti — Contenido — —
 - [~] T24 Tablas Mango y H&M — Contenido — — (parcial: H&M camiseta y pantalón hecho; Mango pendiente de guía oficial)
 - [x] T25 Tablas Brownie, Scalpers, Hollister, Brandy Melville — Contenido — —
 - [x] T26 Tabla genérica europea — Contenido — —

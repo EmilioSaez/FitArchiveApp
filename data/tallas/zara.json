@@ -1,0 +1,12 @@
+{
+  "marca": "Zara",
+  "fuente": "https://www.zara.com/es/es/help-center/MySize",
+  "fecha": "2026-11-02",
+  "notas": [
+    "Pendiente: no se han recogido medidas. La guía oficial de la marca no es accesible automáticamente (WebFetch devuelve 403; la guía de medidas está en un modal de la ficha de producto)."
+  ],
+  "pendiente": [
+    "todas las prendas: camiseta, pantalon, vestido, falda, chaqueta, calzado"
+  ],
+  "prendas": {}
+}
