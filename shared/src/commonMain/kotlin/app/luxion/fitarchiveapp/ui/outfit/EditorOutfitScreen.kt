@@ -41,6 +41,7 @@ import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.LIENZO_ALTO
 import app.luxion.fitarchiveapp.avatar.Slot
 import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
+import app.luxion.fitarchiveapp.compartir.rememberCompartirOutfit
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
 import app.luxion.fitarchiveapp.foto.cargarImagen
@@ -57,10 +58,12 @@ fun EditorOutfitScreen(
     armario: GarmentRepository,
     onTerminado: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Outfit guardado que se edita; null crea uno nuevo. */
+    outfitId: Long? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val vm = remember(outfits, armario) {
-        EditorOutfitViewModel(outfits, armario, scope) { Clock.System.now().toEpochMilliseconds() }
+    val vm = remember(outfits, armario, outfitId) {
+        EditorOutfitViewModel(outfits, armario, scope, outfitId) { Clock.System.now().toEpochMilliseconds() }
     }
     val estado by vm.estado.collectAsState()
     LaunchedEffect(estado.idGuardado) { if (estado.idGuardado != null) onTerminado() }
@@ -74,11 +77,13 @@ fun EditorOutfitScreen(
         imagenes[e.prenda.photoPath]?.let { PrendaAvatar(it, subtipoPorDefecto(e.prenda.type), e.ajuste) }
     }
 
+    val compartir = rememberCompartirOutfit()
+
     Column(modifier.fillMaxSize().padding(top = 8.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = onTerminado) { Text("Cancelar") }
             Text(
-                "Nuevo outfit",
+                if (outfitId == null) "Nuevo outfit" else "Editar outfit",
                 Modifier.weight(1f),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
@@ -106,6 +111,10 @@ fun EditorOutfitScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Ocasiones(estado.ocasion, vm::cambiarOcasion)
+                OutlinedButton(
+                    onClick = { compartir.compartir(estado.nombre, prendasAvatar) { vm.mostrarError("No se pudo compartir el outfit") } },
+                    enabled = prendasAvatar.isNotEmpty(),
+                ) { Text("Compartir") }
                 estado.error?.let {
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
                 }
@@ -200,7 +209,7 @@ private fun Slot.titulo() = when (this) {
     else -> name
 }
 
-private fun Occasion.etiqueta() = when (this) {
+internal fun Occasion.etiqueta() = when (this) {
     Occasion.WORK -> "Trabajo"
     Occasion.DATE -> "Cita"
     Occasion.PARTY -> "Fiesta"

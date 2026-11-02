@@ -145,6 +145,15 @@ class EditorOutfitViewModelTest {
     }
 
     @Test
+    fun mostrarErrorYDescartarlo() = runTest(UnconfinedTestDispatcher()) {
+        val e = entorno(backgroundScope)
+        e.vm.mostrarError("No se pudo compartir el outfit")
+        assertEquals("No se pudo compartir el outfit", e.vm.estado.value.error)
+        e.vm.descartarError()
+        assertEquals(null, e.vm.estado.value.error)
+    }
+
+    @Test
     fun guardarPersistePosicionEscalaYCapaPorPrenda() = runTest(UnconfinedTestDispatcher()) {
         val e = entorno(backgroundScope)
         val camiseta = e.nueva(GarmentType.TSHIRT)

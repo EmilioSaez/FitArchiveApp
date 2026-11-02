@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -35,25 +36,35 @@ data class EditorOutfitUiState(
     /** Id del outfit guardado; el editor se cierra al recibirlo. */
     val idGuardado: Long? = null,
     val error: String? = null,
+    /** Editando un outfit guardado y aún cargándolo: no se puede guardar hasta que termine. */
+    val cargando: Boolean = false,
 ) {
     /** Prendas del armario que caben en el slot activo. */
     val candidatas: List<Garment> get() = armario.filter { slotDe(it.type) == slotActivo }
     val elegidaActiva: PrendaElegida? get() = elegidas[slotActivo]
-    val puedeGuardar get() = elegidas.isNotEmpty() && nombre.isNotBlank() && !guardando && idGuardado == null
+    val puedeGuardar get() = elegidas.isNotEmpty() && nombre.isNotBlank() && !guardando && !cargando && idGuardado == null
 }
 
-/** Estado del editor de outfit (T18): prendas por slot, ajuste, nombre/ocasión y guardado. */
+/**
+ * Estado del editor de outfit (T18): prendas por slot, ajuste, nombre/ocasión y guardado.
+ * Con [outfitId] edita ese outfit guardado (conserva su favorito y fecha) en vez de crear uno nuevo.
+ */
 class EditorOutfitViewModel(
     private val outfits: OutfitRepository,
     armario: GarmentRepository,
     private val scope: CoroutineScope,
+    private val outfitId: Long? = null,
     private val ahora: () -> Long,
 ) {
-    private val _estado = MutableStateFlow(EditorOutfitUiState())
+    private val _estado = MutableStateFlow(EditorOutfitUiState(cargando = outfitId != null))
     val estado: StateFlow<EditorOutfitUiState> = _estado.asStateFlow()
+
+    /** Outfit que se edita (para conservar favorito y fecha al guardar); null si es nuevo o aún no cargó. */
+    private var original: Outfit? = null
 
     init {
         scope.launch {
+            if (outfitId != null) cargarOutfit(outfitId, armario)
             armario.observeAll().collect { prendas ->
                 // Si una prenda elegida se elimina del armario, sale también del outfit.
                 val ids = prendas.map { it.id }.toSet()
@@ -61,6 +72,36 @@ class EditorOutfitViewModel(
                     e.copy(armario = prendas, elegidas = e.elegidas.filterValues { it.prenda.id in ids })
                 }
             }
+        }
+    }
+
+    private suspend fun cargarOutfit(id: Long, armario: GarmentRepository) {
+        try {
+            val guardado = outfits.get(id)
+            if (guardado == null) {
+                _estado.update { it.copy(cargando = false, error = "No se encontró el outfit") }
+                return
+            }
+            val prendas = armario.observeAll().first().associateBy { it.id }
+            val elegidas = guardado.garments.mapNotNull { g ->
+                val prenda = prendas[g.garmentId] ?: return@mapNotNull null
+                val slot = slotDe(prenda.type)
+                slot to PrendaElegida(prenda, AjustePrenda(g.x, g.y, g.scale))
+            }.toMap()
+            original = guardado.outfit
+            _estado.update {
+                it.copy(
+                    nombre = guardado.outfit.name,
+                    ocasion = guardado.outfit.occasion,
+                    elegidas = elegidas,
+                    slotActivo = elegidas.keys.minByOrNull { s -> SLOTS_EDITOR.indexOf(s) } ?: it.slotActivo,
+                    cargando = false,
+                )
+            }
+        } catch (c: CancellationException) {
+            throw c
+        } catch (t: Throwable) {
+            _estado.update { it.copy(cargando = false, error = "No se pudo cargar el outfit") }
         }
     }
 
@@ -100,6 +141,8 @@ class EditorOutfitViewModel(
         e.copy(elegidas = e.elegidas + (e.slotActivo to actual.copy(ajuste = cambio(actual.ajuste).limitado(caja))))
     }
 
+    fun mostrarError(mensaje: String) = _estado.update { it.copy(error = mensaje) }
+
     fun descartarError() = _estado.update { it.copy(error = null) }
 
     /** Guarda el outfit si [EditorOutfitUiState.puedeGuardar]; al terminar rellena `idGuardado`. */
@@ -109,10 +152,19 @@ class EditorOutfitViewModel(
         _estado.update { it.copy(guardando = true, error = null) }
         scope.launch {
             try {
-                val id = outfits.create(
-                    Outfit(0, e.nombre.trim(), e.ocasion, favorite = false, createdAt = ahora()),
-                    e.elegidas.aOutfitGarments(),
-                )
+                val previo = original
+                val id = if (previo != null) {
+                    outfits.update(
+                        previo.copy(name = e.nombre.trim(), occasion = e.ocasion),
+                        e.elegidas.aOutfitGarments(previo.id),
+                    )
+                    previo.id
+                } else {
+                    outfits.create(
+                        Outfit(0, e.nombre.trim(), e.ocasion, favorite = false, createdAt = ahora()),
+                        e.elegidas.aOutfitGarments(),
+                    )
+                }
                 _estado.update { it.copy(guardando = false, idGuardado = id) }
             } catch (c: CancellationException) {
                 throw c
@@ -124,7 +176,7 @@ class EditorOutfitViewModel(
 }
 
 /** Prendas del outfit listas para guardar: posición y escala del ajuste, y `zIndex` = z del slot. */
-fun Map<Slot, PrendaElegida>.aOutfitGarments(): List<OutfitGarment> =
+fun Map<Slot, PrendaElegida>.aOutfitGarments(outfitId: Long = 0): List<OutfitGarment> =
     entries.sortedBy { it.key.z }.map { (slot, e) ->
-        OutfitGarment(0, e.prenda.id, e.ajuste.dx, e.ajuste.dy, e.ajuste.escala, slot.z)
+        OutfitGarment(outfitId, e.prenda.id, e.ajuste.dx, e.ajuste.dy, e.ajuste.escala, slot.z)
     }
