@@ -44,7 +44,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T31 Pruebas del algoritmo con casos reales — QA — T28–T30
 
 ## v0.4 Organización
-- [ ] T32 Calendario: asignar outfits a días — UI — T19
+- [x] T32 Calendario: asignar outfits a días — UI — T19
 - [ ] T33 Historial y contador de usos — Lógica — T32
 - [x] T34 Limpia/sucia — UI — T13
 - [ ] T35 Sucia automática tras N usos — Lógica — T33, T34

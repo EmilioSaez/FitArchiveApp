@@ -40,6 +40,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.sqldelight.coroutines)
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.serialization.json)

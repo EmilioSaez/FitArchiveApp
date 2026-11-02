@@ -18,6 +18,7 @@ import app.luxion.fitarchiveapp.fondo.crearQuitaFondo
 import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
+import app.luxion.fitarchiveapp.ui.calendario.CalendarioScreen
 import app.luxion.fitarchiveapp.ui.detalle.DetallePrendaScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
 import app.luxion.fitarchiveapp.ui.outfit.EditorOutfitScreen
@@ -120,6 +121,11 @@ fun App(repositories: Repositories) {
                         editandoOutfit = true
                     },
                     modifier = Modifier.padding(padding),
+                )
+                Destino.Calendario -> CalendarioScreen(
+                    repositories.calendar,
+                    repositories.outfits,
+                    Modifier.padding(padding),
                 )
                 else -> PantallaVacia(destino.titulo, Modifier.padding(padding))
             }
