@@ -1,0 +1,20 @@
+CREATE TABLE Outfit (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    occasion TEXT,
+    favorite INTEGER NOT NULL DEFAULT 0 CHECK (favorite IN (0, 1)),
+    created_at INTEGER NOT NULL
+);
+
+-- Prendas de un outfit con su posición en el lienzo del avatar.
+CREATE TABLE OutfitGarment (
+    outfit_id INTEGER NOT NULL REFERENCES Outfit(id) ON DELETE CASCADE,
+    garment_id INTEGER NOT NULL REFERENCES Garment(id) ON DELETE CASCADE,
+    x REAL NOT NULL DEFAULT 0,
+    y REAL NOT NULL DEFAULT 0,
+    scale REAL NOT NULL DEFAULT 1,
+    z_index INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (outfit_id, garment_id)
+);
+
+CREATE INDEX outfit_garment_garment ON OutfitGarment(garment_id);
