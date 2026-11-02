@@ -1,0 +1,158 @@
+{
+  "marca": "Hollister",
+  "fuente": "https://www.hollisterco.com/hol/faq/sizecharts.html",
+  "fecha": "2026-11-02",
+  "unidad": "cm",
+  "tipo_valor": "rango",
+  "notas": [
+    "La guía oficial da pulgadas y cm; se guardan los cm de la guía.",
+    "Tallas numéricas (0-11) son tallas US de pantalón; la página no da conversión a EU para ropa.",
+    "Sección de mujer de la página ('Bettys')."
+  ],
+  "prendas": {
+    "parte_superior": {
+      "XS": {
+        "pecho": [
+          79,
+          81
+        ]
+      },
+      "S": {
+        "pecho": [
+          82,
+          86
+        ]
+      },
+      "M": {
+        "pecho": [
+          87,
+          91
+        ]
+      },
+      "L": {
+        "pecho": [
+          92,
+          96
+        ]
+      }
+    },
+    "parte_inferior": {
+      "XS": {
+        "cintura": [
+          59,
+          62
+        ],
+        "cadera": [
+          84,
+          88
+        ]
+      },
+      "S": {
+        "cintura": [
+          63,
+          67
+        ],
+        "cadera": [
+          89,
+          93
+        ]
+      },
+      "M": {
+        "cintura": [
+          69,
+          72
+        ],
+        "cadera": [
+          94,
+          98
+        ]
+      },
+      "L": {
+        "cintura": [
+          73,
+          77
+        ],
+        "cadera": [
+          99,
+          103
+        ]
+      }
+    },
+    "parte_inferior_numerica_us": {
+      "0": {
+        "cintura": [
+          59,
+          61
+        ],
+        "cadera": [
+          85,
+          86
+        ]
+      },
+      "1": {
+        "cintura": [
+          62,
+          64
+        ],
+        "cadera": [
+          87,
+          89
+        ]
+      },
+      "3": {
+        "cintura": [
+          64,
+          66
+        ],
+        "cadera": [
+          90,
+          92
+        ]
+      },
+      "5": {
+        "cintura": [
+          66,
+          68
+        ],
+        "cadera": [
+          92,
+          94
+        ]
+      },
+      "7": {
+        "cintura": [
+          69,
+          71
+        ],
+        "cadera": [
+          95,
+          97
+        ]
+      },
+      "9": {
+        "cintura": [
+          72,
+          74
+        ],
+        "cadera": [
+          98,
+          99
+        ]
+      },
+      "11": {
+        "cintura": [
+          74,
+          76
+        ],
+        "cadera": [
+          100,
+          101
+        ]
+      }
+    }
+  },
+  "pendiente": [
+    "Cintura y cadera de parte superior: no figuran.",
+    "Jeans/curvy, tallas XXS y XL+, vestidos: sin tabla en la página consultada."
+  ]
+}
