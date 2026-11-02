@@ -8,7 +8,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T01 Framework (Kotlin Multiplatform) y proyecto — Base — PR #1
 - [x] T02 Navegación y tema visual base (colores, tipografía editorial) — UI — T01
 - [x] T03 Modelo de datos y BD local: prenda, outfit, medidas, día de calendario, viaje — Datos — T01
-- [ ] T04 Capa de acceso a datos con tests — Datos — T03
+- [x] T04 Capa de acceso a datos con tests — Datos — T03
 
 ## v0.1 Armario básico
 - [ ] T05 Pantalla de carga con puertas del armario — UI — T02

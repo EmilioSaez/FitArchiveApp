@@ -6,3 +6,16 @@ CREATE TABLE CalendarDay (
 );
 
 CREATE INDEX calendar_day_outfit ON CalendarDay(outfit_id);
+
+selectByDate:
+SELECT * FROM CalendarDay WHERE date = ?;
+
+-- Rango inclusivo de fechas ISO (el orden léxico coincide con el cronológico).
+selectBetween:
+SELECT * FROM CalendarDay WHERE date BETWEEN ? AND ? ORDER BY date;
+
+upsert:
+INSERT OR REPLACE INTO CalendarDay (date, outfit_id, note) VALUES (?, ?, ?);
+
+deleteByDate:
+DELETE FROM CalendarDay WHERE date = ?;

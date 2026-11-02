@@ -17,7 +17,7 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-        withHostTest { }
+        withHostTest {}
     }
 
     listOf(
@@ -36,11 +36,15 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
-            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.sqldelight.coroutines)
         }
         commonTest.dependencies {
-            implementation(kotlin("test"))
+            implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+        }
+        getByName("androidHostTest").dependencies {
+            implementation(libs.sqldelight.sqlite.driver)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)

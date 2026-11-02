@@ -62,3 +62,10 @@ data class Trip(
     val endDate: String?,
     val createdAt: Long,
 )
+
+/** Prenda en la lista de la maleta; [packed] indica que ya está guardada. */
+data class TripGarment(
+    val tripId: Long,
+    val garmentId: Long,
+    val packed: Boolean,
+)
