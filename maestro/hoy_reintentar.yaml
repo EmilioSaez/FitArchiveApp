@@ -1,0 +1,9 @@
+# T44: continúa hoy_sin_red con la red ya restaurada (adb shell svc wifi enable; svc data enable): "Reintentar" recupera el tiempo.
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Reintentar"
+- extendedWaitUntil:
+    visible: "[0-9-]+° · máx.*"
+    timeout: 20000
+- assertNotVisible: "No pudimos consultar el tiempo.*"
+- assertVisible: "Clima"

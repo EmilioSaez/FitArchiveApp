@@ -293,6 +293,23 @@ class OutfitDelDiaViewModelTest {
     }
 
     @Test
+    fun trasReiniciarReconoceElOutfitYaAceptadoYNoLoDuplica() = runTest(UnconfinedTestDispatcher()) {
+        val e = Entorno(backgroundScope, motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]))))
+        e.vm.aceptar()
+
+        // Nuevo ViewModel sobre los mismos repositorios, como al volver a abrir la app.
+        val reiniciado = OutfitDelDiaViewModel(
+            e.motor, GarmentRepositoryEnMemoria(armarioBasico), e.usos, e.calendario, e.outfits, e.tiempo, { e.ciudad },
+            backgroundScope, hoy, { 1234L },
+        )
+        assertTrue(reiniciado.estado.value.guardadoActual)
+        assertTrue(reiniciado.estado.value.aceptadoActual)
+
+        reiniciado.guardar()
+        assertEquals(1, e.outfits.creados.size)
+    }
+
+    @Test
     fun siOtroOutfitOcupaHoyLaActualNoCuentaComoAceptada() = runTest(UnconfinedTestDispatcher()) {
         val a = sugerido(armarioBasico[0], armarioBasico[1])
         val b = sugerido(armarioBasico[0], armarioBasico[1], armarioBasico[2])

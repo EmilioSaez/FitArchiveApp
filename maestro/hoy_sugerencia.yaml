@@ -1,0 +1,23 @@
+# T44: pestaña Hoy con ubicación y red: tiempo, sugerencia, desglose sin "Tu estilo" (aún no hay likes, outfits ni usos).
+# Supone camiseta + pantalón sin outfits guardados, ubicación concedida y red.
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Aceptar para hoy"
+    timeout: 15000
+- assertVisible: "Tu outfit del día"
+- assertVisible: "[0-9-]+° · máx [0-9-]+° / mín [0-9-]+° · .*"
+- assertVisible: "[0-9]+%"
+- assertVisible: "Clima"
+- assertVisible: "Colores"
+- assertVisible: "Frescura"
+- assertNotVisible: "Tu estilo"
+- assertNotVisible: "Ocasión"
+- assertNotVisible: "Alternativas"
+- assertVisible: "Guardar como outfit"

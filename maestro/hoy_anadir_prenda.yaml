@@ -1,0 +1,35 @@
+# T44: como anadir_prenda, pero tolera el fallo del recorte de fondo (pulsa "Usar original" si sale el diálogo).
+# Parte de la pestaña Armario. Env: FOTO_X, TIPO, ESTACION, USO
+appId: app.luxion.fitarchiveapp
+---
+- tapOn:
+    text: "Añadir mi primera prenda|[+] Añadir"
+- tapOn: "Elegir de la galería"
+- waitForAnimationToEnd
+- tapOn:
+    point: "${FOTO_X},62%"
+- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "Guardar prenda|Tipo.*|Usar original"
+    timeout: 60000
+- runFlow:
+    when:
+      visible: "Usar original"
+    commands:
+      - tapOn: "Usar original"
+- extendedWaitUntil:
+    visible: "Tipo.*"
+    timeout: 10000
+- tapOn: "${TIPO}"
+- scrollUntilVisible:
+    element: "${ESTACION}"
+- tapOn: "${ESTACION}"
+- scrollUntilVisible:
+    element: "${USO}"
+- tapOn: "${USO}"
+- scrollUntilVisible:
+    element: "Guardar prenda"
+- tapOn: "Guardar prenda"
+- extendedWaitUntil:
+    visible: "Armario"
+    timeout: 10000

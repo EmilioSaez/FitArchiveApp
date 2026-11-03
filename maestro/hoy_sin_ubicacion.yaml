@@ -1,0 +1,28 @@
+# T44: sin permiso de ubicación y sin ciudad elegida: aviso, sugerencia sin clima (sin criterio "Clima") y acceso a Perfil.
+# Se lanza con el permiso denegado. Supone que no hay ciudad guardada.
+appId: app.luxion.fitarchiveapp
+---
+- launchApp:
+    stopApp: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Configurar ubicación"
+    timeout: 15000
+- assertVisible: "Sin ubicación no sabemos qué tiempo hace.*"
+- assertNotVisible: "[0-9-]+° · máx.*"
+- assertNotVisible: "Clima"
+- assertVisible: "Colores"
+- assertVisible: "[0-9]+%"
+- tapOn: "Configurar ubicación"
+# La sección está al final de Perfil (O-hoy: no se baja sola hasta ella)
+- scrollUntilVisible:
+    element: "Ubicación y tiempo"
+    timeout: 30000
+- scrollUntilVisible:
+    element: "Usar mi ubicación aproximada"
