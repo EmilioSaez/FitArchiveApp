@@ -17,3 +17,11 @@ captures/
 xcuserdata/
 DerivedData/
 Pods/
+# Firma y secretos
+keystore.properties
+*.p12
+*.pem
+*.pfx
+*.p8
+*.mobileprovision
+mapping.txt

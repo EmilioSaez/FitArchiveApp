@@ -14,3 +14,9 @@ en simulador/dispositivo y compilar el proyecto Xcode.
 - Camara (`UIImagePickerController`) y permisos de Info.plist.
 - Quitar fondo (Vision `VNGenerateForegroundInstanceMaskRequest`, iOS 17+): resultado del recorte, PNG con transparencia, `createCGImage` con el rect de `ci.extent`, comportamiento en iOS < 17.
 - Ubicacion iOS (T39b), `IosPhotoStore` y carga de imagenes: solo comprobado que compilan, no su ejecucion.
+
+## Publicación (T51): lo que exige un Mac
+Checklist completo en `docs/publicacion.md` (sección 7). No se ha intentado nada de esto en Windows:
+- Crear el proyecto Xcode (no existe `.xcodeproj` en `iosApp/`) e integrar el framework `Shared`.
+- Completar `Info.plist` (`CFBundleLocalizations`, `ITSAppUsesNonExemptEncryption`, versiones), `PrivacyInfo.xcprivacy` y el `AppIcon.appiconset` desde `store/ios/AppIcon-1024.png`.
+- Firma con cuenta de Apple Developer, Archive, TestFlight y App Store Connect.

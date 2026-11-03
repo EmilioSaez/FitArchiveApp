@@ -8,4 +8,4 @@ Recursos para Google Play y App Store (T48). Listos para integrar; no tocan `and
 - `ios/AppIcon-1024.png`: icono único 1024×1024 RGB sin canal alfa, para el asset catalog.
 - `ficha-es.md`, `ficha-en.md`: textos de las fichas.
 
-Integración pendiente: crear `mipmap-anydpi-v26/ic_launcher.xml` (adaptive-icon con background `@color/ic_launcher_background`, foreground y monochrome) y copiar el PNG iOS a `AppIcon.appiconset`.
+Integración Android hecha (T51): `mipmap-anydpi-v26/ic_launcher.xml` y recursos copiados a `androidApp/src/main/res`. Pendiente iOS: copiar el PNG a `AppIcon.appiconset` (necesita Mac). Capturas y gráfico de funciones: ver `docs/publicacion.md`.
