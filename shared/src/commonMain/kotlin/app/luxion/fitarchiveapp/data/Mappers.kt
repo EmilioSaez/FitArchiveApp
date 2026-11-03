@@ -15,9 +15,13 @@ import app.luxion.fitarchiveapp.model.TripGarment
 import app.luxion.fitarchiveapp.model.Usage
 
 // Los enums se guardan como TEXT con su `name`; un valor desconocido en BD es un error de datos.
+// enumValueOf busca por nombre sin crear un array de valores por fila (con armarios grandes se llama miles de veces).
 internal inline fun <reified E : Enum<E>> enumFromDb(value: String): E =
-    enumValues<E>().firstOrNull { it.name == value }
-        ?: error("Valor \"$value\" no válido para ${E::class.simpleName}")
+    try {
+        enumValueOf<E>(value)
+    } catch (e: IllegalArgumentException) {
+        error("Valor \"$value\" no válido para ${E::class.simpleName}")
+    }
 
 internal fun Boolean.toDb(): Long = if (this) 1L else 0L
 

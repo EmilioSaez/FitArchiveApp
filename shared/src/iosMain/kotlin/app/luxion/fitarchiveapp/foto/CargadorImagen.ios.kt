@@ -12,8 +12,9 @@ import platform.Foundation.NSData
 import platform.Foundation.dataWithContentsOfFile
 import platform.posix.memcpy
 
+// [ladoMaximo] aún no reduce la imagen en iOS (no compilable en Windows; docs/ios-pendiente.md): la caché sí aplica.
 @OptIn(ExperimentalForeignApi::class)
-actual suspend fun cargarImagen(ruta: String): ImageBitmap? = withContext(Dispatchers.Default) {
+actual suspend fun cargarImagen(ruta: String, ladoMaximo: Int): ImageBitmap? = withContext(Dispatchers.Default) {
     runCatching {
         val datos = NSData.dataWithContentsOfFile(ruta) ?: return@runCatching null
         val bytes = ByteArray(datos.length.toInt())

@@ -9,12 +9,10 @@ import app.luxion.fitarchiveapp.model.Season
 import app.luxion.fitarchiveapp.model.Usage
 import app.luxion.fitarchiveapp.ui.anadir.etiqueta
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -100,6 +98,17 @@ data class ArmarioUiState(
     val filtroSinResultados get() = !cargando && totalArmario > 0 && total == 0
 }
 
+/** Si [prenda] cumple todos los criterios activos del filtro (misma semántica que `Garment.selectFiltered`). */
+fun GarmentFilter.admite(prenda: Garment) =
+    (type == null || prenda.type == type) &&
+        (color == null || prenda.color == color) &&
+        (season == null || prenda.season == season) &&
+        (usage == null || prenda.usage == usage) &&
+        (favorite == null || prenda.favorite == favorite) &&
+        (dirty == null || prenda.dirty == dirty)
+
+private fun GarmentFilter.numeroCriteriosTotales() = listOf(type, color, season, usage, favorite, dirty).count { it != null }
+
 /** Nº de criterios del filtro que el usuario puede activar (type, color, season, usage, favorite). */
 fun GarmentFilter.numeroCriterios() =
     listOf(type, color, season, usage).count { it != null } + if (favorite == true) 1 else 0
@@ -109,7 +118,6 @@ fun GarmentFilter.numeroCriterios() =
  * T11: la agrupación (tipo/color/estación) es seleccionable. T12: [aplicarFiltro] combina criterios.
  * T14 (favoritas) puede añadir su propia agrupación/criterio sin tocar la pantalla.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ArmarioViewModel(
     private val repositorio: GarmentRepository,
     private val scope: CoroutineScope,
@@ -119,22 +127,33 @@ class ArmarioViewModel(
     private val pestanaActual = MutableStateFlow(0)
     private val filtro = MutableStateFlow(GarmentFilter())
 
+    // Una sola consulta: el filtro se aplica en memoria sobre todo el armario (antes eran dos consultas y dos mapeos).
     val estado: StateFlow<ArmarioUiState> = combine(
-        filtro.flatMapLatest { repositorio.observeFiltered(it) },
         repositorio.observeAll(),
         agrupacion,
         pestanaActual,
         filtro,
-    ) { prendas, todas, grupo, indice, criterio ->
+    ) { todas, grupo, indice, criterio ->
+        val prendas = if (criterio.numeroCriteriosTotales() == 0) todas else todas.filter { criterio.admite(it) }
         val pestanas = grupo.pestanas
         val actual = indice.coerceIn(0, pestanas.lastIndex)
+        val conteos = IntArray(pestanas.size)
+        val deLaPestana = ArrayList<Garment>()
+        for (g in prendas) {
+            for (i in pestanas.indices) {
+                if (pestanas[i].admite(g)) {
+                    conteos[i]++
+                    if (i == actual) deLaPestana += g
+                }
+            }
+        }
         ArmarioUiState(
             cargando = false,
             agrupacion = grupo,
             pestanas = pestanas,
             pestanaActual = actual,
-            prendas = prendas.filter { pestanas[actual].admite(it) },
-            conteos = pestanas.map { p -> prendas.count { p.admite(it) } },
+            prendas = deLaPestana,
+            conteos = conteos.asList(),
             total = prendas.size,
             totalArmario = todas.size,
             filtro = criterio,

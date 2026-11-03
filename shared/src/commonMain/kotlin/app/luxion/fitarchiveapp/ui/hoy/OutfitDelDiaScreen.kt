@@ -51,6 +51,7 @@ import app.luxion.fitarchiveapp.ui.avatar.PrendaAvatar
 import app.luxion.fitarchiveapp.ui.outfit.etiqueta
 import app.luxion.fitarchiveapp.weather.Ciudad
 import app.luxion.fitarchiveapp.weather.ServicioTiempo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.math.roundToInt
@@ -82,6 +83,7 @@ fun OutfitDelDiaScreen(
             scope = scope,
             hoy = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString(),
             ahora = { Clock.System.now().toEpochMilliseconds() },
+            calculo = Dispatchers.Default, // El motor con armarios grandes no debe bloquear la interfaz.
         )
     }
     val estado by vm.estado.collectAsState()
