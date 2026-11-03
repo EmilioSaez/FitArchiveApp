@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -135,7 +136,7 @@ class OutfitDelDiaViewModelTest {
     }
 
     @Test
-    fun construyeElPedidoConArmarioTiempoUsosYAfinidadNula() = runTest(UnconfinedTestDispatcher()) {
+    fun construyeElPedidoConArmarioTiempoYUsos() = runTest(UnconfinedTestDispatcher()) {
         val espia = MotorEspia()
         val usos = UsosFijos(listOf(WearRecord("2026-10-30", 1)))
         val e = Entorno(backgroundScope, motor = espia, usos = usos)
@@ -147,8 +148,36 @@ class OutfitDelDiaViewModelTest {
         assertEquals(templado, pedido.tiempo)
         assertEquals(Occasion.CASUAL, pedido.ocasion)
         assertEquals(usos.registros, pedido.usos)
-        assertNull(pedido.afinidad)
         assertEquals(listOf<Ciudad?>(madrid), e.tiempo.ciudades)
+    }
+
+    @Test
+    fun sinSenalesDeGustoLaAfinidadVaANula() = runTest(UnconfinedTestDispatcher()) {
+        val espia = MotorEspia()
+        Entorno(backgroundScope, motor = espia)
+        assertNull(espia.ultimo!!.afinidad)
+    }
+
+    @Test
+    fun conLikesOUsosOOutfitsGuardadosSeAprendeLaAfinidad() = runTest(UnconfinedTestDispatcher()) {
+        val conLike = MotorEspia()
+        Entorno(backgroundScope, armario = armarioBasico.map { if (it.id == 1L) it.copy(favorite = true) else it }, motor = conLike)
+        assertNotNull(conLike.ultimo!!.afinidad)
+
+        val conUsos = MotorEspia()
+        Entorno(backgroundScope, motor = conUsos, usos = UsosFijos(listOf(WearRecord("2026-10-30", 1))))
+        assertNotNull(conUsos.ultimo!!.afinidad)
+    }
+
+    @Test
+    fun losOutfitsGuardadosEntranEnLaAfinidadAlRegenerar() = runTest(UnconfinedTestDispatcher()) {
+        val espia = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1])))
+        val e = Entorno(backgroundScope, motor = espia)
+        assertNull(espia.ultimo!!.afinidad)
+
+        e.vm.guardar() // el outfit guardado es ya una señal de gusto
+        e.vm.regenerar()
+        assertNotNull(espia.ultimo!!.afinidad)
     }
 
     @Test

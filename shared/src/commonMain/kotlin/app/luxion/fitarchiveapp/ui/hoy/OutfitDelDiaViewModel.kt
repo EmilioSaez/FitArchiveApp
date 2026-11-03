@@ -10,8 +10,11 @@ import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.Occasion
 import app.luxion.fitarchiveapp.model.Outfit
 import app.luxion.fitarchiveapp.model.WearRecord
+import app.luxion.fitarchiveapp.suggestions.AfinidadAprendida
+import app.luxion.fitarchiveapp.suggestions.AfinidadEstilo
 import app.luxion.fitarchiveapp.suggestions.DesgloseSugerencia
 import app.luxion.fitarchiveapp.suggestions.MotorSugerencias
+import app.luxion.fitarchiveapp.suggestions.OutfitGuardado
 import app.luxion.fitarchiveapp.suggestions.OutfitSugerido
 import app.luxion.fitarchiveapp.suggestions.PedidoSugerencia
 import app.luxion.fitarchiveapp.ui.outfit.PrendaElegida
@@ -77,7 +80,7 @@ data class OutfitDelDiaUiState(
 /**
  * Estado de la pantalla "outfit del día" (T43): arma el [PedidoSugerencia] con armario, tiempo (T39), usos (T33)
  * y ocasión opcional, y reparte las sugerencias del [motor] (T41). Aceptar asigna el outfit a hoy en el calendario (T32).
- * La afinidad de estilo (T42) se enganchará en [pedido]; mientras tanto va a null.
+ * La afinidad de estilo (T42) se aprende de likes, outfits guardados y usos; sin nada de eso va a null.
  */
 class OutfitDelDiaViewModel(
     private val motor: MotorSugerencias,
@@ -95,6 +98,7 @@ class OutfitDelDiaViewModel(
     val estado: StateFlow<OutfitDelDiaUiState> = _estado.asStateFlow()
 
     private var historial: List<WearRecord> = emptyList()
+    private var guardadosParaAfinidad: List<OutfitGuardado> = emptyList()
 
     init {
         scope.launch {
@@ -179,6 +183,13 @@ class OutfitDelDiaViewModel(
         } catch (t: Throwable) {
             emptyList() // Sin historial solo se pierde la rotación de prendas.
         }
+        guardadosParaAfinidad = try {
+            outfits.observeAll().first().mapNotNull { o -> outfits.get(o.id)?.let { OutfitGuardado.de(it.outfit, it.garments) } }
+        } catch (c: CancellationException) {
+            throw c
+        } catch (t: Throwable) {
+            emptyList() // Sin outfits solo se pierde esa señal de gusto.
+        }
         val tiempo = try {
             tiempoServicio.tiempoDeHoy(ciudad()).fold(
                 onSuccess = { EstadoTiempo.Disponible(it) },
@@ -199,8 +210,14 @@ class OutfitDelDiaViewModel(
         tiempo = e.tiempoDia,
         ocasion = e.ocasion,
         usos = historial,
-        afinidad = null, // T42 lo rellenará.
+        afinidad = afinidad(e),
     )
+
+    /** Null sin ninguna señal de gusto (likes, outfits guardados o usos): así no se muestra un "Tu estilo" neutro. */
+    private fun afinidad(e: OutfitDelDiaUiState): AfinidadEstilo? {
+        val hayEvidencia = e.armario.any { it.favorite } || guardadosParaAfinidad.isNotEmpty() || historial.isNotEmpty()
+        return if (hayEvidencia) AfinidadAprendida.desde(e.armario, guardadosParaAfinidad, historial) else null
+    }
 
     /** Recalcula las sugerencias cuando ya hay armario y el tiempo ha terminado de cargar. */
     private fun recalcular() {
