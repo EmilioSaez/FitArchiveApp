@@ -1,0 +1,21 @@
+# Historial de usos (T33): un día pasado con outfit suma uso a sus prendas al abrir la app (los días de hoy y futuros no cuentan).
+# Supone camiseta + pantalón en el outfit y la camiseta como 1ª tarjeta del Armario. Env: OUTFIT, DIA (día del mes anterior, p.ej. 15)
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Calendario"
+- tapOn: "‹"
+- tapOn: "${DIA}"
+- tapOn: "${OUTFIT}"
+- tapOn: "Cerrar"
+- launchApp
+- extendedWaitUntil:
+    visible: "Armario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Armario"
+- tapOn:
+    point: "25%,25%"
+- scrollUntilVisible:
+    element: "Historial"
+- assertVisible: "${DIA} de .* de 20.*"
+- assertVisible: "Veces usada"

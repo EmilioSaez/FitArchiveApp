@@ -1,0 +1,28 @@
+# Viajes (T37): maleta de un viaje abierto. Supone un outfit de camiseta + pantalón (env OUTFIT) y el detalle del viaje abierto.
+# Elegir/quitar outfit, prenda suelta, marcar guardadas hasta "Maleta lista" y persistencia tras reiniciar.
+# Env: OUTFIT, DESTINO
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Añadir prenda"
+- tapOn: "Camiseta.*"
+- assertVisible: "Añadida a mano"
+- assertVisible: "0 de 1 guardadas"
+- tapOn: "Quitar"
+- assertVisible: "La maleta está vacía.*"
+- tapOn: "${OUTFIT}"
+- assertVisible: "0 de 2 guardadas"
+# Casillas de las dos filas (posición fija del Checkbox, sin texto propio)
+- tapOn:
+    point: "10%,37%"
+- assertVisible: "1 de 2 guardadas"
+- tapOn:
+    point: "10%,43%"
+- assertVisible: "¡Maleta lista! 2 prendas guardadas"
+- launchApp
+- extendedWaitUntil:
+    visible: "Viajes"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Viajes"
+- tapOn: "${DESTINO}"
+- assertVisible: "¡Maleta lista! 2 prendas guardadas"

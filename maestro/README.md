@@ -12,3 +12,6 @@ Observaciones menores: `filtro_aplicar_fijo` (O1), `favorita_visible` (O2), `rec
 
 ## Outfits (T21)
 `outfit_crear` (camiseta + pantalón, env `NOMBRE`), `outfit_lista` (favorito, reinicio, cancelar/confirmar eliminar; env `NOMBRE`), `outfit_compartir` (selector del sistema con vista previa). Suponen un armario con una camiseta y un pantalón (fotos de color plano). Resultados en `docs/bugs-v02.md`.
+
+## v0.4 (T38)
+`calendario_asignar` (outfit en hoy, nota, cambio de mes, reinicio; env `OUTFIT`), `calendario_usos` (outfit en un día del mes anterior y comprobar el historial en el detalle; env `OUTFIT DIA`), `sucia_manual` (limpiar/ensuciar, umbral − / +, insignia en el Armario), `viaje_crear` (validación de fechas y alta; env `DESTINO IDA VUELTA DIAS`), `viaje_maleta` (outfit, prenda suelta, casillas, reinicio; env `OUTFIT DESTINO`), `viaje_sucias` (aviso de sucias; env `DESTINO`), `viaje_editar_eliminar` (env `DESTINO NUEVO`). Suponen camiseta + pantalón + un outfit con ambas y un emulador con fecha en noviembre de 2026 (casillas por posición). Orden usado: limpiar → 2× anadir_prenda → outfit_crear → viaje_crear → viaje_maleta → calendario_asignar → calendario_usos → sucia_manual → viaje_sucias → viaje_editar_eliminar. Tras `launchApp` esperar a que termine la pantalla de carga antes de pulsar la barra inferior. Resultados en `docs/bugs-v04.md`.

@@ -1,0 +1,8 @@
+# Viajes (T37) + limpia/sucia (T34): la maleta avisa de las prendas sucias. Probar tras sucia_manual (camiseta sucia) con el viaje cuyo outfit la incluye.
+# Env: DESTINO
+appId: app.luxion.fitarchiveapp
+---
+- tapOn: "Viajes"
+- tapOn: "${DESTINO}"
+- assertVisible: "Sucias, lávalas antes de salir: Camiseta"
+- assertVisible: ".* · sucia"

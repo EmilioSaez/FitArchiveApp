@@ -28,7 +28,7 @@ internal fun HistorialUsos(prenda: Garment, usos: UsoRepository) {
         Text("Historial", style = MaterialTheme.typography.titleMedium)
         if (fechas.isEmpty()) {
             Text(
-                "Aún sin usos. Asigna un outfit con esta prenda a un día del calendario.",
+                "Aún sin usos. Asigna un outfit con esta prenda a un día del calendario; el uso se cuenta cuando ese día ya ha pasado.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
