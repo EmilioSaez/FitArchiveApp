@@ -54,7 +54,7 @@ Ninguno de código. Un cambio de texto (O9, abajo).
 ## Observaciones
 
 - **O9. El historial vacío no explicaba por qué un outfit asignado a hoy no cuenta.** El uso solo se registra cuando el día ya ha pasado (`registrarHasta`). Corregido: el texto vacío dice "…el uso se cuenta cuando ese día ya ha pasado" (`HistorialUsos.kt`). Verificado por lectura, no visualmente.
-- **O10. Fechas del viaje como texto libre.** La validación es correcta (fechas imposibles, formato, orden, vuelta sin ida), pero escribir `AAAA-MM-DD` a mano es incómodo y en la lista y el detalle las fechas se muestran también en ISO. Propuesta: `DatePicker` de Material 3 y formato "10 dic → 14 dic 2026" como en el historial.
+- **O10. Fechas del viaje como texto libre.** Resuelta: el formulario usa `DatePicker` de Material 3 (campos Ida/Vuelta de solo lectura, botón "Borrar" para quitar una fecha; la vuelta sin fecha abre el selector en el mes de la ida) y la lista y el detalle muestran "10 dic → 14 dic 2026 · 5 días" (`formatearFechasViaje`, con el año en cada fecha si cruzan de año). Se mantienen las validaciones (vuelta sin ida, vuelta anterior a la ida) y el almacenamiento ISO. Verificado en emulador con `viaje_crear` y `viaje_editar_eliminar`. Limitación: los textos propios del selector (mes, días de la semana) siguen el idioma del dispositivo.
 - **O11. Pestaña Viajes sin viajes cargados: el botón "Nuevo viaje" desaparece de la cabecera** mientras la lista está vacía y solo queda el CTA central. Coherente, solo anotado.
 - **O12. El botón "Añadir prenda" de la maleta se deshabilita** cuando ya están todas las prendas del armario en ella, sin explicación. Menor.
 - **O13. Tamaño de los botones − / +** del umbral de sucia (texto pequeño, difícil de acertar con el pulgar). Menor.
@@ -68,7 +68,7 @@ Ninguno de código. Un cambio de texto (O9, abajo).
 shogun emulator start
 ./gradlew :androidApp:installDebug
 # armario: camiseta + pantalón + outfit (ver maestro/README.md)
-maestro test -e DESTINO=Lisboa -e IDA=2026-12-10 -e VUELTA=2026-12-14 -e "DIAS=5 días" maestro/viaje_crear.yaml
+maestro test -e DESTINO=Lisboa maestro/viaje_crear.yaml
 maestro test -e OUTFIT="Look playa" -e DESTINO=Lisboa maestro/viaje_maleta.yaml
 maestro test -e OUTFIT="Look playa" maestro/calendario_asignar.yaml
 maestro test -e OUTFIT="Look playa" -e DIA=15 maestro/calendario_usos.yaml

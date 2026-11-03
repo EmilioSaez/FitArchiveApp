@@ -19,6 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +42,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,7 +56,9 @@ import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.Trip
 import app.luxion.fitarchiveapp.ui.anadir.etiqueta
 import app.luxion.fitarchiveapp.viaje.ItemMaleta
-import app.luxion.fitarchiveapp.viaje.diasDeViaje
+import app.luxion.fitarchiveapp.viaje.formatearFechaCorta
+import app.luxion.fitarchiveapp.viaje.formatearFechasViaje
+import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
 
 /** Pestaña Viajes (T37): lista de viajes y, al abrir uno, su maleta con los outfits y prendas elegidos. */
@@ -108,11 +117,7 @@ fun ViajesScreen(
 /** Formulario de viaje abierto: [editado] es el viaje que se modifica, o null si es uno nuevo. */
 private class FormularioAbierto(val editado: Trip?)
 
-private fun Trip.fechas(): String? = when {
-    startDate == null -> null
-    endDate == null -> startDate
-    else -> "$startDate → $endDate" + (diasDeViaje(startDate, endDate)?.let { " · $it ${if (it == 1) "día" else "días"}" } ?: "")
-}
+private fun Trip.fechas(): String? = formatearFechasViaje(startDate, endDate)
 
 @Composable
 private fun ListaViajes(estado: ViajesUiState, modifier: Modifier, onNuevo: () -> Unit, onAbrir: (Trip) -> Unit) {
@@ -319,14 +324,8 @@ private fun FormularioViaje(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(nombre, { nombre = it }, Modifier.fillMaxWidth(), label = { Text("Nombre") }, singleLine = true)
                 OutlinedTextField(destino, { destino = it }, Modifier.fillMaxWidth(), label = { Text("Destino") }, singleLine = true)
-                OutlinedTextField(
-                    inicio, { inicio = it }, Modifier.fillMaxWidth(),
-                    label = { Text("Ida (AAAA-MM-DD)") }, singleLine = true,
-                )
-                OutlinedTextField(
-                    fin, { fin = it }, Modifier.fillMaxWidth(),
-                    label = { Text("Vuelta (AAAA-MM-DD)") }, singleLine = true,
-                )
+                CampoFecha("Ida", inicio, onCambio = { inicio = it })
+                CampoFecha("Vuelta", fin, onCambio = { fin = it }, mesPorDefecto = inicio)
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
             }
         },
@@ -338,4 +337,70 @@ private fun FormularioViaje(
         },
         dismissButton = { TextButton(onClick = onCerrar) { Text("Cancelar") } },
     )
+}
+
+private const val DIA_MS = 86_400_000L
+
+/**
+ * Campo de fecha (ISO en [valor], vacío si no hay): al tocarlo abre un DatePicker; "Borrar" la quita.
+ * Sin fecha, el selector abre en el mes de [mesPorDefecto] (ISO) si es válido y, si no, en el actual.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CampoFecha(etiqueta: String, valor: String, onCambio: (String) -> Unit, mesPorDefecto: String = "") {
+    var abierto by remember { mutableStateOf(false) }
+    val fecha = runCatching { LocalDate.parse(valor) }.getOrNull()
+    Box {
+        OutlinedTextField(
+            if (valor.isEmpty()) "" else formatearFechaCorta(valor),
+            {},
+            Modifier.fillMaxWidth(),
+            readOnly = true,
+            label = { Text(etiqueta) },
+            singleLine = true,
+            trailingIcon = if (valor.isEmpty()) null else ({
+                TextButton(
+                    onClick = { onCambio("") },
+                    Modifier.semantics { contentDescription = "Borrar ${etiqueta.lowercase()}" },
+                ) { Text("Borrar") }
+            }),
+        )
+        // Capa transparente que recoge el toque (un campo de solo lectura no lo propaga); deja libre el botón Borrar.
+        Box(
+            Modifier
+                .matchParentSize()
+                .padding(end = if (valor.isEmpty()) 0.dp else 88.dp)
+                .semantics { contentDescription = if (valor.isEmpty()) etiqueta else "$etiqueta ${formatearFechaCorta(valor)}" }
+                .clickable(role = Role.Button) { abierto = true },
+        )
+    }
+    if (abierto) {
+        val estado = rememberDatePickerState(
+            initialSelectedDateMillis = fecha?.let { it.toEpochDays() * DIA_MS },
+            initialDisplayedMonthMillis = (fecha ?: runCatching { LocalDate.parse(mesPorDefecto) }.getOrNull())?.let { it.toEpochDays() * DIA_MS },
+        )
+        DatePickerDialog(
+            onDismissRequest = { abierto = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    estado.selectedDateMillis?.let { onCambio(LocalDate.fromEpochDays((it / DIA_MS).toInt()).toString()) }
+                    abierto = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = { TextButton(onClick = { abierto = false }) { Text("Cancelar") } },
+        ) {
+            DatePicker(
+                estado,
+                title = { Text("Fecha de ${etiqueta.lowercase()}", Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp)) },
+                headline = {
+                    val elegida = estado.selectedDateMillis?.let { LocalDate.fromEpochDays((it / DIA_MS).toInt()).toString() }
+                    Text(
+                        elegida?.let { formatearFechaCorta(it) } ?: "Elige una fecha",
+                        Modifier.padding(start = 24.dp, end = 12.dp, bottom = 12.dp),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                },
+            )
+        }
+    }
 }
