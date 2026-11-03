@@ -41,10 +41,10 @@ Ninguno que requiera cambios de BD.
 
 ## Observaciones
 
-- **O14. Dos outfits guardados desde Hoy el mismo día se llaman igual** ("Outfit del 03/11") y en Outfits solo se distinguen por las prendas. Propuesta: sufijo numérico o la ocasión en el nombre.
-- **O15. Con alternativas, "Aceptar para hoy" y "Guardar como outfit" quedan bajo el pliegue** y hay que hacer scroll (avatar de 380 dp + fila de alternativas). Propuesta: acciones fijas abajo o avatar más pequeño.
-- **O16. "Configurar ubicación" abre Perfil en "Mis medidas"**; la sección "Ubicación y tiempo" está al final y hay que bajar hasta ella. Propuesta: abrir Perfil ya en esa sección.
-- **O17. El motivo dice "Hace días que no llevas estas prendas" también con prendas que nunca se han usado.** Correcto pero poco informativo; con armario nuevo es siempre el motivo.
+- **O14 (resuelto en T46: el segundo se llama "… (2)"). Dos outfits guardados desde Hoy el mismo día se llaman igual** ("Outfit del 03/11") y en Outfits solo se distinguen por las prendas. Propuesta: sufijo numérico o la ocasión en el nombre.
+- **O15 (resuelto en T46: acciones fijas abajo, avatar de 340 dp). Con alternativas, "Aceptar para hoy" y "Guardar como outfit" quedan bajo el pliegue** y hay que hacer scroll (avatar de 380 dp + fila de alternativas). Propuesta: acciones fijas abajo o avatar más pequeño.
+- **O16 (resuelto en T46: Perfil se abre en "Ubicación y tiempo"). "Configurar ubicación" abre Perfil en "Mis medidas"**; la sección "Ubicación y tiempo" está al final y hay que bajar hasta ella. Propuesta: abrir Perfil ya en esa sección.
+- **O17 (resuelto en T46: "Aún no has estrenado estas prendas"). El motivo dice "Hace días que no llevas estas prendas" también con prendas que nunca se han usado.** Correcto pero poco informativo; con armario nuevo es siempre el motivo.
 - **O18. El tiempo cambia entre aperturas (15° → 17°, Nublado → Despejado):** consulta real en cada apertura o al regenerar, sin caché. Coherente, solo anotado (relacionado con T47).
 - **Entorno:** el recorte de fondo falla en el emulador con fotos planas (diálogo "No pudimos quitar el fondo"); `hoy_anadir_prenda` pulsa "Usar original". Las capturas guardadas en `/sdcard` entran en la galería y el selector las ofrece como foto de prenda (a una prenda se le puso una captura de la propia app): guardarlas en `/data/local/tmp`. Maestro concede los permisos al lanzar: los flujos "sin ubicación" usan `permissions: all: deny`. `hoy_aceptar` necesita el punto de la casilla de hoy (`CASILLA`).
 - No cubierto: iOS (no compilable en Windows), prioridad de la ubicación del móvil sobre la ciudad elegida (solo por tests), "Tu estilo" por usos reales (requiere días pasados; cubierto por los tests de `AfinidadAprendida`), outfit con todas las prendas sucias, cambio de huso o de fecha del dispositivo.

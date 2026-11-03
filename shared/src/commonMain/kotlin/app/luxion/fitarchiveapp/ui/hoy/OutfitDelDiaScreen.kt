@@ -48,6 +48,8 @@ import app.luxion.fitarchiveapp.suggestions.MotorSugerenciasPorReglas
 import app.luxion.fitarchiveapp.ui.armario.FotoPrenda
 import app.luxion.fitarchiveapp.ui.avatar.AvatarConPrendas
 import app.luxion.fitarchiveapp.ui.avatar.PrendaAvatar
+import app.luxion.fitarchiveapp.ui.components.Titular
+import app.luxion.fitarchiveapp.ui.components.TituloSeccion
 import app.luxion.fitarchiveapp.ui.outfit.etiqueta
 import app.luxion.fitarchiveapp.weather.Ciudad
 import app.luxion.fitarchiveapp.weather.ServicioTiempo
@@ -93,68 +95,68 @@ fun OutfitDelDiaScreen(
         rutas.filter { it !in imagenes }.forEach { ruta -> cargarImagen(ruta)?.let { imagenes[ruta] = it } }
     }
 
-    Column(
-        modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Cabecera(estado)
-        AvisoTiempo(estado.tiempo, onConfigurar = onAbrirPerfil, onReintentar = vm::regenerar)
-        Ocasiones(estado.ocasion, vm::elegirOcasion)
+    Column(modifier.fillMaxSize()) {
+        Column(
+            Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Cabecera(estado)
+            AvisoTiempo(estado.tiempo, onConfigurar = onAbrirPerfil, onReintentar = vm::regenerar)
+            Ocasiones(estado.ocasion, vm::elegirOcasion)
 
-        when {
-            estado.cargando -> Box(Modifier.fillMaxWidth().height(240.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-            actual == null -> EstadoVacio(estado, onAnadirPrendas, vm::elegirOcasion)
-            else -> {
-                val prendasAvatar = actual.prendas.mapNotNull { p ->
-                    imagenes[p.photoPath]?.let { PrendaAvatar(it, subtipoPorDefecto(p.type)) }
+            when {
+                estado.cargando -> Box(Modifier.fillMaxWidth().height(240.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    AvatarConPrendas(prendasAvatar, Modifier.height(380.dp))
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(
-                            "${(actual.puntuacion * 100).roundToInt()}%",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                        Text(
-                            motivoBreve(actual.desglose, estado.tiempoDia != null, estado.ocasion != null),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        actual.desglose.criterios(estado.tiempoDia != null, estado.ocasion != null).forEach { c ->
-                            Criterio(c)
+                actual == null -> EstadoVacio(estado, onAnadirPrendas, vm::elegirOcasion)
+                else -> {
+                    val prendasAvatar = actual.prendas.mapNotNull { p ->
+                        imagenes[p.photoPath]?.let { PrendaAvatar(it, subtipoPorDefecto(p.type)) }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        AvatarConPrendas(prendasAvatar, Modifier.height(340.dp))
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                "${(actual.puntuacion * 100).roundToInt()}%",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(
+                                motivoBreve(actual.desglose, estado.tiempoDia != null, estado.ocasion != null, estado.actualSinEstrenar),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            actual.desglose.criterios(estado.tiempoDia != null, estado.ocasion != null).forEach { c ->
+                                Criterio(c)
+                            }
                         }
                     }
-                }
-                if (estado.hayVariasOpciones) {
-                    Text("Alternativas", style = MaterialTheme.typography.titleMedium)
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        itemsIndexed(estado.sugerencias) { i, s ->
-                            Alternativa(s.prendas, seleccionada = i == estado.indice, onClick = { vm.elegir(i) })
+                    if (estado.hayVariasOpciones) {
+                        TituloSeccion("Alternativas")
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            itemsIndexed(estado.sugerencias) { i, s ->
+                                Alternativa(s.prendas, seleccionada = i == estado.indice, onClick = { vm.elegir(i) })
+                            }
                         }
                     }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        TextButton(onClick = vm::siguiente, enabled = estado.hayVariasOpciones) { Text("Siguiente") }
+                        TextButton(onClick = vm::regenerar) { Text("Regenerar") }
+                    }
                 }
-                Acciones(estado, vm)
             }
         }
+        // Las acciones principales quedan fijas abajo: no hace falta bajar por la pantalla para aceptar (O15).
+        if (actual != null && !estado.cargando) Acciones(estado, vm)
     }
 }
 
 @Composable
 private fun Cabecera(estado: OutfitDelDiaUiState) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Hoy", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-        Text("Tu outfit del día", style = MaterialTheme.typography.headlineLarge)
-        estado.tiempoDia?.let { t ->
-            Text(
-                "${t.temperaturaC.roundToInt()}° · máx ${t.maximaC.roundToInt()}° / mín ${t.minimaC.roundToInt()}° · " +
-                    t.condicion.descripcion(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+    val clima = estado.tiempoDia?.let { t ->
+        "${t.temperaturaC.roundToInt()}° · máx ${t.maximaC.roundToInt()}° / mín ${t.minimaC.roundToInt()}° · " +
+            t.condicion.descripcion()
     }
+    Titular("Tu outfit del día", Modifier.fillMaxWidth(), antetitulo = "Hoy", subtitulo = clima)
 }
 
 /** Aviso cuando se sugiere sin saber el tiempo: sin ubicación (se invita a configurarla) o con fallo de red (se puede reintentar). */
@@ -221,18 +223,16 @@ private fun Alternativa(prendas: List<Garment>, seleccionada: Boolean, onClick: 
 
 @Composable
 private fun Acciones(estado: OutfitDelDiaUiState, vm: OutfitDelDiaViewModel) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        estado.aviso?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary) }
-        estado.error?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
-        Button(onClick = vm::aceptar, enabled = !estado.ocupado && !estado.aceptadoActual, modifier = Modifier.fillMaxWidth()) {
-            Text(if (estado.aceptadoActual) "Asignado a hoy" else "Aceptar para hoy")
-        }
-        OutlinedButton(onClick = vm::guardar, enabled = !estado.ocupado && !estado.guardadoActual, modifier = Modifier.fillMaxWidth()) {
-            Text(if (estado.guardadoActual) "Guardado en tus outfits" else "Guardar como outfit")
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            TextButton(onClick = vm::siguiente, enabled = estado.hayVariasOpciones) { Text("Siguiente") }
-            TextButton(onClick = vm::regenerar) { Text("Regenerar") }
+    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 8.dp) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            estado.aviso?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary) }
+            estado.error?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
+            Button(onClick = vm::aceptar, enabled = !estado.ocupado && !estado.aceptadoActual, modifier = Modifier.fillMaxWidth()) {
+                Text(if (estado.aceptadoActual) "Asignado a hoy" else "Aceptar para hoy")
+            }
+            OutlinedButton(onClick = vm::guardar, enabled = !estado.ocupado && !estado.guardadoActual, modifier = Modifier.fillMaxWidth()) {
+                Text(if (estado.guardadoActual) "Guardado en tus outfits" else "Guardar como outfit")
+            }
         }
     }
 }

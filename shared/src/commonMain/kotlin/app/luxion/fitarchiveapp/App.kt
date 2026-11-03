@@ -52,6 +52,8 @@ fun App(repositories: Repositories) {
             runCatching { repositories.usos.registrarHasta(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
         }
         var destino by remember { mutableStateOf(Destino.Hoy) }
+        // "Configurar ubicación" abre Perfil ya en "Ubicación y tiempo"; entrar por la barra inferior empieza arriba.
+        var perfilEnUbicacion by remember { mutableStateOf(false) }
         var anadiendo by remember { mutableStateOf(false) }
         if (anadiendo) {
             val quitaFondo = remember { crearQuitaFondo() }
@@ -102,7 +104,10 @@ fun App(repositories: Repositories) {
                     Destino.entries.forEach { item ->
                         NavigationBarItem(
                             selected = item == destino,
-                            onClick = { destino = item },
+                            onClick = {
+                                destino = item
+                                perfilEnUbicacion = false
+                            },
                             icon = { Box {} },
                             label = { Text(item.titulo) },
                             alwaysShowLabel = true,
@@ -116,11 +121,18 @@ fun App(repositories: Repositories) {
                     repositories,
                     servicioTiempo,
                     ciudad = seleccionCiudad::ciudadGuardada,
-                    onAbrirPerfil = { destino = Destino.Perfil },
+                    onAbrirPerfil = {
+                        perfilEnUbicacion = true
+                        destino = Destino.Perfil
+                    },
                     onAnadirPrendas = { anadiendo = true },
                     modifier = Modifier.padding(padding),
                 )
-                Destino.Perfil -> MedidasScreen(repositories.measurements, Modifier.padding(padding)) {
+                Destino.Perfil -> MedidasScreen(
+                    repositories.measurements,
+                    Modifier.padding(padding),
+                    irAlContenidoExtra = perfilEnUbicacion,
+                ) {
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                 }
                 Destino.Armario -> ArmarioScreen(

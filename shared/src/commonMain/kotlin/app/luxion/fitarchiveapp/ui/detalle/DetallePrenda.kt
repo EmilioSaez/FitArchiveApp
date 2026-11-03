@@ -18,6 +18,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -228,8 +232,19 @@ private fun UsosParaLavar(usos: Int, onCambiar: (Int) -> Unit) {
             },
             Modifier.weight(1f),
         )
-        TextButton(onClick = { onCambiar(usos - 1) }, enabled = usos > SOLO_MANUAL) { Text("−") }
-        TextButton(onClick = { onCambiar(usos + 1) }, enabled = usos < MAX_USOS_PARA_LAVAR) { Text("+") }
+        // Botones de 48 dp con el signo grande: fáciles de acertar con el pulgar.
+        OutlinedIconButton(onClick = { onCambiar(usos - 1) }, enabled = usos > SOLO_MANUAL, modifier = Modifier.size(48.dp)) {
+            Text("−", style = MaterialTheme.typography.titleLarge)
+        }
+        Text(
+            usos.toString(),
+            Modifier.width(40.dp),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
+        OutlinedIconButton(onClick = { onCambiar(usos + 1) }, enabled = usos < MAX_USOS_PARA_LAVAR, modifier = Modifier.size(48.dp)) {
+            Text("+", style = MaterialTheme.typography.titleLarge)
+        }
     }
 }
 

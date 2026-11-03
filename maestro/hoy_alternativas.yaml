@@ -17,6 +17,7 @@ appId: app.luxion.fitarchiveapp
 - assertVisible: "Aceptar para hoy|Asignado a hoy"
 - scrollUntilVisible:
     element: "Siguiente"
+    # (Siguiente/Regenerar siguen en la zona desplazable; Aceptar/Guardar están fijos)
 - tapOn: "Siguiente"
 - waitForAnimationToEnd
 # Siguiente desde la última vuelve a la primera

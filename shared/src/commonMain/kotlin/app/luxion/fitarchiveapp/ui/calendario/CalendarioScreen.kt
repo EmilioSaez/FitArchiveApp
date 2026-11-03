@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui.calendario
 
+import app.luxion.fitarchiveapp.ui.components.Titular
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -72,12 +73,7 @@ fun CalendarioScreen(
     }
 
     Column(modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        Text(
-            "Calendario",
-            Modifier.padding(top = 16.dp),
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        Titular("Calendario", Modifier.padding(start = 4.dp, top = 16.dp))
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = vm::mesAnterior) { Text("‹") }
             Text(

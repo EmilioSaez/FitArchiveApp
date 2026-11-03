@@ -20,9 +20,8 @@ appId: app.luxion.fitarchiveapp
 - assertVisible: "Colores"
 - assertVisible: "[0-9]+%"
 - tapOn: "Configurar ubicación"
-# La sección está al final de Perfil (O-hoy: no se baja sola hasta ella)
-- scrollUntilVisible:
-    element: "Ubicación y tiempo"
-    timeout: 30000
-- scrollUntilVisible:
-    element: "Usar mi ubicación aproximada"
+# T46 (O16): Perfil se abre ya en "Ubicación y tiempo", sin hacer scroll
+- extendedWaitUntil:
+    visible: "Ubicación y tiempo"
+    timeout: 5000
+- assertVisible: "Usar mi ubicación aproximada"
