@@ -1,6 +1,7 @@
 package app.luxion.fitarchiveapp.weather
 
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.TimeZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -67,6 +68,62 @@ class ServicioTiempoOpenMeteoTest {
     fun busquedaEnBlancoNoLlamaALaRed() = runTest {
         assertEquals(emptyList(), servicio(null).buscarCiudades("  ").getOrThrow())
         assertTrue(urls.isEmpty())
+    }
+
+    // --- Caché corta (O18) ---
+
+    private var reloj = 1_000_000_000_000L
+    private val cache = CacheTiempo(vidaMs = 30 * 60_000L, ahora = { reloj }, zona = { TimeZone.UTC })
+    private fun conCache(gps: Coordenadas? = null) = ServicioTiempoOpenMeteo(cliente, cache) { gps }
+
+    @Test
+    fun conCacheLaSegundaConsultaNoUsaLaRed() = runTest {
+        val primero = conCache().tiempoDeHoy(madrid).getOrThrow()
+        reloj += 5 * 60_000L
+        val segundo = conCache().tiempoDeHoy(madrid).getOrThrow() // otro servicio: la caché es compartida
+        assertEquals(primero, segundo)
+        assertEquals(1, urls.size)
+    }
+
+    @Test
+    fun laCacheCaducaConElTiempo() = runTest {
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        reloj += 31 * 60_000L
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        assertEquals(2, urls.size)
+    }
+
+    @Test
+    fun laCacheCaducaAlCambiarDeDia() = runTest {
+        reloj = 1_000_000_000_000L - 1_000_000_000_000L % 86_400_000L + 86_400_000L - 60_000L // 23:59 UTC
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        reloj += 2 * 60_000L // 00:01 del día siguiente, aún dentro de la vida de la caché
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        assertEquals(2, urls.size)
+    }
+
+    @Test
+    fun cambiarDeCiudadNoUsaLaCache() = runTest {
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        conCache().tiempoDeHoy(Ciudad("Lima", "Perú", Coordenadas(-12.05, -77.04))).getOrThrow()
+        assertEquals(2, urls.size)
+    }
+
+    @Test
+    fun losFallosNoSeCachean() = runTest {
+        respuesta = { error("sin conexión") }
+        assertIs<ErrorTiempo.Red>(conCache().tiempoDeHoy(madrid).exceptionOrNull())
+        respuesta = { TIEMPO_JSON }
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        assertEquals(2, urls.size)
+    }
+
+    @Test
+    fun vaciarLaCacheVuelveAConsultar() = runTest {
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        cache.vaciar()
+        conCache().tiempoDeHoy(madrid).getOrThrow()
+        assertEquals(2, urls.size)
     }
 
     @Test

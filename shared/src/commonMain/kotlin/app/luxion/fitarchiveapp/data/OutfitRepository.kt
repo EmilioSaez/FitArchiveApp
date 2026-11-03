@@ -7,8 +7,11 @@ import app.luxion.fitarchiveapp.db.FitArchiveDatabase
 import app.luxion.fitarchiveapp.model.Outfit
 import app.luxion.fitarchiveapp.model.OutfitGarment
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -26,6 +29,19 @@ interface OutfitRepository {
     /** Emite null si el outfit no existe (o se elimina). */
     fun observe(id: Long): Flow<OutfitWithGarments?>
     suspend fun get(id: Long): OutfitWithGarments?
+
+    /**
+     * Todos los outfits con sus prendas, más recientes primero; se vuelve a emitir al cambiar cualquiera.
+     * La versión por defecto observa cada outfit por separado (un listener por outfit); la de SQL lo hace con dos consultas.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeAllConPrendas(): Flow<List<OutfitWithGarments>> = observeAll().flatMapLatest { lista ->
+        if (lista.isEmpty()) {
+            flowOf(emptyList())
+        } else {
+            combine(lista.map { o -> observe(o.id).map { it ?: OutfitWithGarments(o, emptyList()) } }) { it.toList() }
+        }
+    }
 
     /** Crea el outfit (se ignora `outfit.id`) con sus prendas y devuelve el id nuevo. */
     suspend fun create(outfit: Outfit, garments: List<OutfitGarment>): Long
@@ -48,6 +64,15 @@ internal class SqlOutfitRepository(
 
     override fun observeFavorites() =
         queries.selectFavorites().asFlow().mapToList(context).map { it.map { o -> o.toModel() } }
+
+    override fun observeAllConPrendas(): Flow<List<OutfitWithGarments>> = combine(
+        queries.selectAll().asFlow().mapToList(context),
+        queries.selectAllGarments().asFlow().mapToList(context),
+    ) { outfits, piezas ->
+        // selectAllGarments viene ordenado por outfit y prenda; el orden de capas (z_index) se aplica aquí.
+        val porOutfit = piezas.groupBy({ it.outfit_id }, { it.toModel() })
+        outfits.map { o -> OutfitWithGarments(o.toModel(), porOutfit[o.id].orEmpty().sortedWith(compareBy({ it.zIndex }, { it.garmentId }))) }
+    }
 
     override fun observe(id: Long): Flow<OutfitWithGarments?> = combine(
         queries.selectById(id).asFlow().mapToOneOrNull(context),

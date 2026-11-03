@@ -22,16 +22,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,7 +37,7 @@ import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
 import app.luxion.fitarchiveapp.compartir.rememberCompartirOutfit
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
-import app.luxion.fitarchiveapp.foto.cargarImagen
+import app.luxion.fitarchiveapp.foto.rememberMiniaturas
 import app.luxion.fitarchiveapp.model.Outfit
 import app.luxion.fitarchiveapp.ui.avatar.AvatarConPrendas
 import app.luxion.fitarchiveapp.ui.avatar.PrendaAvatar
@@ -58,13 +55,6 @@ fun OutfitsScreen(
     val vm = remember(outfits, armario) { ListaOutfitsViewModel(outfits, armario, scope) }
     val estado by vm.estado.collectAsState()
     val compartir = rememberCompartirOutfit()
-
-    // Las fotos se cargan una vez por ruta y se comparten entre miniaturas.
-    val imagenes = remember { mutableStateMapOf<String, ImageBitmap>() }
-    val rutas = estado.outfits.flatMap { o -> o.prendas.map { it.prenda.photoPath } }.distinct()
-    LaunchedEffect(rutas) {
-        rutas.filter { it !in imagenes }.forEach { ruta -> cargarImagen(ruta)?.let { imagenes[ruta] = it } }
-    }
 
     estado.porEliminar?.let { outfit ->
         AlertDialog(
@@ -113,7 +103,6 @@ fun OutfitsScreen(
                 items(estado.outfits, key = { it.outfit.id }) { item ->
                     TarjetaOutfit(
                         item,
-                        imagenes,
                         onAbrir = { onAbrirOutfit(item.outfit) },
                         onFavorito = { vm.alternarFavorito(item.outfit) },
                         onEliminar = { vm.pedirEliminar(item.outfit) },
@@ -149,12 +138,13 @@ private fun EstadoVacio(onNuevoOutfit: () -> Unit, modifier: Modifier = Modifier
 @Composable
 private fun TarjetaOutfit(
     item: OutfitEnLista,
-    imagenes: Map<String, ImageBitmap>,
     onAbrir: () -> Unit,
     onFavorito: () -> Unit,
     onEliminar: () -> Unit,
     onCompartir: (List<PrendaAvatar>) -> Unit,
 ) {
+    // Cada tarjeta carga solo sus miniaturas, y solo cuando la cuadrícula la compone (carga perezosa con caché).
+    val imagenes = rememberMiniaturas(item.prendas.map { it.prenda.photoPath })
     val prendas = item.prendas.mapNotNull { p ->
         imagenes[p.prenda.photoPath]?.let {
             PrendaAvatar(it, subtipoPorDefecto(p.prenda.type), AjustePrenda(p.colocacion.x, p.colocacion.y, p.colocacion.scale))

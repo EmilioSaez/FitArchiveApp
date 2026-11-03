@@ -105,11 +105,17 @@ class MotorSugerenciasPorReglas : MotorSugerencias {
             }
         }
         val ordenados = todos
-            .sortedWith(compareByDescending<Evaluado> { it.sugerido.puntuacion }.thenBy { it.sugerido.prendas.map { g -> g.id }.joinToString(",") })
+            // El desempate por ids (texto) solo se construye cuando las puntuaciones empatan.
+            .sortedWith { a, b ->
+                val c = b.sugerido.puntuacion.compareTo(a.sugerido.puntuacion)
+                if (c != 0) c else clave(a).compareTo(clave(b))
+            }
         // Si hay combinaciones que casan de color, las que chocan no se sugieren.
         val buenos = ordenados.filter { it.combina }.ifEmpty { ordenados }
         return variar(buenos.map { it.sugerido }, pedido.maximo)
     }
+
+    private fun clave(e: Evaluado) = e.sugerido.prendas.joinToString(",") { it.id.toString() }
 
     private class Candidata(val prenda: Garment, val clima: Double, val ocasion: Double, val frescura: Double) {
         /** Puntuación individual, solo para quedarse con las mejores de cada ranura. */
@@ -155,12 +161,16 @@ class MotorSugerenciasPorReglas : MotorSugerencias {
     }
 
     private fun ultimosUsos(usos: List<WearRecord>): Map<Long, LocalDate> {
-        val mapa = mutableMapOf<Long, LocalDate>()
-        usos.forEach { u ->
-            val f = parsearFecha(u.date) ?: return@forEach
-            val actual = mapa[u.garmentId]
-            if (actual == null || f > actual) mapa[u.garmentId] = f
+        // Las fechas ISO se ordenan como texto: se queda con la mayor de cada prenda y solo esa se interpreta
+        // (con años de historial son miles de filas y parsear cada una cuesta).
+        val ultima = HashMap<Long, String>()
+        for (u in usos) {
+            if (!pareceFechaIso(u.date)) continue
+            val actual = ultima[u.garmentId]
+            if (actual == null || u.date > actual) ultima[u.garmentId] = u.date
         }
+        val mapa = HashMap<Long, LocalDate>(ultima.size * 2)
+        for ((id, texto) in ultima) parsearFecha(texto)?.let { mapa[id] = it }
         return mapa
     }
 
@@ -231,6 +241,8 @@ class MotorSugerenciasPorReglas : MotorSugerencias {
         private fun TiempoDia?.llueve(): Boolean = this != null && condicion in setOf(
             CondicionTiempo.LLOVIZNA, CondicionTiempo.LLUVIA, CondicionTiempo.NIEVE, CondicionTiempo.TORMENTA,
         )
+
+        private fun pareceFechaIso(t: String) = t.length == 10 && t[4] == '-' && t[7] == '-'
 
         private fun parsearFecha(texto: String): LocalDate? = try {
             LocalDate.parse(texto)

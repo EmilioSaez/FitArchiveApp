@@ -30,6 +30,7 @@ import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
 import app.luxion.fitarchiveapp.ui.viaje.ViajesScreen
+import app.luxion.fitarchiveapp.weather.CacheTiempo
 import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
 import app.luxion.fitarchiveapp.weather.SeleccionCiudad
 import app.luxion.fitarchiveapp.weather.ServicioTiempoOpenMeteo
@@ -42,6 +43,8 @@ import kotlin.time.Clock
 @Composable
 fun App(repositories: Repositories) {
     FitArchiveTheme {
+        // Fuera de las ramas con return: el servicio del tiempo se recrea al volver de otras pantallas, la caché no.
+        val cacheTiempo = remember { CacheTiempo() }
         var cargando by remember { mutableStateOf(true) }
         if (cargando) {
             PantallaCarga(onTerminado = { cargando = false })
@@ -94,7 +97,7 @@ fun App(repositories: Repositories) {
         }
         val ubicacion = rememberProveedorUbicacion()
         val almacenCiudad = rememberAlmacenCiudad()
-        val servicioTiempo = remember(ubicacion) { ServicioTiempoOpenMeteo(ClienteHttpKtor(), ubicacion) }
+        val servicioTiempo = remember(ubicacion) { ServicioTiempoOpenMeteo(ClienteHttpKtor(), cacheTiempo, ubicacion) }
         val seleccionCiudad = remember(servicioTiempo, almacenCiudad) { SeleccionCiudad(servicioTiempo, almacenCiudad) }
         Scaffold(
             bottomBar = {

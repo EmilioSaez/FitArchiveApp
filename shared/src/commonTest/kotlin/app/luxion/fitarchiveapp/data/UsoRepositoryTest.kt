@@ -46,6 +46,20 @@ class UsoRepositoryTest {
     }
 
     @Test
+    fun manyPendingDaysOfOneGarmentAreAppliedAtOnceWithTheWashRule() = runTest {
+        val vaqueros = prenda(washAfterWears = null, type = GarmentType.JEANS) // se ensucian a los 3 usos
+        val o = outfitCon(vaqueros)
+        listOf("2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31").forEach { repos.calendar.set(CalendarDay(it, o, null)) }
+
+        assertEquals(4, repos.usos.registrarHasta("2026-11-02"))
+
+        val g = repos.garments.get(vaqueros)!!
+        assertEquals(4, g.totalWears)
+        assertEquals(4, g.wearsSinceWash)
+        assertTrue(g.dirty)
+    }
+
+    @Test
     fun todayAndFutureDaysDoNotCountYet() = runTest {
         val a = prenda()
         val o = outfitCon(a)

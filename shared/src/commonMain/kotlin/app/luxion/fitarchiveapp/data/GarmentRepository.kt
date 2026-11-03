@@ -131,7 +131,32 @@ internal class SqlGarmentRepository(
 }
 
 /** Suma un uso a la prenda y la marca sucia si toca (T35). Debe llamarse dentro de una transacción. */
-internal fun GarmentQueries.registrarUso(id: Long) {
-    val prenda = selectById(id).executeAsOneOrNull()?.toModel() ?: return
-    registerWear(dirty = prenda.sucioTrasUso().toDb(), id = id)
+internal fun GarmentQueries.registrarUso(id: Long) = registrarUsos(id, 1)
+
+/**
+ * Suma [veces] usos a la prenda (con la misma regla de sucia que [registrarUso], uso a uso) con una sola
+ * lectura y una sola escritura. Debe llamarse dentro de una transacción.
+ */
+internal fun GarmentQueries.registrarUsos(id: Long, veces: Int) {
+    if (veces <= 0) return
+    var prenda = selectById(id).executeAsOneOrNull()?.toModel() ?: return
+    repeat(veces) {
+        prenda = prenda.copy(dirty = prenda.sucioTrasUso(), wearsSinceWash = prenda.wearsSinceWash + 1, totalWears = prenda.totalWears + 1)
+    }
+    update(
+        photo_path = prenda.photoPath,
+        type = prenda.type.name,
+        color = prenda.color.name,
+        season = prenda.season.name,
+        usage = prenda.usage.name,
+        brand = prenda.brand,
+        size = prenda.size,
+        fit = prenda.fit.name,
+        favorite = prenda.favorite.toDb(),
+        dirty = prenda.dirty.toDb(),
+        wears_since_wash = prenda.wearsSinceWash.toLong(),
+        total_wears = prenda.totalWears.toLong(),
+        wash_after_wears = prenda.washAfterWears?.toLong(),
+        id = prenda.id,
+    )
 }
