@@ -145,8 +145,9 @@ class ViajesViewModel(
                 viajes.addOutfit(viaje.id, outfit.id)
             } else {
                 viajes.removeOutfit(viaje.id, outfit.id)
-                // Sus prendas dejan de estar en la lista, salvo las que otro outfit del viaje sigue necesitando.
-                val propias = estado.maleta.items.filter { it.outfits == listOf(outfit.name) }
+                // Sus prendas dejan de estar en la lista, salvo las que otro outfit del viaje sigue necesitando
+                // y las que el usuario añadió a mano (siguen en la maleta con su casilla).
+                val propias = estado.maleta.items.filter { it.outfits == listOf(outfit.name) && !it.anadida }
                 propias.forEach { viajes.removeGarment(viaje.id, it.prenda.id) }
             }
         }
@@ -154,7 +155,7 @@ class ViajesViewModel(
 
     fun anadirPrenda(prenda: Garment) {
         val viaje = _estado.value.abierto ?: return
-        accion("No se pudo añadir la prenda") { viajes.addGarment(viaje.id, prenda.id) }
+        accion("No se pudo añadir la prenda") { viajes.addGarment(viaje.id, prenda.id, manual = true) }
     }
 
     fun quitarPrenda(prenda: Garment) {

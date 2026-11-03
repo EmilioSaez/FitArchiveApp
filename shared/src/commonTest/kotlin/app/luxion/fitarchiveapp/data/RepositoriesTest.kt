@@ -256,6 +256,18 @@ class RepositoriesTest {
     }
 
     @Test
+    fun tripGarmentManualFlagSurvivesLaterNonManualAdd() = runTest {
+        val trip = repos.trips.create(Trip(0, "Viaje", null, null, null, 1))
+        val g = repos.garments.add(garment())
+        repos.trips.addGarment(trip, g)
+        assertEquals(listOf(TripGarment(trip, g, false, false)), repos.trips.observePacking(trip).first())
+        repos.trips.addGarment(trip, g, manual = true)
+        repos.trips.setPacked(trip, g, true)
+        repos.trips.addGarment(trip, g)
+        assertEquals(listOf(TripGarment(trip, g, true, true)), repos.trips.observePacking(trip).first())
+    }
+
+    @Test
     fun tripOutfitsAndPacking() = runTest {
         val trip = repos.trips.create(Trip(0, "Viaje", null, null, null, 1))
         val o = repos.outfits.create(outfit(), emptyList())

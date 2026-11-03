@@ -22,7 +22,7 @@ Cubre T32–T37 (calendario, historial/contador de usos, limpia/sucia, sucia aut
 | Editar viaje (nombre y vuelta → "3 días"), volver a la lista | OK |
 | Eliminar viaje con confirmación (cancelar conserva; confirmar borra y deja el armario intacto) | OK |
 | Eliminar una prenda que está en una maleta: el viaje sigue y la prenda desaparece de la lista | OK |
-| Quitar un outfit del viaje cuando una de sus prendas se había añadido también a mano | **Falla, ver B8** |
+| Quitar un outfit del viaje cuando una de sus prendas se había añadido también a mano | Corregido (B8); verificado con tests, falta pasada visual |
 | **Calendario (T32)** | |
 | Mes con los días en su columna (1 nov 2026 = domingo), hoy resaltado | OK |
 | Asignar outfit a un día (nombre en la casilla), nota (punto "•") y quitar outfit | OK |
@@ -45,11 +45,12 @@ Tests: `:shared:testAndroidHostTest` en verde (294 tests).
 
 ## Bugs corregidos en esta rama
 
-Ninguno de código. Un cambio de texto (O9, abajo).
+- **B8. Quitar un outfit del viaje borraba también las prendas añadidas a mano que coincidían con él.** Causa: `trip_garment` no distinguía "añadida a mano". Corregido: columna `manual` en `TripGarment` (la BD no tiene migraciones: hay que reinstalar la app o borrar sus datos al actualizar el esquema); `anadirPrenda` la marca y `alternarOutfit` solo elimina las filas no manuales, de modo que la prenda a mano sigue en la maleta con su casilla. La copia de seguridad incluye el campo (por defecto `false`, compatible con copias antiguas). Tests: `ViajesViewModelTest`, `RepositoriesTest`, `MaletaTest`. Sin flujo maestro nuevo (requiere emulador).
+- Un cambio de texto (O9, abajo).
 
 ## Bugs pendientes
 
-- **B8. Quitar un outfit del viaje borra también las prendas añadidas a mano que coincidían con él.** Si se añade a mano una prenda (p. ej. la camiseta) y después se elige un outfit que la incluye, la fila pasa a mostrarse como "de outfit" (ya no tiene "Quitar"); al quitar el outfit, `alternarOutfit` elimina todas las prendas cuyo único outfit era ese, también la añadida a mano y su casilla "guardada". Causa: `trip_garment` no distingue "añadida a mano" de "fila creada al marcar la casilla de una prenda de outfit". Arreglo: columna nueva (`manual`) en `trip_garment`, lo que obliga a regenerar la BD (sin migraciones) → no se corrige aquí. Impacto bajo: el usuario puede volver a añadir la prenda.
+Ninguno.
 
 ## Observaciones
 

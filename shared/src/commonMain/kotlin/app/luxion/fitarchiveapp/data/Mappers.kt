@@ -87,4 +87,5 @@ internal fun app.luxion.fitarchiveapp.db.TripGarment.toModel() = TripGarment(
     tripId = trip_id,
     garmentId = garment_id,
     packed = packed == 1L,
+    manual = manual == 1L,
 )

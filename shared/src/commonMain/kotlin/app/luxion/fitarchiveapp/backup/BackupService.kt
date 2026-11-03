@@ -112,7 +112,7 @@ private fun WardrobeSnapshot.toManifest(createdAt: Long, photos: List<PhotoEntry
     calendar = calendar.map { CalendarDayDto(it.date, it.outfitId, it.note) },
     trips = trips.map { TripDto(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
     tripOutfits = tripOutfits.map { TripOutfitDto(it.tripId, it.outfitId) },
-    tripGarments = tripGarments.map { TripGarmentDto(it.tripId, it.garmentId, it.packed) },
+    tripGarments = tripGarments.map { TripGarmentDto(it.tripId, it.garmentId, it.packed, it.manual) },
     wears = wears.map { WearDto(it.date, it.garmentId) },
     photos = photos,
 )
@@ -141,6 +141,6 @@ private fun BackupManifest.toSnapshot() = WardrobeSnapshot(
     calendar = calendar.map { CalendarDay(it.date, it.outfitId, it.note) },
     trips = trips.map { Trip(it.id, it.name, it.destination, it.startDate, it.endDate, it.createdAt) },
     tripOutfits = tripOutfits.map { TripOutfitLink(it.tripId, it.outfitId) },
-    tripGarments = tripGarments.map { TripGarmentLink(it.tripId, it.garmentId, it.packed) },
+    tripGarments = tripGarments.map { TripGarmentLink(it.tripId, it.garmentId, it.packed, it.manual) },
     wears = wears.map { WearRecord(it.date, it.garmentId) },
 )

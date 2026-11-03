@@ -143,6 +143,17 @@ class MaletaTest {
     }
 
     @Test
+    fun marcaComoAnadidaLaPrendaManualAunqueUnOutfitLaIncluya() {
+        val m = construirMaleta(
+            listOf(outfit(10, "Día", 1, 2)),
+            listOf(TripGarment(5, 1, packed = true, manual = true), TripGarment(5, 2, packed = true)),
+            listOf(prenda(1), prenda(2)),
+        )
+        assertEquals(listOf(true, false), m.items.map { it.anadida })
+        assertTrue(m.items.none { it.manual })
+    }
+
+    @Test
     fun ignoraPrendasQueYaNoExistenEnElArmario() {
         val m = construirMaleta(listOf(outfit(10, "Día", 1, 99)), listOf(TripGarment(5, 98, false)), listOf(prenda(1)))
         assertEquals(listOf(1L), m.items.map { it.prenda.id })

@@ -76,10 +76,15 @@ private class ViajesEnMemoria : TripRepository {
 
     override fun observePacking(tripId: Long): Flow<List<TripGarment>> = lista.map { it[tripId].orEmpty().sortedBy { g -> g.garmentId } }
 
-    override suspend fun addGarment(tripId: Long, garmentId: Long) {
+    override suspend fun addGarment(tripId: Long, garmentId: Long, manual: Boolean) {
         comprobar()
         val actual = lista.value[tripId].orEmpty()
-        if (actual.none { it.garmentId == garmentId }) lista.value += tripId to (actual + TripGarment(tripId, garmentId, false))
+        lista.value += tripId to
+            if (actual.none { it.garmentId == garmentId }) {
+                actual + TripGarment(tripId, garmentId, false, manual)
+            } else {
+                actual.map { if (it.garmentId == garmentId && manual) it.copy(manual = true) else it }
+            }
     }
 
     override suspend fun setPacked(tripId: Long, garmentId: Long, packed: Boolean) {
@@ -196,6 +201,34 @@ class ViajesViewModelTest {
         val s = e.vm.estado.value
         assertEquals(setOf(11L), s.outfitsDelViaje)
         assertEquals(listOf(2L, 3L), s.maleta.items.map { it.prenda.id })
+    }
+
+    @Test
+    fun quitarUnOutfitConservaLaPrendaAnadidaAManoQueCoincidia() = runTest(UnconfinedTestDispatcher()) {
+        val e = entorno(backgroundScope)
+        e.conViajeAbierto()
+        e.vm.anadirPrenda(camiseta)
+        e.vm.alternarOutfit(dia.outfit)
+        e.vm.marcarGuardada(camiseta, true)
+        e.vm.alternarOutfit(dia.outfit)
+        val s = e.vm.estado.value
+        assertTrue(s.outfitsDelViaje.isEmpty())
+        // La camiseta (a mano) sigue, guardada; los vaqueros, que solo venían del outfit, salen.
+        val item = s.maleta.items.single()
+        assertEquals(1L, item.prenda.id)
+        assertTrue(item.guardada)
+        assertTrue(item.manual)
+    }
+
+    @Test
+    fun anadirAManoUnaPrendaYaMarcadaDeOutfitLaVuelveManual() = runTest(UnconfinedTestDispatcher()) {
+        val e = entorno(backgroundScope)
+        e.conViajeAbierto()
+        e.vm.alternarOutfit(dia.outfit)
+        e.vm.marcarGuardada(camiseta, true)
+        e.vm.anadirPrenda(camiseta)
+        e.vm.alternarOutfit(dia.outfit)
+        assertEquals(listOf(1L), e.vm.estado.value.maleta.items.map { it.prenda.id })
     }
 
     @Test
