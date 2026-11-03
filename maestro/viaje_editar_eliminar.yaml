@@ -1,5 +1,5 @@
 # Viajes (T37): editar un viaje, volver a la lista, cancelar y confirmar la eliminación.
-# Env: DESTINO (viaje existente creado con IDA 2026-12-10), NUEVO (nuevo nombre). Cambia la vuelta a 2026-12-12 (3 días).
+# Env: DESTINO (viaje existente del 10 al 14 dic 2026), NUEVO (nuevo nombre). Borra la vuelta (queda solo la ida) y la pone al 12 dic (3 días).
 appId: app.luxion.fitarchiveapp
 ---
 - tapOn: "Viajes"
@@ -11,13 +11,16 @@ appId: app.luxion.fitarchiveapp
     point: "80%,37%"
 - eraseText: 40
 - inputText: "${NUEVO}"
-- tapOn:
-    point: "80%,61%"
-- eraseText: 10
-- inputText: "2026-12-12"
+- tapOn: "Borrar vuelta"
 - tapOn: "Guardar"
 - assertVisible: "${NUEVO}"
-- assertVisible: "2026-12-10 → 2026-12-12 · 3 días"
+- assertVisible: "10 dic 2026"
+- tapOn: "Editar"
+- tapOn: "Vuelta.*"
+- tapOn: '.*\b12\b.*'
+- tapOn: "Aceptar"
+- tapOn: "Guardar"
+- assertVisible: "10 dic → 12 dic 2026 · 3 días"
 - tapOn: "‹ Viajes"
 - assertVisible: "${NUEVO}"
 - tapOn: "${NUEVO}"

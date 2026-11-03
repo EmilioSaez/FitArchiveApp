@@ -80,6 +80,24 @@ class MaletaTest {
         assertEquals("2026-12-05", valido(validarViaje("V", "", "2026-12-05", "")).inicio)
     }
 
+    // --- formato de fechas (O10) ---
+
+    @Test
+    fun fechasDelViajeSeMuestranEnFormatoCorto() {
+        assertEquals("10 dic → 14 dic 2026 · 5 días", formatearFechasViaje("2026-12-10", "2026-12-14"))
+        assertEquals("10 dic → 10 dic 2026 · 1 día", formatearFechasViaje("2026-12-10", "2026-12-10"))
+        assertEquals("30 dic 2026 → 1 ene 2027 · 3 días", formatearFechasViaje("2026-12-30", "2027-01-01"))
+        assertEquals("10 dic 2026", formatearFechasViaje("2026-12-10", null))
+        assertNull(formatearFechasViaje(null, null))
+        assertNull(formatearFechasViaje(null, "2026-12-10"))
+    }
+
+    @Test
+    fun fechaCortaConservaElTextoSiNoEsValido() {
+        assertEquals("x", formatearFechaCorta("x"))
+        assertEquals("5 mar", formatearFechaCorta("2026-03-05", conAnio = false))
+    }
+
     // --- diasDeViaje ---
 
     @Test

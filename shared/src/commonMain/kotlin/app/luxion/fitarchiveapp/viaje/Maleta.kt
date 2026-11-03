@@ -52,6 +52,25 @@ fun diasDeViaje(inicio: String?, fin: String?): Int? {
     return desde.daysUntil(hasta) + 1
 }
 
+private val MESES_CORTOS = listOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
+
+/** "2026-12-10" → "10 dic 2026" (o "10 dic" si [conAnio] es false); el texto original si no es una fecha válida. */
+fun formatearFechaCorta(iso: String, conAnio: Boolean = true): String = parsearFecha(iso)?.let {
+    "${it.day} ${MESES_CORTOS[it.month.ordinal]}" + if (conAnio) " ${it.year}" else ""
+} ?: iso
+
+/**
+ * Fechas de un viaje para mostrar: "10 dic → 14 dic 2026 · 5 días". El año va solo al final si ida y vuelta
+ * coinciden en él; si no, en cada fecha. Null si no hay fecha de ida.
+ */
+fun formatearFechasViaje(inicio: String?, fin: String?): String? {
+    if (inicio == null) return null
+    if (fin == null) return formatearFechaCorta(inicio)
+    val mismoAnio = parsearFecha(inicio)?.year.let { it != null && it == parsearFecha(fin)?.year }
+    val dias = diasDeViaje(inicio, fin)?.let { " · $it ${if (it == 1) "día" else "días"}" }.orEmpty()
+    return "${formatearFechaCorta(inicio, conAnio = !mismoAnio)} → ${formatearFechaCorta(fin)}$dias"
+}
+
 /** Prenda de la lista de la maleta. */
 data class ItemMaleta(
     val prenda: Garment,

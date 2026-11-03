@@ -1,5 +1,6 @@
-# Viajes (T37): validación del formulario (fechas como texto) y alta de un viaje. Parte de la lista de viajes vacía.
-# Env: DESTINO (p.ej. Lisboa), IDA / VUELTA (AAAA-MM-DD, p.ej. 2026-12-10 / 2026-12-14), DIAS (texto de duración, p.ej. "5 días")
+# Viajes (T37, O10): validación del formulario (fechas con DatePicker) y alta de un viaje. Parte de la lista de viajes vacía.
+# Env: DESTINO (p.ej. Lisboa). Crea el viaje del 10 al 14 de diciembre de 2026 (5 días).
+# Los días del selector se eligen por su descripción de accesibilidad (vale en cualquier idioma). Supone el emulador en noviembre de 2026: el selector abre en noviembre, se avanza un mes con ">".
 appId: app.luxion.fitarchiveapp
 ---
 - tapOn: "Viajes"
@@ -9,28 +10,30 @@ appId: app.luxion.fitarchiveapp
 - assertVisible: "Ponle un nombre o un destino al viaje"
 - tapOn: "Destino"
 - inputText: "${DESTINO}"
-# Fecha inexistente, formato incorrecto, vuelta sin ida y vuelta anterior a la ida
-- tapOn: "Ida.*"
-- inputText: "2026-02-30"
-- tapOn: "Guardar"
-- assertVisible: "Fecha de inicio no válida.*"
-- eraseText: 20
-- inputText: "10/12/2026"
-- tapOn: "Guardar"
-- assertVisible: "Fecha de inicio no válida.*"
-- eraseText: 20
+# Vuelta sin ida
 - tapOn: "Vuelta.*"
-- inputText: "${VUELTA}"
+- tapOn:
+    point: "85%,35%"
+- tapOn: '.*\b14\b.*'
+- assertVisible: "14 dic 2026"
+- tapOn: "Aceptar"
+- assertVisible: "Vuelta 14 dic 2026"
 - tapOn: "Guardar"
 - assertVisible: "Indica también la fecha de inicio"
+# Vuelta anterior a la ida
 - tapOn: "Ida.*"
-- inputText: "2099-01-01"
+- tapOn:
+    point: "85%,35%"
+- tapOn: '.*\b20\b.*'
+- tapOn: "Aceptar"
 - tapOn: "Guardar"
 - assertVisible: "La vuelta no puede ser antes de la ida"
-- eraseText: 20
-- inputText: "${IDA}"
+# Se corrige la ida (el selector abre en el mes de la fecha ya elegida)
+- tapOn: "Ida.*"
+- tapOn: '.*\b10\b.*'
+- tapOn: "Aceptar"
 - tapOn: "Guardar"
 # Al crearlo se abre el detalle
 - assertVisible: "${DESTINO}"
-- assertVisible: "${IDA} → ${VUELTA} · ${DIAS}"
+- assertVisible: "10 dic → 14 dic 2026 · 5 días"
 - assertVisible: "La maleta está vacía.*"
