@@ -26,12 +26,16 @@ import app.luxion.fitarchiveapp.weather.ServicioTiempo
 import app.luxion.fitarchiveapp.weather.TiempoDia
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /** Tiempo de hoy tal como lo ve la pantalla. */
 sealed interface EstadoTiempo {
@@ -98,8 +102,14 @@ class OutfitDelDiaViewModel(
     private val scope: CoroutineScope,
     hoy: String,
     private val ahora: () -> Long,
+    /**
+     * Contexto donde se calculan las sugerencias y la afinidad (T47). La pantalla pasa `Dispatchers.Default` para no
+     * bloquear el hilo de la interfaz con armarios grandes; por defecto se calculan en el contexto de [scope].
+     */
+    private val calculo: CoroutineContext = EmptyCoroutineContext,
 ) {
     private val _estado = MutableStateFlow(OutfitDelDiaUiState(hoy))
+    private var trabajoCalculo: Job? = null
     val estado: StateFlow<OutfitDelDiaUiState> = _estado.asStateFlow()
 
     private var historial: List<WearRecord> = emptyList()
@@ -190,7 +200,7 @@ class OutfitDelDiaViewModel(
             emptyList() // Sin historial solo se pierde la rotación de prendas.
         }
         val existentes = try {
-            outfits.observeAll().first().mapNotNull { o -> outfits.get(o.id) }
+            outfits.observeAllConPrendas().first()
         } catch (c: CancellationException) {
             throw c
         } catch (t: Throwable) {
@@ -216,27 +226,35 @@ class OutfitDelDiaViewModel(
         recalcular()
     }
 
-    private fun pedido(e: OutfitDelDiaUiState) = PedidoSugerencia(
+    private fun pedido(e: OutfitDelDiaUiState, usos: List<WearRecord>, guardados: List<OutfitGuardado>) = PedidoSugerencia(
         armario = e.armario,
         hoy = e.hoy,
         tiempo = e.tiempoDia,
         ocasion = e.ocasion,
-        usos = historial,
-        afinidad = afinidad(e),
+        usos = usos,
+        afinidad = afinidad(e, usos, guardados),
     )
 
     /** Null sin ninguna señal de gusto (likes, outfits guardados o usos): así no se muestra un "Tu estilo" neutro. */
-    private fun afinidad(e: OutfitDelDiaUiState): AfinidadEstilo? {
-        val hayEvidencia = e.armario.any { it.favorite } || guardadosParaAfinidad.isNotEmpty() || historial.isNotEmpty()
-        return if (hayEvidencia) AfinidadAprendida.desde(e.armario, guardadosParaAfinidad, historial) else null
+    private fun afinidad(e: OutfitDelDiaUiState, usos: List<WearRecord>, guardados: List<OutfitGuardado>): AfinidadEstilo? {
+        val hayEvidencia = e.armario.any { it.favorite } || guardados.isNotEmpty() || usos.isNotEmpty()
+        return if (hayEvidencia) AfinidadAprendida.desde(e.armario, guardados, usos) else null
     }
 
-    /** Recalcula las sugerencias cuando ya hay armario y el tiempo ha terminado de cargar. */
+    /**
+     * Recalcula las sugerencias cuando ya hay armario y el tiempo ha terminado de cargar. El cálculo corre en [calculo];
+     * si llega otro cambio antes de acabar, el anterior se descarta y solo se publica el último.
+     */
     private fun recalcular() {
         val e = _estado.value
         if (e.cargando) return
-        val sugerencias = motor.sugerir(pedido(e))
-        _estado.update { it.copy(sugerencias = sugerencias, indice = 0) }
+        val usosAhora = historial
+        val guardadosAhora = guardadosParaAfinidad
+        trabajoCalculo?.cancel()
+        trabajoCalculo = scope.launch {
+            val sugerencias = withContext(calculo) { motor.sugerir(pedido(e, usosAhora, guardadosAhora)) }
+            _estado.update { it.copy(sugerencias = sugerencias, indice = 0) }
+        }
     }
 }
 

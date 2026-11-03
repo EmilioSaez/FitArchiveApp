@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
 import app.luxion.fitarchiveapp.data.TripRepository
-import app.luxion.fitarchiveapp.foto.cargarImagen
+import app.luxion.fitarchiveapp.foto.cargarMiniatura
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.Trip
 import app.luxion.fitarchiveapp.ui.anadir.etiqueta
@@ -252,7 +252,7 @@ private fun DetalleViaje(
 @Composable
 private fun FilaMaleta(item: ItemMaleta, onGuardada: (Boolean) -> Unit, onQuitar: () -> Unit) {
     val prenda = item.prenda
-    val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarImagen(prenda.photoPath) }
+    val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarMiniatura(prenda.photoPath) }
     Row(
         Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

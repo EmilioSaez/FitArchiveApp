@@ -153,6 +153,23 @@ class RepositoriesTest {
     }
 
     @Test
+    fun observeAllConPrendasAgrupaPorOutfitYOrdenaPorCapa() = runTest {
+        val g1 = repos.garments.add(garment())
+        val g2 = repos.garments.add(garment(GarmentType.JEANS))
+        val a = repos.outfits.create(outfit("A", 1), listOf(OutfitGarment(0, g1, 0f, 0f, 1f, 3), OutfitGarment(0, g2, 0f, 0f, 1f, 1)))
+        val vacio = repos.outfits.create(outfit("Vacío", 2), emptyList())
+        val b = repos.outfits.create(outfit("B", 3), listOf(OutfitGarment(0, g1, 1f, 1f, 1f, 0)))
+
+        val todos = repos.outfits.observeAllConPrendas().first()
+        assertEquals(listOf(b, vacio, a), todos.map { it.outfit.id })
+        assertEquals(listOf(g1), todos[0].garments.map { it.garmentId })
+        assertEquals(emptyList(), todos[1].garments)
+        assertEquals(listOf(g2, g1), todos[2].garments.map { it.garmentId })
+        // Mismo resultado que pedirlos de uno en uno.
+        todos.forEach { assertEquals(repos.outfits.get(it.outfit.id), it) }
+    }
+
+    @Test
     fun outfitUpdateReplacesGarments() = runTest {
         val g1 = repos.garments.add(garment())
         val g2 = repos.garments.add(garment())

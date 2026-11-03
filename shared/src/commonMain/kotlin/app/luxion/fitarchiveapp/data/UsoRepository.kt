@@ -41,10 +41,9 @@ internal class SqlUsoRepository(
     override suspend fun registrarHasta(hoy: String): Int = withContext(context) {
         db.transactionWithResult {
             val pendientes = queries.selectPending(hoy).executeAsList()
-            pendientes.forEach {
-                queries.insert(it.date, it.garment_id)
-                db.garmentQueries.registrarUso(it.garment_id)
-            }
+            pendientes.forEach { queries.insert(it.date, it.garment_id) }
+            // Una escritura por prenda aunque acumule muchos días (p. ej. tras importar una copia o semanas sin abrir la app).
+            pendientes.groupingBy { it.garment_id }.eachCount().forEach { (id, veces) -> db.garmentQueries.registrarUsos(id, veces) }
             pendientes.size
         }
     }

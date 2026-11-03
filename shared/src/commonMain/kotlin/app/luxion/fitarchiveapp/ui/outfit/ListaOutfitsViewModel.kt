@@ -2,21 +2,15 @@ package app.luxion.fitarchiveapp.ui.outfit
 
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
-import app.luxion.fitarchiveapp.data.OutfitWithGarments
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.Outfit
 import app.luxion.fitarchiveapp.model.OutfitGarment
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -89,14 +83,3 @@ class ListaOutfitsViewModel(
         }
     }
 }
-
-/** Todos los outfits con sus prendas, en el orden del repositorio (más recientes primero). */
-@OptIn(ExperimentalCoroutinesApi::class)
-private fun OutfitRepository.observeAllConPrendas(): Flow<List<OutfitWithGarments>> =
-    observeAll().flatMapLatest { lista ->
-        if (lista.isEmpty()) {
-            flowOf(emptyList())
-        } else {
-            combine(lista.map { o -> observe(o.id).map { it ?: OutfitWithGarments(o, emptyList()) } }) { it.toList() }
-        }
-    }

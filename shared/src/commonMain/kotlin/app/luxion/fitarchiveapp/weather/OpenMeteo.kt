@@ -11,6 +11,8 @@ import kotlinx.serialization.json.Json
 /** Servicio del tiempo con Open-Meteo (gratuito, sin clave de API). */
 class ServicioTiempoOpenMeteo(
     private val cliente: ClienteHttp,
+    /** Caché corta (O18): evita consultar la red en cada apertura o regeneración. Sin caché, siempre consulta. */
+    private val cache: CacheTiempo? = null,
     private val ubicacion: ProveedorUbicacion,
 ) : ServicioTiempo {
 
@@ -18,6 +20,7 @@ class ServicioTiempoOpenMeteo(
         val coords = (ubicacion.ubicacionAproximada() ?: ciudadElegida?.coordenadas)
             ?: throw ErrorTiempo.SinUbicacion
         val c = coords.aproximadas()
+        cache?.obtener(c)?.let { return@llamar it }
         val url = "$URL_TIEMPO?latitude=${c.latitud}&longitude=${c.longitud}" +
             "&current=temperature_2m,weather_code" +
             "&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1"
@@ -27,7 +30,7 @@ class ServicioTiempoOpenMeteo(
             maximaC = r.daily.max.first(),
             minimaC = r.daily.min.first(),
             condicion = condicionDeCodigo(r.current.codigo),
-        )
+        ).also { cache?.guardar(c, it) } // Solo se cachean las respuestas válidas: un fallo se puede reintentar.
     }
 
     override suspend fun buscarCiudades(texto: String): Result<List<Ciudad>> = llamar {
