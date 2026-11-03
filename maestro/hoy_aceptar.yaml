@@ -1,0 +1,30 @@
+# T44: aceptar la sugerencia asigna el outfit a hoy en el calendario (y lo guarda en Outfits). Env: NOMBRE (p.ej. "Outfit del 03/11") y CASILLA (punto de la casilla de hoy; 3 nov 2026 = "24%,31%").
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Aceptar para hoy|Asignado a hoy"
+    timeout: 15000
+- runFlow:
+    when:
+      visible: "Aceptar para hoy"
+    commands:
+      - tapOn: "Aceptar para hoy"
+- extendedWaitUntil:
+    visible: "Asignado a hoy"
+    timeout: 5000
+- assertVisible: "Guardar como outfit|Guardado en tus outfits"
+# Calendario: el outfit aparece en la casilla de hoy y en su detalle
+- tapOn: "Calendario"
+- tapOn:
+    point: "${CASILLA}"
+- assertVisible: "Outfit: ${NOMBRE}"
+- tapOn: "Cerrar"
+# Outfits: el outfit está guardado
+- tapOn: "Outfits"
+- assertVisible: "${NOMBRE}"

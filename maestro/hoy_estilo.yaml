@@ -1,0 +1,41 @@
+# T44: "Tu estilo" solo aparece con señales de gusto. Borra los outfits (2 como máximo), comprueba que desaparece, da like a una
+# prenda del Armario y comprueba que vuelve. Supone armario sin usos registrados.
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Outfits"
+- repeat:
+    times: 2
+    commands:
+      - runFlow:
+          when:
+            visible: "Eliminar"
+          commands:
+            - tapOn:
+                text: "Eliminar"
+                index: 0
+            - tapOn:
+                point: "74%,56%"
+            - waitForAnimationToEnd
+- assertVisible: "Aún no tienes outfits"
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Tu outfit del día"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Frescura"
+    timeout: 10000
+- assertNotVisible: "Tu estilo"
+# Like a una prenda (corazón de la primera tarjeta) → aparece "Tu estilo"
+- tapOn: "Armario"
+- waitForAnimationToEnd
+- tapOn:
+    point: "42%,27%"
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Tu estilo"
+    timeout: 10000

@@ -1,0 +1,28 @@
+# T44: alternativas (elegir una, "Siguiente" que da la vuelta) y "Regenerar" (vuelve a la mejor). Supone 2 camisetas + 1 pantalón.
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Alternativas"
+    timeout: 15000
+# Elegir la segunda alternativa
+- tapOn:
+    point: "45%,80%"
+- waitForAnimationToEnd
+- assertVisible: "Aceptar para hoy|Asignado a hoy"
+- scrollUntilVisible:
+    element: "Siguiente"
+- tapOn: "Siguiente"
+- waitForAnimationToEnd
+# Siguiente desde la última vuelve a la primera
+- tapOn: "Siguiente"
+- waitForAnimationToEnd
+- tapOn: "Regenerar"
+- extendedWaitUntil:
+    visible: "Alternativas"
+    timeout: 10000

@@ -1,0 +1,32 @@
+# T44: filtrar por ocasión. Con camiseta Casual + pantalón Trabajo ninguna ocasión encaja del todo: se comprueba el criterio
+# "Ocasión", el estado vacío con "Probar sin ocasión" y volver a quitar el filtro. Env: OCASION_VACIA (la que deja sin outfit).
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Aceptar para hoy"
+    timeout: 15000
+- tapOn: "${OCASION_VACIA}"
+- extendedWaitUntil:
+    visible: "Hoy no encontramos un outfit"
+    timeout: 5000
+- assertVisible: "Probar sin ocasión"
+- tapOn: "Probar sin ocasión"
+- extendedWaitUntil:
+    visible: "Aceptar para hoy"
+    timeout: 5000
+- assertNotVisible: "Ocasión"
+# Elegir y desmarcar la misma ocasión la quita
+- tapOn: "Casual"
+- extendedWaitUntil:
+    visible: "Ocasión"
+    timeout: 5000
+- tapOn: "Casual"
+- extendedWaitUntil:
+    visible: "Aceptar para hoy"
+    timeout: 5000

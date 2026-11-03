@@ -58,7 +58,7 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 - [x] T41 Motor de sugerencias — Lógica — T35, T36, T39, T40
 - [x] T42 Aprender estilo de likes y outfits guardados — Lógica — T14, T41
 - [x] T43 Pantalla "outfit del día" — UI — T17, T41
-- [ ] T44 Pruebas v0.5 — QA — T39–T43
+- [x] T44 Pruebas v0.5 — QA — T39–T43
 
 ## v1.0 Lanzamiento
 - [x] T45 Exportar/importar copia — Datos — T03

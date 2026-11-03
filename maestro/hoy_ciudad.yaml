@@ -1,0 +1,46 @@
+# T44: sin permiso de ubicación pero con ciudad elegida en Perfil → Hoy usa el tiempo de esa ciudad. Parte de "sin ubicación" (hoy_sin_ubicacion)
+# y deja el permiso denegado. Env: CIUDAD (texto a buscar, p.ej. Madrid) y RESULTADO (la fila a elegir, p.ej. "Madrid, España").
+appId: app.luxion.fitarchiveapp
+---
+- launchApp:
+    stopApp: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Buscar ciudad"
+    timeout: 30000
+- tapOn: "Buscar ciudad"
+- inputText: "${CIUDAD}"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Buscar"
+- tapOn: "Buscar"
+- scrollUntilVisible:
+    element: "${RESULTADO}"
+    timeout: 30000
+- tapOn: "${RESULTADO}"
+- assertVisible: "Ciudad elegida: ${RESULTADO}"
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "[0-9-]+° · máx.*"
+    timeout: 15000
+- assertNotVisible: "Configurar ubicación"
+- assertVisible: "Clima"
+# Persiste tras reiniciar
+- launchApp:
+    stopApp: true
+    permissions:
+      all: deny
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "[0-9-]+° · máx.*"
+    timeout: 15000

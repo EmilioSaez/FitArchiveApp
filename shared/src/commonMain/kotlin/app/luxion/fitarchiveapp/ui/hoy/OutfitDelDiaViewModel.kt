@@ -183,13 +183,17 @@ class OutfitDelDiaViewModel(
         } catch (t: Throwable) {
             emptyList() // Sin historial solo se pierde la rotación de prendas.
         }
-        guardadosParaAfinidad = try {
-            outfits.observeAll().first().mapNotNull { o -> outfits.get(o.id)?.let { OutfitGuardado.de(it.outfit, it.garments) } }
+        val existentes = try {
+            outfits.observeAll().first().mapNotNull { o -> outfits.get(o.id) }
         } catch (c: CancellationException) {
             throw c
         } catch (t: Throwable) {
             emptyList() // Sin outfits solo se pierde esa señal de gusto.
         }
+        guardadosParaAfinidad = existentes.map { OutfitGuardado.de(it.outfit, it.garments) }
+        // Reconoce como ya guardados los outfits de la BD (p. ej. tras reiniciar): no se duplican al guardar o aceptar.
+        val guardados = existentes.associate { o -> o.garments.map { it.garmentId }.sorted() to o.outfit.id }
+        _estado.update { it.copy(guardados = guardados) }
         val tiempo = try {
             tiempoServicio.tiempoDeHoy(ciudad()).fold(
                 onSuccess = { EstadoTiempo.Disponible(it) },

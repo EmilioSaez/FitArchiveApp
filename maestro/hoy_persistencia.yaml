@@ -1,0 +1,14 @@
+# T44: tras reiniciar la app, Hoy reconoce que el outfit sugerido ya está guardado y asignado a hoy (no ofrece duplicarlo).
+# Supone haber ejecutado antes hoy_aceptar con la misma sugerencia.
+appId: app.luxion.fitarchiveapp
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Calendario"
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn: "Hoy"
+- extendedWaitUntil:
+    visible: "Asignado a hoy"
+    timeout: 15000
+- assertVisible: "Guardado en tus outfits"
