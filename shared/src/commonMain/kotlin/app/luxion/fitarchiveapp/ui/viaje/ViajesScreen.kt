@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui.viaje
 
+import app.luxion.fitarchiveapp.ui.components.Titular
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -123,15 +124,10 @@ private fun Trip.fechas(): String? = formatearFechasViaje(startDate, endDate)
 private fun ListaViajes(estado: ViajesUiState, modifier: Modifier, onNuevo: () -> Unit, onAbrir: (Trip) -> Unit) {
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                "Viajes",
-                Modifier.weight(1f),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Titular("Viajes", Modifier.weight(1f))
             if (!estado.vacio) Button(onClick = onNuevo) { Text("Nuevo viaje") }
         }
         when {

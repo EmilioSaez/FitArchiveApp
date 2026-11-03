@@ -269,6 +269,26 @@ class OutfitDelDiaViewModelTest {
     }
 
     @Test
+    fun dosOutfitsDistintosElMismoDiaSeNombranDistinto() = runTest(UnconfinedTestDispatcher()) {
+        val e = Entorno(
+            backgroundScope,
+            motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]), sugerido(armarioBasico[0], armarioBasico[2]))),
+        )
+
+        e.vm.guardar()
+        e.vm.siguiente()
+        e.vm.guardar()
+
+        assertEquals(listOf("Outfit del 02/11", "Outfit del 02/11 (2)"), e.outfits.creados.map { it.outfit.name })
+    }
+
+    @Test
+    fun prendasUsadasSalenDelHistorial() = runTest(UnconfinedTestDispatcher()) {
+        val e = Entorno(backgroundScope, usos = UsosFijos(listOf(WearRecord("2026-10-30", 1))))
+        assertEquals(setOf(1L), e.estado.prendasUsadas)
+    }
+
+    @Test
     fun aceptarLoAsignaAHoyConsevandoLaNota() = runTest(UnconfinedTestDispatcher()) {
         val e = Entorno(backgroundScope, motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]))))
         e.calendario.set(CalendarDay(hoy, null, "Reunión"))
@@ -349,6 +369,26 @@ class OutfitDelDiaViewModelTest {
         assertEquals(
             "Es la mejor combinación posible con tu armario.",
             motivoBreve(DesgloseSugerencia(0.3, 0.3, 0.3, 0.3), hayTiempo = true, hayOcasion = true),
+        )
+    }
+
+    @Test
+    fun motivoDiferenciaPrendasSinEstrenar() {
+        val d = DesgloseSugerencia(clima = 0.2, ocasion = 0.2, colores = 0.2, frescura = 1.0)
+        assertEquals("Hace días que no llevas estas prendas.", motivoBreve(d, hayTiempo = true, hayOcasion = true))
+        assertEquals(
+            "Aún no has estrenado estas prendas.",
+            motivoBreve(d, hayTiempo = true, hayOcasion = true, sinEstrenar = true),
+        )
+    }
+
+    @Test
+    fun nombreUnicoNumeraLosRepetidos() {
+        assertEquals("Outfit del 02/11", nombreOutfitUnico("Outfit del 02/11", emptySet()))
+        assertEquals("Outfit del 02/11 (2)", nombreOutfitUnico("Outfit del 02/11", setOf("Outfit del 02/11")))
+        assertEquals(
+            "Outfit del 02/11 (3)",
+            nombreOutfitUnico("Outfit del 02/11", setOf("Outfit del 02/11", "Outfit del 02/11 (2)")),
         )
     }
 

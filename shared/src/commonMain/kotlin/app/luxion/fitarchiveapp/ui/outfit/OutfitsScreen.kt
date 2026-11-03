@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui.outfit
 
+import app.luxion.fitarchiveapp.ui.components.Titular
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -79,15 +80,10 @@ fun OutfitsScreen(
 
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                "Mis outfits",
-                Modifier.weight(1f),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Titular("Mis outfits", Modifier.weight(1f))
             if (!estado.vacio) Button(onClick = onNuevoOutfit) { Text("Nuevo outfit") }
         }
         when {

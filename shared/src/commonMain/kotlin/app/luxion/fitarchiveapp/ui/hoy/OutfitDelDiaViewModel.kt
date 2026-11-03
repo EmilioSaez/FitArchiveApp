@@ -61,6 +61,8 @@ data class OutfitDelDiaUiState(
     val indice: Int = 0,
     /** Outfits ya guardados en esta sesión, por las prendas (ids ordenados) que los componen. */
     val guardados: Map<List<Long>, Long> = emptyMap(),
+    /** Prendas que ya constan en el historial de usos (para distinguir "sin estrenar" de "hace días"). */
+    val prendasUsadas: Set<Long> = emptySet(),
     /** Outfit asignado hoy en el calendario, si hay. */
     val asignadoHoy: Long? = null,
     val ocupado: Boolean = false,
@@ -75,6 +77,9 @@ data class OutfitDelDiaUiState(
     val guardadoActual get() = idGuardadoActual != null
     val aceptadoActual get() = idGuardadoActual != null && idGuardadoActual == asignadoHoy
     val hayVariasOpciones get() = sugerencias.size > 1
+
+    /** La sugerencia actual solo tiene prendas que nunca se han llevado. */
+    val actualSinEstrenar get() = actual?.prendas?.all { it.id !in prendasUsadas } ?: false
 
     /** Sin sugerencias y sin estar cargando: la pantalla explica por qué. */
     val vacio get() = !cargando && sugerencias.isEmpty()
@@ -160,8 +165,9 @@ class OutfitDelDiaViewModel(
         _estado.value.guardados[sugerido.clave()]?.let { return it }
         val estado = _estado.value
         val elegidas = sugerido.prendas.associate { slotDe(it.type) to PrendaElegida(it) }
+        val nombres = outfits.observeAll().first().map { it.name }.toSet()
         val id = outfits.create(
-            Outfit(0, nombreOutfit(estado.hoy), estado.ocasion, favorite = false, createdAt = ahora()),
+            Outfit(0, nombreOutfitUnico(nombreOutfit(estado.hoy), nombres), estado.ocasion, favorite = false, createdAt = ahora()),
             elegidas.aOutfitGarments(),
         )
         _estado.update { it.copy(guardados = it.guardados + (sugerido.clave() to id)) }
@@ -200,6 +206,8 @@ class OutfitDelDiaViewModel(
         } catch (t: Throwable) {
             emptyList() // Sin outfits solo se pierde esa señal de gusto.
         }
+        val usadas = historial.map { it.garmentId }.toSet()
+        _estado.update { it.copy(prendasUsadas = usadas) }
         guardadosParaAfinidad = existentes.map { OutfitGuardado.de(it.outfit, it.garments) }
         // Reconoce como ya guardados los outfits de la BD (p. ej. tras reiniciar): no se duplican al guardar o aceptar.
         val guardados = existentes.associate { o -> o.garments.map { it.garmentId }.sorted() to o.outfit.id }
@@ -258,6 +266,14 @@ internal fun nombreOutfit(hoy: String): String {
     return if (p.size == 3) "Outfit del ${p[2]}/${p[1]}" else "Outfit del día"
 }
 
+/** [base] si está libre; si no, "[base] (2)", "[base] (3)"… para distinguir outfits guardados el mismo día. */
+internal fun nombreOutfitUnico(base: String, existentes: Set<String>): String {
+    if (base !in existentes) return base
+    var n = 2
+    while ("$base ($n)" in existentes) n++
+    return "$base ($n)"
+}
+
 /** Un criterio del desglose con su puntuación de 0.0 a 1.0. */
 data class CriterioPuntuado(val etiqueta: String, val valor: Double)
 
@@ -274,12 +290,17 @@ fun DesgloseSugerencia.criterios(hayTiempo: Boolean, hayOcasion: Boolean): List<
 private const val UMBRAL_MOTIVO = 0.7
 
 /** Frase corta con los (hasta dos) criterios en que más destaca la sugerencia. */
-fun motivoBreve(desglose: DesgloseSugerencia, hayTiempo: Boolean, hayOcasion: Boolean): String {
+fun motivoBreve(
+    desglose: DesgloseSugerencia,
+    hayTiempo: Boolean,
+    hayOcasion: Boolean,
+    sinEstrenar: Boolean = false,
+): String {
     val frases = mapOf(
         "Clima" to "va bien con el tiempo de hoy",
         "Ocasión" to "encaja con la ocasión",
         "Colores" to "los colores combinan",
-        "Frescura" to "hace días que no llevas estas prendas",
+        "Frescura" to if (sinEstrenar) "aún no has estrenado estas prendas" else "hace días que no llevas estas prendas",
         "Tu estilo" to "es muy de tu estilo",
     )
     val destacados = desglose.criterios(hayTiempo, hayOcasion)

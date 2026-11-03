@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui.armario
 
+import app.luxion.fitarchiveapp.ui.components.Titular
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -110,21 +111,13 @@ internal fun ArmarioContenido(
             Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(Modifier.weight(1f)) {
-                Text("Armario", style = MaterialTheme.typography.headlineLarge)
-                if (estado.totalArmario > 0) {
-                    val resumen = when {
-                        estado.hayFiltro -> "${estado.total} de ${estado.totalArmario} prendas"
-                        estado.total == 1 -> "1 prenda"
-                        else -> "${estado.total} prendas"
-                    }
-                    Text(
-                        resumen,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+            val resumen = when {
+                estado.totalArmario == 0 -> null
+                estado.hayFiltro -> "${estado.total} de ${estado.totalArmario} prendas"
+                estado.total == 1 -> "1 prenda"
+                else -> "${estado.total} prendas"
             }
+            Titular("Armario", Modifier.weight(1f), subtitulo = resumen)
             if (!estado.armarioVacio) {
                 TextButton(onClick = { hojaFiltro = true }) {
                     val n = estado.filtro.numeroCriterios()

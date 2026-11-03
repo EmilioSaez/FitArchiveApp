@@ -62,8 +62,8 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 
 ## v1.0 Lanzamiento
 - [x] T45 Exportar/importar copia — Datos — T03
-- [ ] T46 Pulir estética de revista — Diseño — T44
-- [x] T47 Rendimiento con armarios grandes — Lógica — T44
+- [x] T46 Pulir estética de revista — Diseño — T44
+- [ ] T47 Rendimiento con armarios grandes — Lógica — T44
 - [x] T48 Icono y fichas de tiendas — Contenido — —
 - [x] T49 Política de privacidad (cámara, ubicación) — Contenido — —
 - [ ] T50 Prueba con usuarias reales y errores — QA — T45–T47

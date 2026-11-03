@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui.screens
 
+import app.luxion.fitarchiveapp.ui.components.Titular
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -21,15 +22,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import app.luxion.fitarchiveapp.data.MeasurementsRepository
 
 @Composable
 fun MedidasScreen(
     repositorio: MeasurementsRepository,
     modifier: Modifier = Modifier,
+    /** Al abrir, baja hasta [contenidoExtra] (p. ej. "Ubicación y tiempo") en lugar de empezar arriba. */
+    irAlContenidoExtra: Boolean = false,
     contenidoExtra: @Composable ColumnScope.() -> Unit = {},
 ) {
     val textos = remember { mutableStateMapOf<Campo, String>().apply { putAll(null.aTextos()) } }
@@ -43,11 +49,18 @@ fun MedidasScreen(
     val lecturas = Campo.entries.associateWith { leer(textos.getValue(it), it) }
     val hayErrores = lecturas.values.any { it is Lectura.Invalido }
 
+    val scroll = rememberScrollState()
+    var inicioExtra by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(irAlContenidoExtra, inicioExtra) {
+        val y = inicioExtra
+        if (irAlContenidoExtra && y != null) scroll.scrollTo(y)
+    }
+
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()).padding(24.dp),
+        modifier = modifier.verticalScroll(scroll).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("Mis medidas", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
+        Titular("Mis medidas")
         Text(
             "Todas en centímetros. Usa una cinta métrica flexible, sin apretar. Puedes dejar vacío lo que no sepas.",
             style = MaterialTheme.typography.bodyMedium,
@@ -84,6 +97,10 @@ fun MedidasScreen(
             modifier = Modifier.fillMaxWidth(),
         ) { Text("Guardar medidas") }
         if (guardado) Text("Medidas guardadas.", color = MaterialTheme.colorScheme.primary)
-        contenidoExtra()
+        Column(
+            Modifier.fillMaxWidth().onGloballyPositioned { inicioExtra = it.positionInParent().y.roundToInt() },
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            content = contenidoExtra,
+        )
     }
 }

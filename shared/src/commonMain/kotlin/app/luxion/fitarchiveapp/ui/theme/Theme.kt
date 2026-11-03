@@ -26,6 +26,8 @@ private val FitArchiveColors = lightColorScheme(
     surface = Color.White,
     onSurface = Tinta,
     surfaceContainer = Color.White,
+    onSurfaceVariant = Color(0xFF5E5A5B),
+    outlineVariant = Color(0xFFE3D6DA),
 )
 
 private val Serif = FontFamily.Serif
@@ -36,12 +38,15 @@ private val FitArchiveTypography = Typography(
     displayLarge = Base.displayLarge.copy(fontFamily = Serif),
     displayMedium = Base.displayMedium.copy(fontFamily = Serif),
     displaySmall = Base.displaySmall.copy(fontFamily = Serif),
-    headlineLarge = Base.headlineLarge.copy(fontFamily = Serif, fontWeight = FontWeight.Bold),
+    headlineLarge = Base.headlineLarge.copy(fontFamily = Serif, fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp),
     headlineMedium = Base.headlineMedium.copy(fontFamily = Serif, fontWeight = FontWeight.Bold),
     headlineSmall = Base.headlineSmall.copy(fontFamily = Serif, fontWeight = FontWeight.Bold),
     titleLarge = Base.titleLarge.copy(fontFamily = Serif, fontWeight = FontWeight.Bold),
     titleMedium = Base.titleMedium.copy(fontFamily = Serif),
     titleSmall = Base.titleSmall.copy(fontFamily = Serif),
+    // Texto corrido más aireado, como en una revista.
+    bodyLarge = Base.bodyLarge.copy(lineHeight = 26.sp),
+    bodyMedium = Base.bodyMedium.copy(lineHeight = 22.sp),
 )
 
 @Composable

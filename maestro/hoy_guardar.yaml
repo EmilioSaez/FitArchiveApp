@@ -10,8 +10,8 @@ appId: app.luxion.fitarchiveapp
 - extendedWaitUntil:
     visible: "Alternativas"
     timeout: 15000
-- scrollUntilVisible:
-    element: "Guardar como outfit|Guardado en tus outfits"
+# T46 (O15): las acciones están fijas abajo, visibles sin scroll
+- assertVisible: "Guardar como outfit|Guardado en tus outfits"
 - tapOn: "Guardar como outfit"
 - extendedWaitUntil:
     visible: "Guardado en tus outfits"

@@ -49,7 +49,7 @@ fun SeccionUbicacionTiempo(
     var job by remember { mutableStateOf<Job?>(null) }
 
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Ubicación y tiempo", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+        TituloSeccion("Ubicación y tiempo")
         Text(
             "Usamos el tiempo de hoy para sugerirte outfits. Puedes usar la ubicación aproximada del móvil " +
                 "o elegir una ciudad.",
