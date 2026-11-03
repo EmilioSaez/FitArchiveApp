@@ -31,7 +31,8 @@ interface TripRepository {
 
     /** Lista de ropa de la maleta. */
     fun observePacking(tripId: Long): Flow<List<TripGarment>>
-    suspend fun addGarment(tripId: Long, garmentId: Long)
+    /** Añade la prenda a la lista; con [manual] queda marcada como añadida a mano (también si la fila ya existía). */
+    suspend fun addGarment(tripId: Long, garmentId: Long, manual: Boolean = false)
     suspend fun setPacked(tripId: Long, garmentId: Long, packed: Boolean)
     suspend fun removeGarment(tripId: Long, garmentId: Long)
 }
@@ -73,8 +74,12 @@ internal class SqlTripRepository(
     override fun observePacking(tripId: Long) =
         queries.selectPacking(tripId).asFlow().mapToList(context).map { it.map { g -> g.toModel() } }
 
-    override suspend fun addGarment(tripId: Long, garmentId: Long) =
-        withContext(context) { queries.insertGarment(tripId, garmentId); Unit }
+    override suspend fun addGarment(tripId: Long, garmentId: Long, manual: Boolean) = withContext(context) {
+        db.transaction {
+            queries.insertGarment(tripId, garmentId)
+            if (manual) queries.markManual(tripId, garmentId)
+        }
+    }
 
     override suspend fun setPacked(tripId: Long, garmentId: Long, packed: Boolean) =
         withContext(context) { queries.setPacked(packed.toDb(), tripId, garmentId); Unit }

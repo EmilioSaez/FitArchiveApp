@@ -29,7 +29,7 @@ class SqlWardrobeBackupStore(
                 tripOutfits = db.tripQueries.selectAllOutfits().executeAsList()
                     .map { TripOutfitLink(it.trip_id, it.outfit_id) },
                 tripGarments = db.tripQueries.selectAllPacking().executeAsList()
-                    .map { TripGarmentLink(it.trip_id, it.garment_id, it.packed == 1L) },
+                    .map { TripGarmentLink(it.trip_id, it.garment_id, it.packed == 1L, it.manual == 1L) },
                 wears = db.wearLogQueries.selectAll().executeAsList().map { WearRecord(it.date, it.garment_id) },
             )
         }
@@ -79,7 +79,7 @@ class SqlWardrobeBackupStore(
             }
             snapshot.tripOutfits.forEach { db.tripQueries.insertOutfit(it.tripId, it.outfitId) }
             snapshot.tripGarments.forEach {
-                db.tripQueries.insertGarmentWithState(it.tripId, it.garmentId, it.packed.toDb())
+                db.tripQueries.insertGarmentWithState(it.tripId, it.garmentId, it.packed.toDb(), it.manual.toDb())
             }
         }
     }

@@ -10,7 +10,7 @@ import app.luxion.fitarchiveapp.model.Trip
 
 data class TripOutfitLink(val tripId: Long, val outfitId: Long)
 
-data class TripGarmentLink(val tripId: Long, val garmentId: Long, val packed: Boolean)
+data class TripGarmentLink(val tripId: Long, val garmentId: Long, val packed: Boolean, val manual: Boolean = false)
 
 /** Todos los datos de la usuaria, tal como están en la BD de T03. */
 data class WardrobeSnapshot(

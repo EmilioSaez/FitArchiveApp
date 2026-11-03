@@ -77,6 +77,8 @@ data class ItemMaleta(
     val guardada: Boolean,
     /** Nombres de los outfits del viaje que la incluyen; vacío si se añadió a mano. */
     val outfits: List<String>,
+    /** Añadida a mano por el usuario, aunque también la incluya un outfit del viaje. */
+    val anadida: Boolean = false,
 ) {
     /** Añadida a mano: solo estas se pueden quitar de la maleta (las de un outfit salen quitando el outfit). */
     val manual get() = outfits.isEmpty()
@@ -105,7 +107,7 @@ fun construirMaleta(outfits: List<OutfitWithGarments>, lista: List<TripGarment>,
     }
     val ids = (deOutfits.keys + enLista.keys).distinct()
     val items = ids.mapNotNull { id ->
-        porId[id]?.let { ItemMaleta(it, enLista[id]?.packed == true, deOutfits[id].orEmpty().distinct()) }
+        porId[id]?.let { ItemMaleta(it, enLista[id]?.packed == true, deOutfits[id].orEmpty().distinct(), enLista[id]?.manual == true) }
     }.sortedWith(compareBy({ it.prenda.type.ordinal }, { it.prenda.id }))
     return Maleta(items)
 }

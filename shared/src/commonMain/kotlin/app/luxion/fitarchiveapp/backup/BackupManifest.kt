@@ -107,7 +107,7 @@ data class TripDto(
 data class TripOutfitDto(val tripId: Long, val outfitId: Long)
 
 @Serializable
-data class TripGarmentDto(val tripId: Long, val garmentId: Long, val packed: Boolean = false)
+data class TripGarmentDto(val tripId: Long, val garmentId: Long, val packed: Boolean = false, val manual: Boolean = false)
 
 @Serializable
 data class WearDto(val date: String, val garmentId: Long)

@@ -78,4 +78,6 @@ data class TripGarment(
     val tripId: Long,
     val garmentId: Long,
     val packed: Boolean,
+    /** Añadida a mano por el usuario: no desaparece al quitar un outfit que la incluya. */
+    val manual: Boolean = false,
 )
