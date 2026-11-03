@@ -1,7 +1,10 @@
 {
   "marca": "Mango",
   "fuente": "https://shop.mango.com/es/mujer/guia-de-tallas",
-  "fecha": "2026-11-02",
+  "fecha": "2026-11-03",
+  "notas": [
+    "Reintento 2026-11-03: la guía oficial sigue devolviendo 403 (bot-detection) y no hay copia oficial indexada. Solo aparecen tablas de minoristas (p. ej. El Palacio de Hierro), con unidades sin confirmar y sin coincidir entre sí: no se usan."
+  ],
   "pendiente": "pendiente: guía oficial no accesible (403 por bot-detection). Falta aportar las tablas o capturas de la guía oficial.",
   "prendas": {}
 }
