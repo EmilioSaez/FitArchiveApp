@@ -63,9 +63,10 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
 ## v1.0 Lanzamiento
 - [x] T45 Exportar/importar copia — Datos — T03
 - [x] T46 Pulir estética de revista — Diseño — T44
-- [ ] T47 Rendimiento con armarios grandes — Lógica — T44
+- [x] T47 Rendimiento con armarios grandes — Lógica — T44
 - [x] T48 Icono y fichas de tiendas — Contenido — —
 - [x] T49 Política de privacidad (cámara, ubicación) — Contenido — —
 - [ ] T50 Prueba con usuarias reales y errores — QA — T45–T47
-  - Estado: **pendiente de usuarias reales**. Preparado: guion y cuestionario (`docs/prueba-usuarias.md`), distribución y reporte de errores (`docs/distribucion-prueba.md`) y prueba de humo del release candidato (`docs/bugs-v10.md`). Bloqueo conocido: T45 no tiene interfaz de exportar/importar (B15).
+  - Estado: **pendiente de usuarias reales**. Preparado: guion y cuestionario (`docs/prueba-usuarias.md`), distribución y reporte de errores (`docs/distribucion-prueba.md`) y prueba de humo del release candidato (`docs/bugs-v10.md`). B15 (T45 sin interfaz de exportar/importar) resuelto: Perfil ya tiene "Copia de seguridad" y muestra la versión (O19). Queda la prueba con usuarias reales; la tarea 9 del guion ya se puede hacer.
+- [x] T52 Rediseño visual (portada, perchas, carpetas, editor, galería, calendario y maleta) — Diseño — T46
 - [ ] T51 Publicar en Google Play y App Store — Base — T48–T50
