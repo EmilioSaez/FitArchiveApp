@@ -54,6 +54,8 @@ class EditorOutfitViewModel(
     armario: GarmentRepository,
     private val scope: CoroutineScope,
     private val outfitId: Long? = null,
+    /** Prendas con las que arranca un outfit nuevo (las elegidas en el armario). */
+    private val prendasIniciales: List<Long> = emptyList(),
     private val ahora: () -> Long,
 ) {
     private val _estado = MutableStateFlow(EditorOutfitUiState(cargando = outfitId != null))
@@ -65,7 +67,13 @@ class EditorOutfitViewModel(
     init {
         scope.launch {
             if (outfitId != null) cargarOutfit(outfitId, armario)
+            var inicialesPuestas = outfitId != null || prendasIniciales.isEmpty()
             armario.observeAll().collect { prendas ->
+                if (!inicialesPuestas) {
+                    inicialesPuestas = true
+                    val porId = prendas.associateBy { it.id }
+                    prendasIniciales.mapNotNull { porId[it] }.forEach { alternarPrenda(it) }
+                }
                 // Si una prenda elegida se elimina del armario, sale también del outfit.
                 val ids = prendas.map { it.id }.toSet()
                 _estado.update { e ->
@@ -122,6 +130,12 @@ class EditorOutfitViewModel(
         }
         e.copy(elegidas = e.elegidas - incompatibles + (slot to PrendaElegida(prenda)), slotActivo = slot)
     }
+
+    /** Quita todas las prendas del maniquí. */
+    fun limpiar() = _estado.update { it.copy(elegidas = emptyMap()) }
+
+    /** Quita la prenda de [slot]. */
+    fun quitar(slot: Slot) = _estado.update { it.copy(elegidas = it.elegidas - slot) }
 
     fun quitarActiva() = _estado.update { it.copy(elegidas = it.elegidas - it.slotActivo) }
 

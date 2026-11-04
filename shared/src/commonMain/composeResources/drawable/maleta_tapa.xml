@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tapa de la maleta con dos correas y cierre. Cerrada tapa la carcasa entera; al abrir gira sobre su borde superior
+     (graphicsLayer: transformOrigin = TransformOrigin(0.5f, 0f), rotationX 0 -> -62, translationY 0 -> -196 dp,
+     cameraDistance alto). 206x250 dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="206dp"
+    android:height="250dp"
+    android:viewportWidth="206"
+    android:viewportHeight="250">
+    <path android:fillColor="#8A684E" android:pathData="M14,0h178a14,14 0,0 1,14 14v222a14,14 0,0 1,-14 14h-178a14,14 0,0 1,-14 -14v-222a14,14 0,0 1,14 -14z" />
+    <path android:fillColor="#5E4532" android:pathData="M48,10h10v230h-10z M148,10h10v230h-10z" />
+    <path android:fillColor="#EFE3D8" android:pathData="M94,114h18v22h-18z" />
+</vector>

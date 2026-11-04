@@ -1,6 +1,16 @@
 package app.luxion.fitarchiveapp.ui.armario
 
 import app.luxion.fitarchiveapp.ui.components.Titular
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.graphics.Color
+import app.luxion.fitarchiveapp.ui.theme.Iconos
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -75,6 +85,8 @@ fun ArmarioScreen(
     onAnadirPrenda: () -> Unit,
     modifier: Modifier = Modifier,
     onAbrirPrenda: (Garment) -> Unit = {},
+    onCrearOutfit: (List<Long>) -> Unit = {},
+    onAbrirCarpetas: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = remember(repositorio) { ArmarioViewModel(repositorio, scope) }
@@ -88,6 +100,8 @@ fun ArmarioScreen(
         onAbrirPrenda = onAbrirPrenda,
         onAlternarFavorita = viewModel::alternarFavorita,
         modifier = modifier,
+        onCrearOutfit = onCrearOutfit,
+        onAbrirCarpetas = onAbrirCarpetas,
     )
 }
 
@@ -101,7 +115,11 @@ internal fun ArmarioContenido(
     modifier: Modifier = Modifier,
     onSeleccionarAgrupacion: (Agrupacion) -> Unit = {},
     onAplicarFiltro: (GarmentFilter) -> Unit = {},
+    onCrearOutfit: (List<Long>) -> Unit = {},
+    onAbrirCarpetas: () -> Unit = {},
 ) {
+    // Selección por pulsación larga: ids de las prendas elegidas para montar un outfit.
+    var elegidas by remember { mutableStateOf(emptySet<Long>()) }
     var hojaFiltro by remember { mutableStateOf(false) }
     if (hojaFiltro) {
         HojaFiltro(estado.filtro, onAplicar = onAplicarFiltro, onCerrar = { hojaFiltro = false })
@@ -119,18 +137,23 @@ internal fun ArmarioContenido(
             }
             Titular("Armario", Modifier.weight(1f), subtitulo = resumen)
             if (!estado.armarioVacio) {
-                TextButton(onClick = { hojaFiltro = true }) {
-                    val n = estado.filtro.numeroCriterios()
-                    Text(if (n > 0) "Filtrar ($n)" else "Filtrar")
+                IconButton(onClick = onAbrirCarpetas) { Icon(Iconos.Carpeta, contentDescription = "Carpetas") }
+                // Las perchas ya son los filtros; la hoja de filtros avanzados queda tras un icono de ajustes.
+                IconButton(onClick = { hojaFiltro = true }) {
+                    Icon(
+                        Iconos.Ajustes,
+                        contentDescription = "Filtros avanzados",
+                        tint = if (estado.filtro.numeroCriterios() > 0) MaterialTheme.colorScheme.primary else LocalContentColor.current,
+                    )
                 }
-                TextButton(onClick = onAnadirPrenda) { Text("+ Añadir") }
+                IconButton(onClick = onAnadirPrenda) { Icon(Iconos.Anadir, contentDescription = "Añadir prenda") }
             }
         }
         if (estado.armarioVacio) {
             EstadoVacio(onAnadirPrenda, Modifier.weight(1f))
             return@Column
         }
-        SelectorAgrupacion(estado.agrupacion, onSeleccionarAgrupacion)
+        RielPerchas(estado.filtro, onAplicarFiltro, Modifier.padding(top = 8.dp))
         if (estado.hayFiltro) FiltrosActivos(estado.filtro, onAplicarFiltro)
         if (estado.pestanas.isNotEmpty()) {
             ScrollableTabRow(
@@ -143,7 +166,14 @@ internal fun ArmarioContenido(
                     Tab(
                         selected = i == estado.pestanaActual,
                         onClick = { onSeleccionarPestana(i) },
-                        text = { Text(if (n > 0) "${pestana.titulo} · $n" else pestana.titulo) },
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = {
+                            Text(
+                                if (n > 0) "${pestana.titulo} · $n" else pestana.titulo,
+                                fontWeight = if (i == estado.pestanaActual) FontWeight.Bold else FontWeight.Medium,
+                            )
+                        },
                     )
                 }
             }
@@ -173,18 +203,56 @@ internal fun ArmarioContenido(
                 )
             }
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(estado.prendas, key = { it.id }) { prenda ->
-                    FotoPrenda(prenda, onClick = { onAbrirPrenda(prenda) }, onAlternarFavorita = { onAlternarFavorita(prenda) })
+            Box(Modifier.weight(1f)) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = if (elegidas.isEmpty()) 16.dp else 88.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(estado.prendas, key = { it.id }) { prenda ->
+                        FotoPrenda(
+                            prenda,
+                            onClick = {
+                                if (elegidas.isEmpty()) onAbrirPrenda(prenda)
+                                else elegidas = if (prenda.id in elegidas) elegidas - prenda.id else elegidas + prenda.id
+                            },
+                            onAlternarFavorita = { onAlternarFavorita(prenda) },
+                            seleccionada = prenda.id in elegidas,
+                            onLongClick = { elegidas = elegidas + prenda.id },
+                        )
+                    }
+                }
+                if (elegidas.isNotEmpty()) {
+                    BarraSeleccion(
+                        elegidas.size,
+                        onCrear = { onCrearOutfit(elegidas.toList()); elegidas = emptySet() },
+                        onCancelar = { elegidas = emptySet() },
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
                 }
             }
         }
+    }
+}
+
+/** Barra flotante negra con el recuento y la acción "Crear outfit". */
+@Composable
+private fun BarraSeleccion(cuantas: Int, onCrear: () -> Unit, onCancelar: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier.padding(horizontal = 20.dp, vertical = 16.dp).fillMaxWidth().clip(RoundedCornerShape(28.dp))
+            .background(MaterialTheme.colorScheme.onSurface).padding(start = 8.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = onCancelar) { Icon(Iconos.Cerrar, contentDescription = "Cancelar selección", tint = MaterialTheme.colorScheme.surface) }
+        Text(
+            if (cuantas == 1) "1 prenda elegida" else "$cuantas prendas elegidas",
+            Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.surface,
+            style = MaterialTheme.typography.labelMedium,
+        )
+        TextButton(onClick = onCrear) { Text("Crear outfit", color = MaterialTheme.colorScheme.surface, style = MaterialTheme.typography.labelLarge) }
     }
 }
 
@@ -273,21 +341,27 @@ private fun <T> Grupo(titulo: String, valores: List<T>, elegido: T?, etiqueta: (
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FotoPrenda(
     prenda: Garment,
     onClick: () -> Unit,
     onAlternarFavorita: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    seleccionada: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarMiniatura(prenda.photoPath) }
+    val forma = RoundedCornerShape(12.dp)
     Box(
         modifier
             .fillMaxWidth()
             .aspectRatio(3f / 4f)
-            .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onClick),
+            .clip(forma)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, forma)
+            .then(if (seleccionada) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, forma) else Modifier)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         contentAlignment = Alignment.Center,
     ) {
         imagen?.let {
@@ -311,26 +385,35 @@ internal fun FotoPrenda(
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             )
         }
+        if (seleccionada) {
+            Box(
+                Modifier.align(Alignment.TopStart).padding(6.dp).size(24.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center,
+            ) { Icon(Iconos.Check, contentDescription = "Elegida", tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp)) }
+        }
         if (onAlternarFavorita != null) {
-            // Disco semitransparente: el corazón se ve sobre cualquier color de prenda.
+            // Disco blanco al 92 % de 28 dp con el corazón en primary; el área táctil crece a 48 dp.
             Box(
                 Modifier
                     .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                    .size(48.dp)
                     .clickable(onClick = onAlternarFavorita)
                     .semantics {
                         contentDescription = if (prenda.favorite) "Quitar de favoritas" else "Marcar como favorita"
                     },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    if (prenda.favorite) "♥" else "♡",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = if (prenda.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                )
+                Box(
+                    Modifier.size(28.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.92f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        if (prenda.favorite) Iconos.CorazonRelleno else Iconos.Looks,
+                        contentDescription = null,
+                        tint = if (prenda.favorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
             }
         }
     }

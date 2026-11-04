@@ -1,6 +1,25 @@
 package app.luxion.fitarchiveapp.ui.calendario
 
 import app.luxion.fitarchiveapp.ui.components.Titular
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import app.luxion.fitarchiveapp.data.TripRepository
+import app.luxion.fitarchiveapp.model.Trip
+import app.luxion.fitarchiveapp.resources.Res
+import app.luxion.fitarchiveapp.resources.maleta_cuerpo
+import app.luxion.fitarchiveapp.resources.maleta_tapa
+import app.luxion.fitarchiveapp.ui.theme.Iconos
+import app.luxion.fitarchiveapp.viaje.formatearFechasViaje
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,7 +66,12 @@ import kotlin.time.Clock
 fun CalendarioScreen(
     calendario: CalendarRepository,
     outfits: OutfitRepository,
+    viajesRepo: TripRepository,
     modifier: Modifier = Modifier,
+    /** Abre la maleta de un viaje (tarjeta "Próximo viaje"). */
+    onAbrirViaje: (Trip) -> Unit = {},
+    /** Abre la lista de viajes (crear y editar). */
+    onAbrirViajes: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val vm = remember(calendario, outfits) {
@@ -72,63 +96,165 @@ fun CalendarioScreen(
         )
     }
 
-    Column(modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        Titular("Calendario", Modifier.padding(start = 4.dp, top = 16.dp))
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = vm::mesAnterior) { Text("‹") }
-            Text(
-                estado.mes.titulo,
-                Modifier.weight(1f),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-            )
-            TextButton(onClick = vm::mesSiguiente) { Text("›") }
-        }
-        TextButton(onClick = vm::irAHoy, Modifier.align(Alignment.CenterHorizontally)) { Text("Hoy") }
-        Row(Modifier.fillMaxWidth()) {
-            MesCalendario.DIAS_SEMANA.forEach {
-                Text(
-                    it,
-                    Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+    val viajes by viajesRepo.observeAll().collectAsState(emptyList())
+    val proximo = viajes
+        .filter { (it.endDate ?: it.startDate)?.let { fin -> fin >= estado.hoy } == true }
+        .minByOrNull { it.startDate ?: "9999-12-31" }
+    val colores = MaterialTheme.colorScheme
+
+    LazyColumn(modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Titular("Calendario", Modifier.weight(1f))
+                TextButton(onClick = onAbrirViajes) { Text("Viajes") }
             }
         }
-        estado.celdas.chunked(7).forEach { semana ->
-            Row(Modifier.fillMaxWidth()) {
-                semana.forEach { fecha ->
-                    Box(Modifier.weight(1f).aspectRatio(0.8f).padding(2.dp)) {
-                        if (fecha != null) CeldaDia(fecha, estado, onClick = { vm.seleccionar(fecha) })
+        item {
+            Column {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = vm::mesAnterior) { Icon(Iconos.Volver, contentDescription = "Mes anterior") }
+                    Text(
+                        estado.mes.titulo,
+                        Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
+                    )
+                    // Volver a hoy: solo cuando no se está en el mes actual.
+                    if (estado.mes != MesCalendario.de(estado.hoy)) {
+                        IconButton(onClick = vm::irAHoy) { Icon(Iconos.Hoy, contentDescription = "Ir a hoy") }
+                    }
+                    IconButton(onClick = vm::mesSiguiente) {
+                        Icon(Iconos.Volver, contentDescription = "Mes siguiente", modifier = Modifier.rotate(180f))
+                    }
+                }
+                Row(Modifier.fillMaxWidth()) {
+                    MesCalendario.DIAS_SEMANA.forEach {
+                        Text(
+                            it,
+                            Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colores.onSurfaceVariant,
+                        )
+                    }
+                }
+                estado.celdas.chunked(7).forEach { semana ->
+                    Row(Modifier.fillMaxWidth()) {
+                        semana.forEach { fecha ->
+                            Box(Modifier.weight(1f).height(48.dp)) {
+                                if (fecha != null) CeldaDia(fecha, estado, viajes, onClick = { vm.seleccionar(fecha) })
+                            }
+                        }
                     }
                 }
             }
         }
+        item { TarjetaHoy(estado.outfitDe(estado.hoy)?.name, onClick = { vm.seleccionar(estado.hoy) }) }
+        proximo?.let { viaje -> item { TarjetaProximoViaje(viaje, viajesRepo, estado.hoy) { onAbrirViaje(viaje) } } }
     }
 }
 
+/**
+ * Celda de 48 dp: un punto primary de 5 dp marca un día con outfit; hoy es un círculo onSurface con el número blanco;
+ * los días de un viaje llevan una banda primaryContainer con los extremos redondeados de 14.
+ */
 @Composable
-private fun CeldaDia(fecha: String, estado: CalendarioUiState, onClick: () -> Unit) {
+private fun CeldaDia(fecha: String, estado: CalendarioUiState, viajes: List<Trip>, onClick: () -> Unit) {
     val dia = estado.dias[fecha]
-    val outfit = estado.outfitDe(fecha)
+    val tieneOutfit = estado.outfitDe(fecha) != null
     val esHoy = fecha == estado.hoy
     val colores = MaterialTheme.colorScheme
+    val viaje = viajes.firstOrNull { v -> v.startDate != null && fecha >= v.startDate!! && fecha <= (v.endDate ?: v.startDate!!) }
+    val esInicio = viaje != null && fecha == viaje.startDate
+    val esFin = viaje != null && fecha == (viaje.endDate ?: viaje.startDate)
+    Box(Modifier.fillMaxSize().clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        if (viaje != null) {
+            Box(
+                Modifier.fillMaxWidth().height(28.dp).background(
+                    colores.primaryContainer,
+                    RoundedCornerShape(
+                        topStart = if (esInicio) 14.dp else 0.dp, bottomStart = if (esInicio) 14.dp else 0.dp,
+                        topEnd = if (esFin) 14.dp else 0.dp, bottomEnd = if (esFin) 14.dp else 0.dp,
+                    ),
+                ),
+            )
+        }
+        Box(
+            Modifier.size(36.dp).clip(CircleShape).background(if (esHoy) colores.onSurface else Color.Transparent),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                LocalDate.parse(fecha).day.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (esHoy) Color.White else colores.onSurface,
+            )
+        }
+        if (tieneOutfit || !dia?.note.isNullOrBlank()) {
+            Box(
+                Modifier.align(Alignment.BottomCenter).padding(bottom = 2.dp).size(5.dp).clip(CircleShape)
+                    .background(if (tieneOutfit) colores.primary else colores.outline),
+            )
+        }
+    }
+}
+
+/** Tarjeta "Hoy" con el outfit del día. */
+@Composable
+private fun TarjetaHoy(outfit: String?, onClick: () -> Unit) {
     Column(
-        Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (outfit != null) colores.primaryContainer else colores.surface)
-            .border(if (esHoy) 2.dp else 1.dp, if (esHoy) colores.primary else colores.outlineVariant, RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .padding(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Text(LocalDate.parse(fecha).day.toString(), style = MaterialTheme.typography.labelLarge)
-        if (outfit != null) {
-            Text(outfit.name, style = MaterialTheme.typography.labelSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        } else if (!dia?.note.isNullOrBlank()) {
-            Text("•", color = colores.primary)
+        Text("HOY", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(outfit ?: "Sin outfit para hoy", style = MaterialTheme.typography.titleLarge)
+        Text(
+            if (outfit == null) "Toca para elegir uno" else "Toca para cambiarlo o añadir una nota",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/** Tarjeta "Próximo viaje" en secondaryContainer: destino, fechas, progreso de la maleta y la maleta cerrada. */
+@Composable
+private fun TarjetaProximoViaje(viaje: Trip, viajes: TripRepository, hoy: String, onClick: () -> Unit) {
+    val packing by viajes.observePacking(viaje.id).collectAsState(emptyList())
+    val guardadas = packing.count { it.packed }
+    val total = packing.size
+    val colores = MaterialTheme.colorScheme
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(colores.secondaryContainer)
+            .clickable(onClick = onClick).padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("PRÓXIMO VIAJE", style = MaterialTheme.typography.labelSmall, color = colores.onSecondaryContainer)
+            Text(viaje.destination ?: viaje.name, style = MaterialTheme.typography.titleLarge, color = colores.onSecondaryContainer)
+            formatearFechasViaje(viaje.startDate, viaje.endDate)?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = colores.onSecondaryContainer)
+            }
+            Text(
+                if (total == 0) "Maleta sin preparar" else "$guardadas de $total prendas en la maleta",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colores.onSecondaryContainer,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            if (total > 0) {
+                LinearProgressIndicator(
+                    progress = { guardadas.toFloat() / total },
+                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
+                    color = colores.tertiary,
+                    trackColor = colores.surface,
+                )
+            }
+        }
+        // Maleta cerrada: cuerpo + tapa a escala reducida.
+        Box(Modifier.size(62.dp, 87.dp)) {
+            Image(painterResource(Res.drawable.maleta_cuerpo), null, Modifier.fillMaxSize())
+            Image(painterResource(Res.drawable.maleta_tapa), null, Modifier.offset(y = 7.dp).size(62.dp, 75.dp))
         }
     }
 }

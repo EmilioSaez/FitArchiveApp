@@ -35,7 +35,7 @@ class ArmarioViewModelTest {
         val vm = ArmarioViewModel(GarmentRepositoryEnMemoria(), backgroundScope)
         val estado = vm.estado.first { !it.cargando }
         assertTrue(estado.armarioVacio)
-        assertEquals(PestanaTipo.entries.size + 1, estado.pestanas.size)
+        assertEquals(PestanaTipo.entries.size + 2, estado.pestanas.size)
     }
 
     @Test
@@ -47,12 +47,12 @@ class ArmarioViewModelTest {
         repo.add(prenda(GarmentType.SHOES))
 
         val camisetas = vm.estado.first { it.total == 3 }
-        assertEquals(2, camisetas.prendas.size)
-        assertEquals(2, camisetas.conteos[PestanaTipo.Camisetas.ordinal])
-        assertEquals(1, camisetas.conteos[PestanaTipo.Calzado.ordinal])
+        assertEquals(3, camisetas.prendas.size) // la pestaña inicial es Todo
+        assertEquals(2, camisetas.conteos[PestanaTipo.Camisetas.ordinal + 1])
+        assertEquals(1, camisetas.conteos[PestanaTipo.Calzado.ordinal + 1])
 
-        vm.seleccionarPestana(PestanaTipo.Calzado.ordinal)
-        val calzado = vm.estado.first { it.pestanaActual == PestanaTipo.Calzado.ordinal }
+        vm.seleccionarPestana(PestanaTipo.Calzado.ordinal + 1)
+        val calzado = vm.estado.first { it.pestanaActual == PestanaTipo.Calzado.ordinal + 1 }
         assertEquals(listOf(GarmentType.SHOES), calzado.prendas.map { it.type })
     }
 
@@ -146,7 +146,7 @@ class ArmarioViewModelTest {
         val dos = vm.estado.first { it.total == 2 }
         assertEquals(4, dos.totalArmario)
         assertEquals(2, dos.filtro.numeroCriterios())
-        assertEquals(1, dos.prendas.size) // pestaña Camisetas
+        assertEquals(2, dos.prendas.size) // pestaña Todo
 
         vm.aplicarFiltro(GarmentFilter(color = GarmentColor.RED, season = Season.SUMMER, usage = Usage.WORK))
         val ninguna = vm.estado.first { it.total == 0 }

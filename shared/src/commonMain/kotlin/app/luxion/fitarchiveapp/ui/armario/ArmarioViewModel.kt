@@ -39,7 +39,8 @@ sealed interface Agrupacion {
     data object PorTipo : Agrupacion {
         override val titulo = "Tipo"
         override val pestanas: List<Pestana> =
-            PestanaTipo.entries.map { p -> Pestana(p.name, p.titulo) { it.type in p.tipos } } +
+            listOf(Pestana("TODO", "Todo") { true }) +
+                PestanaTipo.entries.map { p -> Pestana(p.name, p.titulo) { it.type in p.tipos } } +
                 Pestana("FAVORITAS", "Favoritas") { it.favorite }
     }
 

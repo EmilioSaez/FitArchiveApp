@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Puerta del armario (la izquierda; la derecha es la misma con scaleX = -1). Tirador junto al borde que se abre.
+     Gira con graphicsLayer { rotationY; transformOrigin = TransformOrigin(0f, 0.5f) } (derecha: 1f, 0.5f). 126x380 dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="126dp"
+    android:height="380dp"
+    android:viewportWidth="126"
+    android:viewportHeight="380">
+    <path android:fillColor="#7A5A43" android:pathData="M0,0h126v380h-126z" />
+    <path android:fillColor="#EFE3D8" android:pathData="M2,2h122v376h-122z" />
+    <path android:strokeColor="#D2BCA8" android:strokeWidth="1.5" android:pathData="M16,16h94v348h-94z" />
+    <path android:fillColor="#7A5A43" android:pathData="M109,170h5v44h-5z" />
+</vector>

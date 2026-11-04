@@ -1,11 +1,11 @@
 package app.luxion.fitarchiveapp
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,6 +20,7 @@ import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
 import app.luxion.fitarchiveapp.ui.calendario.CalendarioScreen
+import app.luxion.fitarchiveapp.ui.carpetas.CarpetasScreen
 import app.luxion.fitarchiveapp.ui.detalle.DetallePrendaScreen
 import app.luxion.fitarchiveapp.ui.hoy.OutfitDelDiaScreen
 import app.luxion.fitarchiveapp.ui.navigation.Destino
@@ -29,6 +30,8 @@ import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import app.luxion.fitarchiveapp.ui.navigation.BarraNavegacion
+import app.luxion.fitarchiveapp.ui.portada.PortadaScreen
 import app.luxion.fitarchiveapp.ui.viaje.ViajesScreen
 import app.luxion.fitarchiveapp.weather.CacheTiempo
 import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
@@ -50,6 +53,22 @@ fun App(repositories: Repositories) {
             PantallaCarga(onTerminado = { cargando = false })
             return@FitArchiveTheme
         }
+        var anadiendo by remember { mutableStateOf(false) }
+        var portada by remember { mutableStateOf(true) }
+        if (portada) {
+            val prendas by repositories.garments.observeAll().collectAsState(emptyList())
+            val looks by repositories.outfits.observeAll().collectAsState(emptyList())
+            PortadaScreen(
+                prendas,
+                looks.size,
+                onVerOutfitDeHoy = { portada = false },
+                onAnadirPrenda = {
+                    portada = false
+                    anadiendo = true
+                },
+            )
+            return@FitArchiveTheme
+        }
         // Cada día que pasa con un outfit asignado suma un uso a sus prendas (T33).
         LaunchedEffect(Unit) {
             runCatching { repositories.usos.registrarHasta(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
@@ -57,7 +76,6 @@ fun App(repositories: Repositories) {
         var destino by remember { mutableStateOf(Destino.Hoy) }
         // "Configurar ubicación" abre Perfil ya en "Ubicación y tiempo"; entrar por la barra inferior empieza arriba.
         var perfilEnUbicacion by remember { mutableStateOf(false) }
-        var anadiendo by remember { mutableStateOf(false) }
         if (anadiendo) {
             val quitaFondo = remember { crearQuitaFondo() }
             AnadirPrendaFlow(
@@ -83,6 +101,10 @@ fun App(repositories: Repositories) {
             )
             return@FitArchiveTheme
         }
+        var viendoViajes by remember { mutableStateOf(false) }
+        var viajeInicialId by remember { mutableStateOf<Long?>(null) }
+        var viendoCarpetas by remember { mutableStateOf(false) }
+        var prendasIniciales by remember { mutableStateOf(emptyList<Long>()) }
         var editandoOutfit by remember { mutableStateOf(false) }
         var outfitEditadoId by remember { mutableStateOf<Long?>(null) }
         if (editandoOutfit) {
@@ -92,8 +114,33 @@ fun App(repositories: Repositories) {
                 onTerminado = {
                     editandoOutfit = false
                     outfitEditadoId = null
+                    prendasIniciales = emptyList()
                 },
                 outfitId = outfitEditadoId,
+                prendasIniciales = prendasIniciales,
+            )
+            return@FitArchiveTheme
+        }
+        if (viendoViajes) {
+            ViajesScreen(
+                repositories.trips,
+                repositories.outfits,
+                repositories.garments,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
+                viajeInicialId = viajeInicialId,
+                onVolver = {
+                    viendoViajes = false
+                    viajeInicialId = null
+                },
+            )
+            return@FitArchiveTheme
+        }
+        if (viendoCarpetas) {
+            CarpetasScreen(
+                repositories.garments,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
+                onVolver = { viendoCarpetas = false },
+                onAbrirPrenda = { detalleId = it.id },
             )
             return@FitArchiveTheme
         }
@@ -103,19 +150,9 @@ fun App(repositories: Repositories) {
         val seleccionCiudad = remember(servicioTiempo, almacenCiudad) { SeleccionCiudad(servicioTiempo, almacenCiudad) }
         Scaffold(
             bottomBar = {
-                NavigationBar {
-                    Destino.entries.forEach { item ->
-                        NavigationBarItem(
-                            selected = item == destino,
-                            onClick = {
-                                destino = item
-                                perfilEnUbicacion = false
-                            },
-                            icon = { Box {} },
-                            label = { Text(item.titulo) },
-                            alwaysShowLabel = true,
-                        )
-                    }
+                BarraNavegacion(destino) {
+                    destino = it
+                    perfilEnUbicacion = false
                 }
             },
         ) { padding ->
@@ -142,6 +179,12 @@ fun App(repositories: Repositories) {
                     repositories.garments,
                     onAnadirPrenda = { anadiendo = true },
                     onAbrirPrenda = { detalleId = it.id },
+                    onCrearOutfit = {
+                        prendasIniciales = it
+                        outfitEditadoId = null
+                        editandoOutfit = true
+                    },
+                    onAbrirCarpetas = { viendoCarpetas = true },
                     modifier = Modifier.padding(padding),
                 )
                 Destino.Outfits -> OutfitsScreen(
@@ -157,13 +200,13 @@ fun App(repositories: Repositories) {
                 Destino.Calendario -> CalendarioScreen(
                     repositories.calendar,
                     repositories.outfits,
-                    Modifier.padding(padding),
-                )
-                Destino.Viajes -> ViajesScreen(
                     repositories.trips,
-                    repositories.outfits,
-                    repositories.garments,
                     Modifier.padding(padding),
+                    onAbrirViaje = {
+                        viajeInicialId = it.id
+                        viendoViajes = true
+                    },
+                    onAbrirViajes = { viendoViajes = true },
                 )
             }
         }
