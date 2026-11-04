@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Maleta abierta: asa, carcasa, forro interior (donde van las fotos de las prendas, área x=18..188, y=42..252) y ruedas.
+     La tapa (maleta_tapa.xml) va encima en y=24 y se levanta al abrir. 206x290 dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="206dp"
+    android:height="290dp"
+    android:viewportWidth="206"
+    android:viewportHeight="290">
+    <path android:strokeColor="#3B2A1E" android:strokeWidth="5" android:strokeLineJoin="round" android:pathData="M72,26V6a4,4 0,0 1,4 -4h54a4,4 0,0 1,4 4v20" />
+    <path android:fillColor="#7A5A43" android:pathData="M14,24h178a14,14 0,0 1,14 14v222a14,14 0,0 1,-14 14h-178a14,14 0,0 1,-14 -14v-222a14,14 0,0 1,14 -14z" />
+    <path android:fillColor="#E4D3C3" android:pathData="M18,34h170a8,8 0,0 1,8 8v210a8,8 0,0 1,-8 8h-170a8,8 0,0 1,-8 -8v-210a8,8 0,0 1,8 -8z" />
+    <path android:fillColor="#3B2A1E" android:pathData="M22,283m-7,0a7,7 0,1 0,14 0a7,7 0,1 0,-14 0 M184,283m-7,0a7,7 0,1 0,14 0a7,7 0,1 0,-14 0" />
+</vector>

@@ -1,21 +1,45 @@
 package app.luxion.fitarchiveapp.ui.outfit
 
 import app.luxion.fitarchiveapp.ui.components.Titular
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import app.luxion.fitarchiveapp.resources.Res
+import app.luxion.fitarchiveapp.resources.percha
+import app.luxion.fitarchiveapp.ui.theme.Iconos
+import app.luxion.fitarchiveapp.ui.theme.estiloCartela
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -24,7 +48,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -78,33 +101,159 @@ fun OutfitsScreen(
         )
     }
 
+    var soloFavoritos by remember { mutableStateOf(true) }
+    val visibles = if (soloFavoritos) estado.outfits.filter { it.outfit.favorite } else estado.outfits
+
     Column(modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Titular("Mis outfits", Modifier.weight(1f))
+            Titular("Tus looks", Modifier.weight(1f), subtitulo = "Colgados como en una exposición")
             if (!estado.vacio) Button(onClick = onNuevoOutfit) { Text("Nuevo outfit") }
         }
         when {
             estado.cargando -> Box(Modifier.weight(1f))
             estado.vacio -> EstadoVacio(onNuevoOutfit, Modifier.weight(1f))
-            else -> LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(estado.outfits, key = { it.outfit.id }) { item ->
-                    TarjetaOutfit(
-                        item,
-                        onAbrir = { onAbrirOutfit(item.outfit) },
-                        onFavorito = { vm.alternarFavorito(item.outfit) },
-                        onEliminar = { vm.pedirEliminar(item.outfit) },
-                        onCompartir = { prendas ->
+            else -> {
+                Row(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = soloFavoritos,
+                        onClick = { soloFavoritos = true },
+                        label = { Text("Favoritos") },
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.heightIn(min = 40.dp),
+                    )
+                    FilterChip(
+                        selected = !soloFavoritos,
+                        onClick = { soloFavoritos = false },
+                        label = { Text("Todos") },
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.heightIn(min = 40.dp),
+                    )
+                }
+                if (visibles.isEmpty()) {
+                    Box(Modifier.weight(1f).fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Aún no tienes looks favoritos. Toca el corazón de un look para colgarlo aquí.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else {
+                    Galeria(
+                        visibles,
+                        Modifier.weight(1f),
+                        onAbrir = { onAbrirOutfit(it.outfit) },
+                        onFavorito = { vm.alternarFavorito(it.outfit) },
+                        onEliminar = { vm.pedirEliminar(it.outfit) },
+                        onCompartir = { item, prendas ->
                             compartir.compartir(item.outfit.name, prendas) { vm.mostrarError("No se pudo compartir el outfit") }
                         },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Barra de madera de 6 dp y, colgados de ella, los outfits en un carrusel con snap; el siguiente asoma. */
+@Composable
+private fun Galeria(
+    outfits: List<OutfitEnLista>,
+    modifier: Modifier,
+    onAbrir: (OutfitEnLista) -> Unit,
+    onFavorito: (OutfitEnLista) -> Unit,
+    onEliminar: (OutfitEnLista) -> Unit,
+    onCompartir: (OutfitEnLista, List<PrendaAvatar>) -> Unit,
+) {
+    val estadoLista = rememberLazyListState()
+    Box(modifier.fillMaxWidth()) {
+        Box(Modifier.fillMaxWidth().height(6.dp).background(MaterialTheme.colorScheme.secondary))
+        LazyRow(
+            state = estadoLista,
+            flingBehavior = rememberSnapFlingBehavior(estadoLista),
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(28.dp),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            items(outfits, key = { it.outfit.id }) { item ->
+                MarcoOutfit(item, onAbrir, onFavorito, onEliminar, onCompartir)
+            }
+        }
+    }
+}
+
+/** Percha de 120×56, marco blanco de 228×300 con paspartú y cartela con nombre y ocasión. */
+@Composable
+private fun MarcoOutfit(
+    item: OutfitEnLista,
+    onAbrir: (OutfitEnLista) -> Unit,
+    onFavorito: (OutfitEnLista) -> Unit,
+    onEliminar: (OutfitEnLista) -> Unit,
+    onCompartir: (OutfitEnLista, List<PrendaAvatar>) -> Unit,
+) {
+    // Cada marco carga solo sus miniaturas, y solo cuando el carrusel lo compone (carga perezosa con caché).
+    val imagenes = rememberMiniaturas(item.prendas.map { it.prenda.photoPath })
+    val prendas = item.prendas.mapNotNull { p ->
+        imagenes[p.prenda.photoPath]?.let {
+            PrendaAvatar(it, subtipoPorDefecto(p.prenda.type), AjustePrenda(p.colocacion.x, p.colocacion.y, p.colocacion.scale))
+        }
+    }
+    Column(Modifier.width(228.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Image(painterResource(Res.drawable.percha), contentDescription = null, modifier = Modifier.size(120.dp, 56.dp))
+        Box(
+            Modifier
+                .size(228.dp, 300.dp)
+                .shadow(2.dp, RoundedCornerShape(2.dp))
+                .background(Color.White)
+                .clickable { onAbrir(item) }
+                .padding(10.dp)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            AvatarConPrendas(prendas, Modifier.fillMaxHeight().padding(12.dp))
+            Box(
+                Modifier.align(Alignment.TopEnd).padding(4.dp).size(40.dp).clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable { onFavorito(item) }
+                    .semantics { contentDescription = if (item.outfit.favorite) "Quitar de favoritos" else "Marcar como favorito" },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    if (item.outfit.favorite) Iconos.CorazonRelleno else Iconos.Looks,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+        var menu by remember { mutableStateOf(false) }
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f).padding(start = 8.dp)) {
+                Text(item.outfit.name, style = estiloCartela(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    (item.outfit.occasion?.etiqueta() ?: "Sin ocasión").uppercase() + " · " +
+                        if (item.prendas.size == 1) "1 prenda" else "${item.prendas.size} prendas",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            // Compartir y Eliminar quedan tras el menú: en una exposición no se ve "Eliminar".
+            Box {
+                IconButton(onClick = { menu = true }) { Icon(Iconos.MasVertical, contentDescription = "Más acciones") }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Compartir") },
+                        enabled = prendas.isNotEmpty(),
+                        onClick = { menu = false; onCompartir(item, prendas) },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Eliminar", color = MaterialTheme.colorScheme.error) },
+                        onClick = { menu = false; onEliminar(item) },
                     )
                 }
             }
@@ -119,7 +268,7 @@ private fun EstadoVacio(onNuevoOutfit: () -> Unit, modifier: Modifier = Modifier
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
     ) {
-        Text("Aún no tienes outfits", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+        Text("Aún no tienes looks", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
         Text(
             "Combina las prendas de tu armario sobre el avatar y guarda tus looks favoritos.",
             style = MaterialTheme.typography.bodyLarge,
@@ -127,55 +276,5 @@ private fun EstadoVacio(onNuevoOutfit: () -> Unit, modifier: Modifier = Modifier
             textAlign = TextAlign.Center,
         )
         Button(onClick = onNuevoOutfit) { Text("Nuevo outfit") }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun TarjetaOutfit(
-    item: OutfitEnLista,
-    onAbrir: () -> Unit,
-    onFavorito: () -> Unit,
-    onEliminar: () -> Unit,
-    onCompartir: (List<PrendaAvatar>) -> Unit,
-) {
-    // Cada tarjeta carga solo sus miniaturas, y solo cuando la cuadrícula la compone (carga perezosa con caché).
-    val imagenes = rememberMiniaturas(item.prendas.map { it.prenda.photoPath })
-    val prendas = item.prendas.mapNotNull { p ->
-        imagenes[p.prenda.photoPath]?.let {
-            PrendaAvatar(it, subtipoPorDefecto(p.prenda.type), AjustePrenda(p.colocacion.x, p.colocacion.y, p.colocacion.scale))
-        }
-    }
-    Column(
-        Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onAbrir)
-            .padding(8.dp),
-    ) {
-        AvatarConPrendas(prendas, Modifier.fillMaxWidth().align(Alignment.CenterHorizontally))
-        Text(
-            item.outfit.name,
-            Modifier.padding(top = 4.dp),
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            item.outfit.occasion?.etiqueta() ?: "Sin ocasión",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            // Tres acciones en media pantalla: si no caben en una línea, la última pasa a la siguiente.
-            val relleno = PaddingValues(horizontal = 8.dp)
-            TextButton(onClick = onFavorito, contentPadding = relleno) { Text(if (item.outfit.favorite) "★" else "☆") }
-            TextButton(onClick = { onCompartir(prendas) }, enabled = prendas.isNotEmpty(), contentPadding = relleno) {
-                Text("Compartir", maxLines = 1, softWrap = false)
-            }
-            TextButton(onClick = onEliminar, contentPadding = relleno) {
-                Text("Eliminar", color = MaterialTheme.colorScheme.error, maxLines = 1, softWrap = false)
-            }
-        }
     }
 }

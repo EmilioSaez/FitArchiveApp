@@ -34,8 +34,6 @@ fun Titular(
             )
         }
         Text(titulo, style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onBackground)
-        Spacer(Modifier.height(2.dp))
-        Spacer(Modifier.width(36.dp).height(2.dp).background(MaterialTheme.colorScheme.primary))
         subtitulo?.let {
             Spacer(Modifier.height(4.dp))
             Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

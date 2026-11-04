@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Armario de la portada: cornisa, cuerpo, interior con barra y balda, y patas. Las puertas van aparte
+     (armario_puerta.xml) y se colocan encima: izquierda en x=10, derecha en x=146 (espejada), y=28. 272x440 dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="272dp"
+    android:height="440dp"
+    android:viewportWidth="272"
+    android:viewportHeight="440">
+    <path android:fillColor="#7A5A43" android:pathData="M-8,4a4,4 0,0 1,4 -4h280a4,4 0,0 1,4 4v14h-288z" />
+    <path android:fillColor="#7A5A43" android:pathData="M0,18h272v396a4,4 0,0 1,-4 4h-264a4,4 0,0 1,-4 -4z" />
+    <path android:fillColor="#3B2A1E" android:pathData="M10,28h252v380h-252z" />
+    <path android:strokeColor="#B89A80" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M24,62H248" />
+    <path android:strokeColor="#B89A80" android:strokeWidth="4" android:pathData="M24,294H248" />
+    <path android:fillColor="#7A5A43" android:pathData="M14,418h14v18a3,3 0,0 1,-3 3h-8a3,3 0,0 1,-3 -3z M244,418h14v18a3,3 0,0 1,-3 3h-8a3,3 0,0 1,-3 -3z" />
+</vector>

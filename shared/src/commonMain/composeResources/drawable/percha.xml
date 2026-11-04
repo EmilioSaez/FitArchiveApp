@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Percha de los filtros y de la galería. Trazo madera #7A5A43; tíntala con secondary si hace falta. 76x40 dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="76dp"
+    android:height="40dp"
+    android:viewportWidth="76"
+    android:viewportHeight="40">
+    <path
+        android:pathData="M38,17V11a5,5 0,1 1,5 -5"
+        android:strokeColor="#7A5A43"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M4,37L38,19L72,37Z"
+        android:strokeColor="#7A5A43"
+        android:strokeWidth="2.8"
+        android:strokeLineJoin="round" />
+</vector>

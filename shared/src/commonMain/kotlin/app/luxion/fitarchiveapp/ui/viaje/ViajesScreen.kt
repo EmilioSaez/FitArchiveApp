@@ -1,6 +1,22 @@
 package app.luxion.fitarchiveapp.ui.viaje
 
 import app.luxion.fitarchiveapp.ui.components.Titular
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.heightIn
+import app.luxion.fitarchiveapp.ui.theme.Iconos
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,12 +85,21 @@ fun ViajesScreen(
     outfits: OutfitRepository,
     armario: GarmentRepository,
     modifier: Modifier = Modifier,
+    /** Viaje que se abre directamente (desde la tarjeta "Próximo viaje" del calendario). */
+    viajeInicialId: Long? = null,
+    /** Volver a la pantalla de origen (el calendario); null oculta el botón. */
+    onVolver: (() -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val vm = remember(viajes, outfits, armario) {
         ViajesViewModel(viajes, outfits, armario, scope) { Clock.System.now().toEpochMilliseconds() }
     }
     val estado by vm.estado.collectAsState()
+    LaunchedEffect(viajeInicialId, estado.viajes) {
+        if (viajeInicialId != null && estado.abierto == null) {
+            estado.viajes.firstOrNull { it.id == viajeInicialId }?.let(vm::abrir)
+        }
+    }
     var formulario by remember { mutableStateOf<FormularioAbierto?>(null) }
 
     formulario?.let { abierto ->
@@ -106,7 +131,7 @@ fun ViajesScreen(
 
     val abierto = estado.abierto
     if (abierto == null) {
-        ListaViajes(estado, modifier, onNuevo = { formulario = FormularioAbierto(null) }, onAbrir = vm::abrir)
+        ListaViajes(estado, modifier, onNuevo = { formulario = FormularioAbierto(null) }, onAbrir = vm::abrir, onVolver = onVolver)
     } else {
         DetalleViaje(
             estado, abierto, vm, modifier,
@@ -121,12 +146,13 @@ private class FormularioAbierto(val editado: Trip?)
 private fun Trip.fechas(): String? = formatearFechasViaje(startDate, endDate)
 
 @Composable
-private fun ListaViajes(estado: ViajesUiState, modifier: Modifier, onNuevo: () -> Unit, onAbrir: (Trip) -> Unit) {
+private fun ListaViajes(estado: ViajesUiState, modifier: Modifier, onNuevo: () -> Unit, onAbrir: (Trip) -> Unit, onVolver: (() -> Unit)?) {
     Column(modifier.fillMaxSize()) {
         Row(
-            Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 16.dp),
+            Modifier.fillMaxWidth().padding(start = if (onVolver == null) 20.dp else 8.dp, end = 16.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (onVolver != null) IconButton(onClick = onVolver) { Icon(Iconos.Volver, contentDescription = "Volver") }
             Titular("Viajes", Modifier.weight(1f))
             if (!estado.vacio) Button(onClick = onNuevo) { Text("Nuevo viaje") }
         }
@@ -179,6 +205,7 @@ private fun DetalleViaje(
     onEditar: () -> Unit,
 ) {
     var anadiendoPrenda by remember { mutableStateOf(false) }
+    var maletaAbierta by remember { mutableStateOf(false) }
     if (anadiendoPrenda) {
         ElegirPrendaDialog(estado.prendasDisponibles, onElegir = vm::anadirPrenda, onCerrar = { anadiendoPrenda = false })
     }
@@ -191,8 +218,9 @@ private fun DetalleViaje(
                 TextButton(onClick = onEditar) { Text("Editar") }
                 TextButton(onClick = { vm.pedirEliminar(viaje) }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
             }
-            Text(viaje.name, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
-            viaje.destination?.takeIf { it != viaje.name }?.let { Text(it, style = MaterialTheme.typography.titleMedium) }
+            Text(viaje.name, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
+            // Si el nombre ya contiene el destino no se repite.
+            viaje.destination?.takeIf { !viaje.name.contains(it, ignoreCase = true) }?.let { Text(it, style = MaterialTheme.typography.titleMedium) }
             viaje.fechas()?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -214,12 +242,7 @@ private fun DetalleViaje(
                     }
                 }
             }
-            Row(Modifier.fillMaxWidth().padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Maleta", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                TextButton(onClick = { anadiendoPrenda = true }, enabled = estado.prendasDisponibles.isNotEmpty()) {
-                    Text("Añadir prenda")
-                }
-            }
+            Text("EQUIPAJE", Modifier.padding(top = 16.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (maleta.items.isEmpty()) {
                 Text(
                     "La maleta está vacía: elige outfits o añade prendas sueltas.",
@@ -241,44 +264,89 @@ private fun DetalleViaje(
                     )
                 }
             }
-        }
-        items(maleta.items, key = { it.prenda.id }) { item ->
-            FilaMaleta(item, onGuardada = { vm.marcarGuardada(item.prenda, it) }, onQuitar = { vm.quitarPrenda(item.prenda) })
-            HorizontalDivider()
+            // A la izquierda la maleta (206 dp) y a la derecha la lista de equipaje con checks.
+            Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                // La tapa sube 196 dp al abrir: se reserva ese hueco para que no tape lo de arriba.
+                val huecoTapa by animateDpAsState(if (maletaAbierta) 96.dp else 0.dp, tween(800))
+                Column(Modifier.padding(top = huecoTapa), horizontalAlignment = Alignment.CenterHorizontally) {
+                    MaletaAnimada(maleta.items.filter { it.guardada }.map { it.prenda }, maletaAbierta, onAlternar = { maletaAbierta = !maletaAbierta })
+                    Button(onClick = { maletaAbierta = !maletaAbierta }, Modifier.padding(top = 12.dp).heightIn(min = 52.dp)) {
+                        Text(if (maletaAbierta) "Cerrar la maleta" else "Abrir la maleta", style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+                Column(Modifier.weight(1f)) {
+                    maleta.items.forEach { item ->
+                        FilaMaleta(item, onGuardada = { vm.marcarGuardada(item.prenda, it) }, onQuitar = { vm.quitarPrenda(item.prenda) })
+                    }
+                    OutlinedButton(
+                        onClick = { anadiendoPrenda = true },
+                        enabled = estado.prendasDisponibles.isNotEmpty(),
+                        modifier = Modifier.padding(top = 8.dp).heightIn(min = 48.dp),
+                    ) { Text("Añadir más") }
+                }
+            }
         }
     }
 }
 
+/**
+ * Fila de equipaje de 44+ dp: círculo de 22 (marcado = tertiary con check), nombre y origen en una línea cada uno.
+ * Quitar una prenda añadida a mano: pulsación larga y menú.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FilaMaleta(item: ItemMaleta, onGuardada: (Boolean) -> Unit, onQuitar: () -> Unit) {
     val prenda = item.prenda
-    val imagen by produceState<ImageBitmap?>(null, prenda.photoPath) { value = cargarMiniatura(prenda.photoPath) }
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Checkbox(checked = item.guardada, onCheckedChange = onGuardada)
-        Box(
-            Modifier.size(48.dp).clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.primaryContainer),
+    val tertiary = MaterialTheme.colorScheme.tertiary
+    var menu by remember { mutableStateOf(false) }
+    Box {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                .combinedClickable(
+                    role = Role.Checkbox,
+                    onClick = { onGuardada(!item.guardada) },
+                    onLongClick = { if (item.manual) menu = true },
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            imagen?.let { Image(it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+            Box(
+                Modifier.size(22.dp).clip(CircleShape)
+                    .then(
+                        if (item.guardada) Modifier.background(tertiary)
+                        else Modifier.border(1.5.dp, MaterialTheme.colorScheme.outline, CircleShape),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (item.guardada) {
+                    Icon(Iconos.Check, contentDescription = "Guardada", tint = MaterialTheme.colorScheme.onTertiary, modifier = Modifier.size(14.dp))
+                }
+            }
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "${prenda.type.etiqueta()} ${prenda.color.etiqueta().lowercase()}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (item.guardada) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                    textDecoration = if (item.guardada) TextDecoration.LineThrough else null,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                val origen = when {
+                    item.outfits.isNotEmpty() -> item.outfits.joinToString { "Look «$it»" }
+                    else -> "Añadida a mano"
+                } + if (prenda.dirty) " · sucia" else ""
+                Text(
+                    origen,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
-        Column(Modifier.weight(1f)) {
-            Text("${prenda.type.etiqueta()} · ${prenda.color.etiqueta()}", style = MaterialTheme.typography.bodyLarge)
-            val detalle = when {
-                item.outfits.isNotEmpty() -> item.outfits.joinToString()
-                else -> "Añadida a mano"
-            } + if (prenda.dirty) " · sucia" else ""
-            Text(
-                detalle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+            DropdownMenuItem(text = { Text("Quitar de la maleta") }, onClick = { menu = false; onQuitar() })
         }
-        if (item.manual) TextButton(onClick = onQuitar) { Text("Quitar") }
     }
 }
 
