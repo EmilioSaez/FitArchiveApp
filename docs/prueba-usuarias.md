@@ -104,4 +104,4 @@ Escala 1 (nada) a 5 (mucho) salvo indicación.
 13. ¿La seguirías usando? ¿La recomendarías a una amiga? (Sí / Quizá / No, y por qué)
 
 ## 8. Estado y bloqueos conocidos antes de la prueba
-Ver `docs/bugs-v10.md`. Resumen: **la build actual no ofrece en la interfaz exportar/importar copia** (T45 solo implementó el servicio y los tests en `shared`); la tarea 9 del guion no se puede hacer hasta que haya pantalla. Ver ese documento para el detalle.
+Ver `docs/bugs-v10.md`. Resumen: B15 (sin interfaz de exportar/importar copia) está resuelto: Perfil tiene "Copia de seguridad" y muestra la versión de la app, así que la tarea 9 del guion ya se puede hacer. Ver ese documento para el detalle.

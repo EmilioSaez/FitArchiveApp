@@ -15,6 +15,14 @@ en simulador/dispositivo y compilar el proyecto Xcode.
 - Quitar fondo (Vision `VNGenerateForegroundInstanceMaskRequest`, iOS 17+): resultado del recorte, PNG con transparencia, `createCGImage` con el rect de `ci.extent`, comportamiento en iOS < 17.
 - Ubicacion iOS (T39b), `IosPhotoStore` y carga de imagenes: solo comprobado que compilan, no su ejecucion.
 
+## Copia de seguridad y versión (B15, O19)
+`SelectorCopia.ios.kt` (`UIDocumentPickerViewController` para exportar con `forExportingURLs` e importar con `forOpeningContentTypes`, `asCopy = true`) y `VersionApp.ios.kt` compilan, pero no se han ejecutado. Sin validar en un Mac:
+- Que el selector se presente sobre el controlador superior y que los delegados lleguen en el hilo principal.
+- Exportar: archivo temporal en `NSTemporaryDirectory` copiado donde elija la usuaria, y que `.fitarchive` se guarde con ese nombre.
+- Importar: que `UTTypeData` deje elegir archivos `.fitarchive` desde Archivos/iCloud y se lean sus bytes completos.
+- Ida y vuelta con `IosPhotoStore`: las rutas de foto son relativas a Documents, y `Repositories.copia` usa `IosPhotoStore()`.
+- Versión: `CFBundleShortVersionString`/`CFBundleVersion` en `Info.plist` (hoy sin proyecto Xcode).
+
 ## Publicación (T51): lo que exige un Mac
 Checklist completo en `docs/publicacion.md` (sección 7). No se ha intentado nada de esto en Windows:
 - Crear el proyecto Xcode (no existe `.xcodeproj` en `iosApp/`) e integrar el framework `Shared`.

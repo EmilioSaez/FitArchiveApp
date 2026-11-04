@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,6 +29,7 @@ import app.luxion.fitarchiveapp.ui.navigation.Destino
 import app.luxion.fitarchiveapp.ui.outfit.EditorOutfitScreen
 import app.luxion.fitarchiveapp.ui.outfit.OutfitsScreen
 import app.luxion.fitarchiveapp.ui.components.SeccionUbicacionTiempo
+import app.luxion.fitarchiveapp.ui.copia.SeccionCopia
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
@@ -174,6 +177,12 @@ fun App(repositories: Repositories) {
                     irAlContenidoExtra = perfilEnUbicacion,
                 ) {
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
+                    repositories.copia?.let { SeccionCopia(it) }
+                    Text(
+                        "FitArchive ${rememberVersionApp()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 Destino.Armario -> ArmarioScreen(
                     repositories.garments,

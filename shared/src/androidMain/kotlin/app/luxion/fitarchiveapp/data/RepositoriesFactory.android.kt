@@ -3,6 +3,7 @@ package app.luxion.fitarchiveapp.data
 import android.content.Context
 import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import app.luxion.fitarchiveapp.backup.AndroidPhotoStore
 import app.luxion.fitarchiveapp.db.FitArchiveDatabase
 
 /** Crea la base de datos local de Android y los repositorios sobre ella. Llamar una sola vez por proceso. */
@@ -17,5 +18,5 @@ fun crearRepositories(context: Context): Repositories {
             }
         },
     )
-    return Repositories(FitArchiveDatabase(driver))
+    return Repositories(FitArchiveDatabase(driver), photos = AndroidPhotoStore(context.applicationContext.filesDir))
 }
