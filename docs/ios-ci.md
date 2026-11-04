@@ -42,11 +42,11 @@ Nunca subas al repo certificados, claves ni perfiles (`.gitignore` ya excluye `*
 TestFlight exige un `CFBundleVersion` mayor en cada subida para la misma versión.
 - Por defecto el lane usa `latest_testflight_build_number + 1` (no hace falta tocar nada).
 - Para fijarlo, pásalo en el campo *build_number* al lanzar el workflow (o `BUILD_NUMBER`).
-- La versión visible (`CFBundleShortVersionString`, p. ej. 1.0.0) se cambia en `project.yml`.
+- La versión visible (`MARKETING_VERSION`, p. ej. 1.0.0) se cambia en `project.yml`; el build se inyecta como `CURRENT_PROJECT_VERSION` en `xcodebuild`.
 
 ## Sin probar (todo)
 Nada se ha ejecutado: no hay cuenta de Apple ni Mac. Solo se validó la sintaxis YAML del workflow. Riesgos a vigilar en la primera ejecución:
 - Opciones de `build_app`/`export_options` y el nombre exacto del perfil (`IOS_PROFILE_NAME`).
 - Que `xcodegen generate` y el build del framework `Shared` (T53) funcionen en `macos-15`.
-- Que `increment_build_number` actúe sobre el `.xcodeproj` generado (si no, mover `CURRENT_PROJECT_VERSION` a una variable de `project.yml`).
+- Que `CURRENT_PROJECT_VERSION` pasado por `xcargs` sobrescriba el valor de `project.yml` (T53) y llegue al `CFBundleVersion` del Info.plist.
 - Formato del `.p12` (ver nota de `-legacy`).
