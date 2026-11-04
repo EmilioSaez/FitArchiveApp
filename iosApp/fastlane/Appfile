@@ -1,0 +1,3 @@
+# Identificador de la app. El resto (equipo, claves) llega por variables de entorno desde los secretos de CI.
+app_identifier("app.luxion.fitarchiveapp")
+team_id(ENV["APPLE_TEAM_ID"]) if ENV["APPLE_TEAM_ID"]
