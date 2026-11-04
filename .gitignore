@@ -25,3 +25,7 @@ keystore.properties
 *.p8
 *.mobileprovision
 mapping.txt
+
+# iOS: proyecto generado por XcodeGen
+iosApp/*.xcodeproj/
+iosApp/*.xcworkspace/

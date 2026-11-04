@@ -70,3 +70,11 @@ Oleadas: 1) base T01–T04 + contenido T23–T26 + avatar T16 (sin código). 2) 
   - Estado: **pendiente de usuarias reales**. Preparado: guion y cuestionario (`docs/prueba-usuarias.md`), distribución y reporte de errores (`docs/distribucion-prueba.md`) y prueba de humo del release candidato (`docs/bugs-v10.md`). B15 (T45 sin interfaz de exportar/importar) resuelto: Perfil ya tiene "Copia de seguridad" y muestra la versión (O19). Queda la prueba con usuarias reales; la tarea 9 del guion ya se puede hacer.
 - [x] T52 Rediseño visual (portada, perchas, carpetas, editor, galería, calendario y maleta) — Diseño — T46
 - [ ] T51 Publicar en Google Play y App Store — Base — T48–T50
+
+## iOS sin Mac (hoja de ruta)
+Objetivo: llegar a TestFlight sin un Mac propio, generando el proyecto Xcode con XcodeGen y compilando/firmando en runners macOS de GitHub Actions. Probar en iPhone real sigue siendo necesario (Vision, cámara, galería, ubicación).
+- [x] T53 Proyecto Xcode generado con XcodeGen (`iosApp/project.yml`, Info.plist, `PrivacyInfo.xcprivacy`, icono, build phase del framework `Shared`) — Base — T48
+- [ ] T54 CI en macOS: compilar iOS (simulador, sin firma) en PRs y `develop` con GitHub Actions — Base — T53
+- [ ] T55 Firma y subida automática a TestFlight (fastlane, secretos de GitHub) — Base — T54 y cuenta de Apple Developer
+- [ ] T56 Validar iOS en iPhone real vía TestFlight (cámara, PHPicker, Vision iOS 17+, ubicación, copia) y corregir — QA — T55 y alguien con iPhone
+- [ ] T57 Publicar en App Store (ficha, capturas, App Privacy, revisión) — Base — T56, T50
