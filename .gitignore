@@ -26,6 +26,9 @@ keystore.properties
 *.mobileprovision
 mapping.txt
 
+# iOS: proyecto generado por XcodeGen
+iosApp/*.xcodeproj/
+iosApp/*.xcworkspace/
 # fastlane
 iosApp/build/
 iosApp/fastlane/report.xml

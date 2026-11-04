@@ -28,3 +28,12 @@ Checklist completo en `docs/publicacion.md` (sección 7). No se ha intentado nad
 - Crear el proyecto Xcode (no existe `.xcodeproj` en `iosApp/`) e integrar el framework `Shared`.
 - Completar `Info.plist` (`CFBundleLocalizations`, `ITSAppUsesNonExemptEncryption`, versiones), `PrivacyInfo.xcprivacy` y el `AppIcon.appiconset` desde `store/ios/AppIcon-1024.png`.
 - Firma con cuenta de Apple Developer, Archive, TestFlight y App Store Connect.
+
+## Proyecto XcodeGen (T53): solo se confirma en CI
+Ver `docs/ios-xcodegen.md`. En Windows solo se validó: YAML/plist/JSON válidos, rutas existentes y `:shared:compileKotlinIosSimulatorArm64`. Sin confirmar hasta el primer run de macOS (T54):
+- Que `xcodegen generate` acepte `project.yml` (claves, `preBuildScripts`, `excludes` del Info.plist).
+- Que el Run Script de Gradle encuentre `./gradlew` ejecutable y que `embedAndSignAppleFrameworkForXcode` deje el framework en `FRAMEWORK_SEARCH_PATHS`.
+- Enlazado: `-lsqlite3` suficiente con el framework estático; `import Shared` resuelto.
+- Que el catálogo de assets compile y App Store Connect acepte el icono sin alfa.
+- Que los motivos de `PrivacyInfo.xcprivacy` sean los correctos (revisar el aviso de privacidad al subir a TestFlight).
+- Mínimo iOS 17.0 elegido por Vision; confirmar si se quiere bajar.

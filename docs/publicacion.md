@@ -66,7 +66,7 @@ Estado de `store/`:
 
 ## 7. iOS (requiere un Mac con Xcode)
 Detalle de lo no validado en `docs/ios-pendiente.md`. Nada de esto se ha intentado en Windows.
-- ⬜ **El proyecto Xcode no está en el repo** (`iosApp/` solo tiene fuentes Swift, `Info.plist` y `InfoPlist.strings`, sin `.xcodeproj`). Crearlo en el Mac (bundle id `app.luxion.fitarchiveapp`) e integrar el framework `Shared` (Run Script `embedAndSignAppleFrameworkForXcode`).
+- ✅ (T53) Proyecto Xcode generado con XcodeGen desde `iosApp/project.yml` (`docs/ios-xcodegen.md`). Antes: **el proyecto Xcode no estaba en el repo** (`iosApp/` solo tiene fuentes Swift, `Info.plist` y `InfoPlist.strings`, sin `.xcodeproj`). Crearlo en el Mac (bundle id `app.luxion.fitarchiveapp`) e integrar el framework `Shared` (Run Script `embedAndSignAppleFrameworkForXcode`).
 - ⬜ Enlazar y ejecutar: `linkReleaseFrameworkIosArm64`, simulador y dispositivo real; validar lo listado en `ios-pendiente.md` (cámara, PHPicker, Vision iOS 17+, ubicación).
 - **Info.plist**: ✅ ya tiene `NSCameraUsageDescription` y `NSLocationWhenInUseUsageDescription` (es y en, vía `InfoPlist.strings`). ⬜ Añadir `CFBundleLocalizations` (es, en), `ITSAppUsesNonExemptEncryption = NO` (solo HTTPS estándar) y versiones (`CFBundleShortVersionString` 1.0.0, `CFBundleVersion` incremental). `NSPhotoLibraryUsageDescription` no hace falta con PHPicker.
 - ⬜ **Icono**: copiar `store/ios/AppIcon-1024.png` a `Assets.xcassets/AppIcon.appiconset` (1024×1024 sin alfa).
