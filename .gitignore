@@ -25,3 +25,9 @@ keystore.properties
 *.p8
 *.mobileprovision
 mapping.txt
+
+# fastlane
+iosApp/build/
+iosApp/fastlane/report.xml
+iosApp/fastlane/test_output/
+iosApp/*.xcodeproj

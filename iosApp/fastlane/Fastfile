@@ -1,0 +1,89 @@
+# T55: firma y subida a TestFlight sin Mac propio (se ejecuta en un runner macOS de GitHub Actions).
+# Lane `beta`: genera el proyecto con XcodeGen, importa certificado y perfil, compila, firma y sube.
+# Todo lo sensible llega por variables de entorno (secretos de GitHub); nada se guarda en el repo.
+#
+# Variables requeridas:
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64   Clave de la API de App Store Connect
+#   APPLE_TEAM_ID                                  Team ID del Apple Developer Program
+#   IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD   Certificado de distribución (.p12)
+#   IOS_PROVISION_PROFILE_BASE64                   Perfil App Store (.mobileprovision)
+# Opcional: BUILD_NUMBER (por defecto, el siguiente número libre en TestFlight).
+
+require "base64"
+require "securerandom"
+require "tmpdir"
+
+default_platform(:ios)
+
+APP_ID = "app.luxion.fitarchiveapp"
+SCHEME = "FitArchive"
+PROJECT = "FitArchive.xcodeproj"
+
+platform :ios do
+  desc "Genera, compila, firma y sube una build a TestFlight"
+  lane :beta do
+    required = %w[ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64 APPLE_TEAM_ID
+                  IOS_DIST_CERT_P12_BASE64 IOS_DIST_CERT_PASSWORD IOS_PROVISION_PROFILE_BASE64]
+    missing = required.select { |k| ENV[k].to_s.empty? }
+    UI.user_error!("Faltan variables de entorno: #{missing.join(', ')}") unless missing.empty?
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_P8_BASE64"],
+      is_key_content_base64: true,
+      in_house: false
+    )
+
+    # El .xcodeproj no se versiona: se genera desde project.yml (T53).
+    sh("xcodegen", "generate", "--spec", File.expand_path("../project.yml", __dir__))
+
+    # Llavero temporal, certificado e instalación del perfil (sin `match`: no hay repo de certificados).
+    keychain_pass = SecureRandom.hex(16)
+    create_keychain(
+      name: "fitarchive-ci",
+      password: keychain_pass,
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false
+    )
+    p12_path = File.join(Dir.tmpdir, "dist.p12")
+    profile_path = File.join(Dir.tmpdir, "fitarchive.mobileprovision")
+    File.binwrite(p12_path, Base64.decode64(ENV["IOS_DIST_CERT_P12_BASE64"]))
+    File.binwrite(profile_path, Base64.decode64(ENV["IOS_PROVISION_PROFILE_BASE64"]))
+    import_certificate(
+      certificate_path: p12_path,
+      certificate_password: ENV["IOS_DIST_CERT_PASSWORD"],
+      keychain_name: "fitarchive-ci",
+      keychain_password: keychain_pass
+    )
+    install_provisioning_profile(path: profile_path)
+    profile_name = ENV["IOS_PROFILE_NAME"] || lane_context[SharedValues::SIGH_NAME] ||
+                   File.basename(profile_path, ".mobileprovision")
+
+    build_number = (ENV["BUILD_NUMBER"].to_s.empty? ? nil : ENV["BUILD_NUMBER"]) ||
+                   (latest_testflight_build_number(app_identifier: APP_ID, api_key: api_key) + 1)
+    increment_build_number(build_number: build_number, xcodeproj: File.expand_path("../#{PROJECT}", __dir__))
+
+    build_app(
+      project: PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      clean: true,
+      output_directory: "build",
+      output_name: "FitArchive.ipa",
+      xcargs: "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']} " \
+              "CODE_SIGN_IDENTITY='Apple Distribution' PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'",
+      export_options: {
+        provisioningProfiles: { APP_ID => profile_name }
+      }
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end
