@@ -70,7 +70,7 @@ Detalle de lo no validado en `docs/ios-pendiente.md`. Nada de esto se ha intenta
 - ⬜ Enlazar y ejecutar: `linkReleaseFrameworkIosArm64`, simulador y dispositivo real; validar lo listado en `ios-pendiente.md` (cámara, PHPicker, Vision iOS 17+, ubicación).
 - **Info.plist**: ✅ ya tiene `NSCameraUsageDescription` y `NSLocationWhenInUseUsageDescription` (es y en, vía `InfoPlist.strings`). ⬜ Añadir `CFBundleLocalizations` (es, en), `ITSAppUsesNonExemptEncryption = NO` (solo HTTPS estándar) y versiones (`CFBundleShortVersionString` 1.0.0, `CFBundleVersion` incremental). `NSPhotoLibraryUsageDescription` no hace falta con PHPicker.
 - ⬜ **Icono**: copiar `store/ios/AppIcon-1024.png` a `Assets.xcassets/AppIcon.appiconset` (1024×1024 sin alfa).
-- ⬜ **Firma**: Team del Apple Developer Program, "Automatically manage signing", certificado de distribución y perfil.
+- ⬜ **Firma**: Team del Apple Developer Program, "Automatically manage signing", certificado de distribución y perfil. Automatizado (sin probar) en `docs/ios-ci.md` (T55).
 - ⬜ **Privacy manifest** (`PrivacyInfo.xcprivacy`): declarar APIs de "required reason" que usen la app o dependencias; sin tracking.
 - ⬜ **App Store Connect**: crear la app (bundle id, SKU), ficha es/en (`store/ficha-*.md`), capturas, categoría, **clasificación por edades**, **App Privacy** (ubicación aproximada: no vinculada a la usuaria, sin tracking, finalidad funcionalidad de la app; resto: no recopilado), URL de política, URL de soporte, notas para el revisor (sin cuenta; ubicación opcional).
 - ⬜ **Archive** (Product → Archive) → Distribute → App Store Connect.
