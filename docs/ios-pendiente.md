@@ -37,3 +37,11 @@ Ver `docs/ios-xcodegen.md`. En Windows solo se validó: YAML/plist/JSON válidos
 - Que el catálogo de assets compile y App Store Connect acepte el icono sin alfa.
 - Que los motivos de `PrivacyInfo.xcprivacy` sean los correctos (revisar el aviso de privacidad al subir a TestFlight).
 - Mínimo iOS 17.0 elegido por Vision; confirmar si se quiere bajar.
+
+## CI en macOS (T54)
+`.github/workflows/ios.yml` (PRs y `develop`, runner `macos-15`) enlaza `Shared` para el simulador, ejecuta `:shared:iosSimulatorArm64Test` (303 tests), genera el proyecto con XcodeGen y compila con `xcodebuild` sin firma. Ya validado en GitHub: compila y pasa. Notas:
+- `macos-14` ya no se admite como etiqueta; los runners macOS arm64 pueden tardar en asignarse (si no se obtiene en ~15 min, GitHub cancela el job: relanzar).
+- `xcodebuild` lleva `ARCHS=arm64`: el destino genérico pide también `x86_64` y `Shared` solo tiene `iosSimulatorArm64`.
+- `gradlew` debe tener el bit ejecutable en git (`git update-index --chmod=+x gradlew`).
+- Los tests iOS activan `PRAGMA foreign_keys` como la app real; sin él fallaban 6 borrados en cascada.
+- Esto solo compila y ejecuta tests de shared; no ejecuta la app. La validación en dispositivo sigue pendiente (T56).

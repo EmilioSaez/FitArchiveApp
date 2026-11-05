@@ -29,8 +29,8 @@ mapping.txt
 # iOS: proyecto generado por XcodeGen
 iosApp/*.xcodeproj/
 iosApp/*.xcworkspace/
+
 # fastlane
 iosApp/build/
 iosApp/fastlane/report.xml
 iosApp/fastlane/test_output/
-iosApp/*.xcodeproj

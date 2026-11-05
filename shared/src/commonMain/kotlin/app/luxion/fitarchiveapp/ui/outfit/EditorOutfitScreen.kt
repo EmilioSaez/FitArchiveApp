@@ -6,7 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,7 +44,6 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -138,7 +137,7 @@ fun EditorOutfitScreen(
         rutas.filter { it !in imagenes }.forEach { ruta -> cargarImagen(ruta)?.let { imagenes[ruta] = it } }
     }
     val prendasAvatar = estado.elegidas.values.mapNotNull { e ->
-        imagenes[e.prenda.photoPath]?.let { PrendaAvatar(it, subtipoPorDefecto(e.prenda.type), e.ajuste) }
+        imagenes[e.prenda.photoPath]?.let { PrendaAvatar.de(e.prenda, it, subtipoPorDefecto(e.prenda.type), e.ajuste) }
     }
     val compartir = rememberCompartirOutfit()
 
@@ -197,20 +196,18 @@ fun EditorOutfitScreen(
                         Modifier.weight(1f).fillMaxWidth().onGloballyPositioned { zonaManiqui = it.boundsInRoot() },
                         contentAlignment = Alignment.Center,
                     ) {
-                        // Arrastrar mueve y pellizcar escala la prenda del slot activo.
+                        // Arrastrar mueve la prenda del slot activo; el tamaño es automático.
                         AvatarConPrendas(
                             prendas = prendasAvatar,
                             modifier = Modifier.fillMaxHeight().pointerInput(Unit) {
-                                detectTransformGestures { _, pan, zoom, _ ->
+                                detectDragGestures { _, pan ->
                                     val unidades = LIENZO_ALTO / size.height
                                     vm.mover(pan.x * unidades, pan.y * unidades)
-                                    if (zoom != 1f) vm.escalarPor(zoom)
                                 }
                             },
                         )
                         if (arrastre != null) ZonaSoltar(sobreManiqui, textoSoltar(arrastre!!.prenda), alineacionSoltar(arrastre!!.prenda))
                     }
-                    estado.elegidaActiva?.let { Ajuste(it.ajuste, vm::fijarEscala) }
                 }
                 ColumnaPrendas(
                     "ABAJO", abajo, recAbajo, arrastre,
@@ -419,17 +416,6 @@ private fun PrendaColumna(
             ) { Icon(Iconos.Estrella, contentDescription = "Recomendada", tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(12.dp)) }
         }
     }
-}
-
-/** Escala de la prenda activa (el movimiento se hace arrastrando sobre el maniquí). */
-@Composable
-private fun Ajuste(ajuste: AjustePrenda, onEscala: (Float) -> Unit) {
-    Slider(
-        value = ajuste.escala,
-        onValueChange = onEscala,
-        valueRange = AjustePrenda.ESCALA_MIN..AjustePrenda.ESCALA_MAX,
-        modifier = Modifier.fillMaxWidth().height(32.dp),
-    )
 }
 
 /** Franja "MÁS" bajo el maniquí: calzado, bolsos y accesorios con scroll horizontal; las recomendadas llevan borde primary. */

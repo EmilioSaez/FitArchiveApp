@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -25,11 +24,11 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
-import app.luxion.fitarchiveapp.avatar.CapaAvatar
 import app.luxion.fitarchiveapp.avatar.LIENZO_ALTO
 import app.luxion.fitarchiveapp.ui.avatar.PrendaAvatar
 import app.luxion.fitarchiveapp.ui.avatar.dibujarAvatarConPrendas
-import app.luxion.fitarchiveapp.ui.avatar.rememberCapasAvatar
+import app.luxion.fitarchiveapp.ui.avatar.ContextoAvatar
+import app.luxion.fitarchiveapp.ui.avatar.LocalAvatar
 import app.luxion.fitarchiveapp.ui.theme.Tinta
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +44,7 @@ private val Gris = Color(0xFF8A8A8A)
 fun renderizarTarjetaOutfit(
     nombre: String,
     prendas: List<PrendaAvatar>,
-    capasAvatar: Map<CapaAvatar, Painter>,
+    contexto: ContextoAvatar,
     medidor: TextMeasurer,
 ): ImageBitmap {
     val d = disposicionTarjeta()
@@ -67,7 +66,7 @@ fun renderizarTarjetaOutfit(
         drawRect(Tinta, Offset(d.filete.x, d.filete.y), Size(d.filete.w, d.filete.h))
 
         translate(d.avatar.x, d.avatar.y) {
-            dibujarAvatarConPrendas(capasAvatar, prendas, d.avatar.h / LIENZO_ALTO)
+            dibujarAvatarConPrendas(contexto, prendas, d.avatar.h / LIENZO_ALTO)
         }
 
         val marca = medidor.measure(
@@ -118,7 +117,7 @@ class CompartirOutfit internal constructor(
 /** Callback de compartir para el editor (T20) y la lista de outfits (T19). */
 @Composable
 fun rememberCompartirOutfit(): CompartirOutfit {
-    val capasAvatar by rememberUpdatedState(rememberCapasAvatar())
+    val contexto by rememberUpdatedState(LocalAvatar.current)
     val medidor = rememberTextMeasurer()
     val imagen = rememberCompartirImagen()
     val scope = rememberCoroutineScope()
@@ -126,7 +125,7 @@ fun rememberCompartirOutfit(): CompartirOutfit {
         CompartirOutfit { nombre, prendas, alFallar ->
             scope.launch {
                 try {
-                    val bitmap = renderizarTarjetaOutfit(nombre, prendas, capasAvatar, medidor)
+                    val bitmap = renderizarTarjetaOutfit(nombre, prendas, contexto, medidor)
                     val png = withContext(Dispatchers.Default) { bitmap.aPng() }
                     imagen.compartirPng(png, nombreArchivoOutfit(nombre))
                 } catch (c: CancellationException) {
