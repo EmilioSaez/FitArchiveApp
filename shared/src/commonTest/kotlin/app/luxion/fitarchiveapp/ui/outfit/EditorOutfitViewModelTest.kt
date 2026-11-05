@@ -4,6 +4,7 @@ import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.Rect
 import app.luxion.fitarchiveapp.avatar.Slot
 import app.luxion.fitarchiveapp.avatar.ajustar
+import app.luxion.fitarchiveapp.avatar.ajusteGuardado
 import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
 import app.luxion.fitarchiveapp.data.GarmentRepositoryEnMemoria
 import app.luxion.fitarchiveapp.data.OutfitRepository
@@ -104,21 +105,17 @@ class EditorOutfitViewModelTest {
     }
 
     @Test
-    fun ajusteSeLimitaALaCajaYLaEscala() = runTest(UnconfinedTestDispatcher()) {
+    fun ajusteSeLimitaALaCajaYLaEscalaSiempreEsAutomatica() = runTest(UnconfinedTestDispatcher()) {
         val e = entorno(backgroundScope)
         val camiseta = e.nueva(GarmentType.TSHIRT)
         e.vm.alternarPrenda(camiseta)
         val caja = subtipoPorDefecto(GarmentType.TSHIRT).caja
 
         e.vm.mover(10_000f, -10_000f)
-        e.vm.escalarPor(10f)
         var ajuste = e.vm.estado.value.elegidaActiva!!.ajuste
         assertEquals(caja.w / 2f, ajuste.dx)
         assertEquals(-caja.h / 2f, ajuste.dy)
-        assertEquals(AjustePrenda.ESCALA_MAX, ajuste.escala)
-
-        e.vm.fijarEscala(0.01f)
-        assertEquals(AjustePrenda.ESCALA_MIN, e.vm.estado.value.elegidaActiva!!.ajuste.escala)
+        assertEquals(AjustePrenda.ESCALA_AUTOMATICA, ajuste.escala)
 
         e.vm.restablecerAjuste()
         ajuste = e.vm.estado.value.elegidaActiva!!.ajuste
@@ -154,13 +151,12 @@ class EditorOutfitViewModelTest {
     }
 
     @Test
-    fun guardarPersistePosicionEscalaYCapaPorPrenda() = runTest(UnconfinedTestDispatcher()) {
+    fun guardarPersistePosicionEscalaAutomaticaYCapaPorPrenda() = runTest(UnconfinedTestDispatcher()) {
         val e = entorno(backgroundScope)
         val camiseta = e.nueva(GarmentType.TSHIRT)
         val zapatos = e.nueva(GarmentType.SHOES)
         e.vm.alternarPrenda(camiseta)
         e.vm.mover(12f, -8f)
-        e.vm.fijarEscala(1.2f)
         e.vm.alternarPrenda(zapatos)
         e.vm.cambiarNombre("  Look de oficina ")
         e.vm.cambiarOcasion(Occasion.WORK)
@@ -176,7 +172,7 @@ class EditorOutfitViewModelTest {
         val top = prendas.last()
         assertEquals(12f, top.x)
         assertEquals(-8f, top.y)
-        assertEquals(1.2f, top.scale)
+        assertEquals(AjustePrenda.ESCALA_AUTOMATICA, top.scale)
         assertEquals(Slot.TOP.z, top.zIndex)
         assertFalse(e.vm.estado.value.puedeGuardar)
     }
@@ -204,6 +200,12 @@ class EditorOutfitViewModelTest {
         e.vm.alternarPrenda(camiseta)
         e.armario.delete(camiseta.id)
         assertTrue(e.vm.estado.first { it.armario.isEmpty() }.elegidas.isEmpty())
+    }
+
+    @Test
+    fun laEscalaGuardadaALaManoSeIgnora() {
+        val guardada = OutfitGarment(1, 2, 5f, -3f, 1.4f, 40)
+        assertEquals(AjustePrenda(5f, -3f, AjustePrenda.ESCALA_AUTOMATICA), guardada.ajusteGuardado())
     }
 
     @Test
