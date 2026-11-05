@@ -1,0 +1,83 @@
+name: iOS
+
+on:
+  pull_request:
+    paths: &paths
+      - "shared/**"
+      - "iosApp/**"
+      - "gradle/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
+      - ".github/workflows/ios.yml"
+  push:
+    branches: [develop]
+    paths: *paths
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Caché de Kotlin/Native
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: konan-${{ runner.os }}-
+
+      - name: Instalar XcodeGen
+        run: brew install xcodegen
+
+      - name: Enlazar framework Shared (simulador)
+        run: ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64 --stacktrace
+
+      - name: Tests iOS de shared
+        run: ./gradlew :shared:iosSimulatorArm64Test --stacktrace
+
+      - name: Generar proyecto Xcode
+        working-directory: iosApp
+        run: xcodegen generate
+
+      - name: Compilar app para el simulador
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild build \
+            -project iosApp/FitArchive.xcodeproj \
+            -scheme FitArchive \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/DerivedData \
+            ARCHS=arm64 \
+            CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build/xcodebuild.log
+
+      - name: Subir logs y reportes si falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-diagnostico
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            build/xcodebuild.log
+            shared/build/reports/**
+            shared/build/test-results/**

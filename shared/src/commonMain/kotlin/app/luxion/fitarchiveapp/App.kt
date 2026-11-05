@@ -35,6 +35,8 @@ import app.luxion.fitarchiveapp.ui.copia.SeccionCopia
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import app.luxion.fitarchiveapp.ui.theme.SeccionTema
+import app.luxion.fitarchiveapp.ui.theme.rememberAlmacenTema
 import app.luxion.fitarchiveapp.ui.navigation.BarraNavegacion
 import app.luxion.fitarchiveapp.ui.portada.PortadaScreen
 import app.luxion.fitarchiveapp.ui.viaje.ViajesScreen

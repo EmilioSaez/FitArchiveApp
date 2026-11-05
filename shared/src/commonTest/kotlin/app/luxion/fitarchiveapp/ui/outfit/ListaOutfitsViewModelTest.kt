@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.ui.outfit
 
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.data.GarmentRepositoryEnMemoria
 import app.luxion.fitarchiveapp.data.OutfitRepository
 import app.luxion.fitarchiveapp.data.OutfitWithGarments
@@ -185,7 +186,7 @@ class ListaOutfitsViewModelTest {
         assertEquals(camiseta, elegida.prenda.id)
         assertEquals(5f, elegida.ajuste.dx)
         assertEquals(-3f, elegida.ajuste.dy)
-        assertEquals(1.2f, elegida.ajuste.escala)
+        assertEquals(AjustePrenda.ESCALA_AUTOMATICA, elegida.ajuste.escala) // la escala manual 1,2 guardada se ignora
 
         editor.cambiarNombre("Look nuevo")
         editor.guardar()
