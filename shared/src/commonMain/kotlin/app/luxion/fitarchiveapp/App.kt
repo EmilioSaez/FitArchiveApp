@@ -1,7 +1,7 @@
 package app.luxion.fitarchiveapp
 
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.padding
@@ -129,7 +129,7 @@ fun App(repositories: Repositories) {
                 repositories.trips,
                 repositories.outfits,
                 repositories.garments,
-                modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
                 viajeInicialId = viajeInicialId,
                 onVolver = {
                     viendoViajes = false
@@ -141,7 +141,7 @@ fun App(repositories: Repositories) {
         if (viendoCarpetas) {
             CarpetasScreen(
                 repositories.garments,
-                modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars),
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
                 onVolver = { viendoCarpetas = false },
                 onAbrirPrenda = { detalleId = it.id },
             )
