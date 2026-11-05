@@ -200,7 +200,7 @@ private fun Polaroid(
     val imagenes = rememberMiniaturas(item.prendas.map { it.prenda.photoPath })
     val prendas = item.prendas.mapNotNull { p ->
         imagenes[p.prenda.photoPath]?.let {
-            PrendaAvatar.de(p.prenda, it, subtipoPorDefecto(p.prenda.type), AjustePrenda(p.colocacion.x, p.colocacion.y, p.colocacion.scale))
+            PrendaAvatar.de(p.prenda, it, subtipoPorDefecto(p.prenda.type), p.colocacion.ajusteGuardado())
         }
     }
     var menu by remember { mutableStateOf(false) }
