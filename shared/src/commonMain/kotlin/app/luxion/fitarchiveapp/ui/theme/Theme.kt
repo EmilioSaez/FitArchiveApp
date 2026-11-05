@@ -3,6 +3,7 @@ package app.luxion.fitarchiveapp.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -35,7 +36,7 @@ val Verde = Color(0xFF2F6B4F)
 /** Papel: fondo de pantalla. */
 val Papel = Color(0xFFFBF8F6)
 
-private val FitArchiveColors = lightColorScheme(
+private val FitArchiveColorsClaro = lightColorScheme(
     primary = Burdeos,
     onPrimary = Color.White,
     primaryContainer = BurdeosClaro,
@@ -106,10 +107,14 @@ fun estiloCartela(): TextStyle = TextStyle(
 )
 
 @Composable
-fun FitArchiveTheme(content: @Composable () -> Unit) {
+fun FitArchiveTheme(ajustes: AjustesTema = AjustesTema(), content: @Composable () -> Unit) {
     val tipos = tipografia(familiaPlayfair(), familiaDmSans())
+    val oscuro = ajustes.modo.esOscuro(isSystemInDarkTheme())
+    val colores = remember(oscuro, ajustes.acento) {
+        if (oscuro) esquemaOscuro(ajustes.acento) else esquemaClaro(FitArchiveColorsClaro, ajustes.acento)
+    }
     MaterialTheme(
-        colorScheme = FitArchiveColors,
+        colorScheme = colores,
         typography = tipos,
         content = content,
     )
