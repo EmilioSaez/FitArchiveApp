@@ -113,6 +113,7 @@ fun FitArchiveTheme(ajustes: AjustesTema = AjustesTema(), content: @Composable (
     val colores = remember(oscuro, ajustes.acento) {
         if (oscuro) esquemaOscuro(ajustes.acento) else esquemaClaro(FitArchiveColorsClaro, ajustes.acento)
     }
+    IconosBarrasSistema(oscuro)
     MaterialTheme(
         colorScheme = colores,
         typography = tipos,
