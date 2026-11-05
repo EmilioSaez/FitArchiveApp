@@ -113,7 +113,7 @@ fun OutfitDelDiaScreen(
                 actual == null -> EstadoVacio(estado, onAnadirPrendas, vm::elegirOcasion)
                 else -> {
                     val prendasAvatar = actual.prendas.mapNotNull { p ->
-                        imagenes[p.photoPath]?.let { PrendaAvatar(it, subtipoPorDefecto(p.type)) }
+                        imagenes[p.photoPath]?.let { PrendaAvatar.de(p, it, subtipoPorDefecto(p.type)) }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         AvatarConPrendas(prendasAvatar, Modifier.height(340.dp))

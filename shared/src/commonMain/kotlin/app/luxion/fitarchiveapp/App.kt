@@ -21,6 +21,8 @@ import app.luxion.fitarchiveapp.fondo.crearQuitaFondo
 import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.ui.anadir.AnadirPrendaFlow
 import app.luxion.fitarchiveapp.ui.armario.ArmarioScreen
+import app.luxion.fitarchiveapp.ui.avatar.ProveedorAvatar
+import app.luxion.fitarchiveapp.ui.avatar.SeccionAvatar
 import app.luxion.fitarchiveapp.ui.calendario.CalendarioScreen
 import app.luxion.fitarchiveapp.ui.carpetas.CarpetasScreen
 import app.luxion.fitarchiveapp.ui.detalle.DetallePrendaScreen
@@ -48,6 +50,11 @@ import kotlin.time.Clock
 
 @Composable
 fun App(repositories: Repositories) {
+    ProveedorAvatar(repositories.measurements, repositories.avatar) { AppContenido(repositories) }
+}
+
+@Composable
+private fun AppContenido(repositories: Repositories) {
     FitArchiveTheme {
         // Fuera de las ramas con return: el servicio del tiempo se recrea al volver de otras pantallas, la caché no.
         val cacheTiempo = remember { CacheTiempo() }
@@ -176,6 +183,7 @@ fun App(repositories: Repositories) {
                     Modifier.padding(padding),
                     irAlContenidoExtra = perfilEnUbicacion,
                 ) {
+                    SeccionAvatar(repositories.avatar)
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                     repositories.copia?.let { SeccionCopia(it) }
                     Text(
