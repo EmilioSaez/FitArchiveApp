@@ -1,17 +1,14 @@
 package app.luxion.fitarchiveapp.ui.outfit
 
 import app.luxion.fitarchiveapp.ui.components.Titular
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
@@ -22,14 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import app.luxion.fitarchiveapp.resources.Res
-import app.luxion.fitarchiveapp.resources.percha
 import app.luxion.fitarchiveapp.ui.theme.Iconos
 import app.luxion.fitarchiveapp.ui.theme.estiloCartela
-import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -109,7 +104,7 @@ fun OutfitsScreen(
             Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Titular("Tus looks", Modifier.weight(1f), subtitulo = "Colgados como en una exposición")
+            Titular("Tus looks", Modifier.weight(1f), subtitulo = "Sujetos con clips, como en un tendedero")
             if (!estado.vacio) Button(onClick = onNuevoOutfit) { Text("Nuevo outfit") }
         }
         when {
@@ -158,7 +153,7 @@ fun OutfitsScreen(
     }
 }
 
-/** Barra de madera de 6 dp y, colgados de ella, los outfits en un carrusel con snap; el siguiente asoma. */
+/** Rejilla vertical de 2 polaroids por fila, sujetas con clips a un cordel como en un tendedero de fotos. */
 @Composable
 private fun Galeria(
     outfits: List<OutfitEnLista>,
@@ -168,94 +163,113 @@ private fun Galeria(
     onEliminar: (OutfitEnLista) -> Unit,
     onCompartir: (OutfitEnLista, List<PrendaAvatar>) -> Unit,
 ) {
-    val estadoLista = rememberLazyListState()
-    Box(modifier.fillMaxWidth()) {
-        Box(Modifier.fillMaxWidth().height(6.dp).background(MaterialTheme.colorScheme.secondary))
-        LazyRow(
-            state = estadoLista,
-            flingBehavior = rememberSnapFlingBehavior(estadoLista),
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(28.dp),
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            items(outfits, key = { it.outfit.id }) { item ->
-                MarcoOutfit(item, onAbrir, onFavorito, onEliminar, onCompartir)
-            }
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        itemsIndexed(outfits, key = { _, it -> it.outfit.id }) { indice, item ->
+            Polaroid(indice, item, onAbrir, onFavorito, onEliminar, onCompartir)
         }
     }
 }
 
-/** Percha de 120×56, marco blanco de 228×300 con paspartú y cartela con nombre y ocasión. */
+/** Clip de pinza de madera que sujeta la foto al cordel. */
 @Composable
-private fun MarcoOutfit(
+private fun Clip(modifier: Modifier = Modifier) {
+    Box(
+        modifier.size(14.dp, 30.dp).shadow(1.dp, RoundedCornerShape(3.dp))
+            .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(3.dp)),
+    ) {
+        Box(Modifier.align(Alignment.Center).fillMaxWidth().height(2.dp).background(Color.Black.copy(alpha = 0.25f)))
+    }
+}
+
+/** Polaroid: cordel a todo el ancho de la celda, dos clips, foto con marco blanco y cartela con nombre y ocasión. */
+@Composable
+private fun Polaroid(
+    indice: Int,
     item: OutfitEnLista,
     onAbrir: (OutfitEnLista) -> Unit,
     onFavorito: (OutfitEnLista) -> Unit,
     onEliminar: (OutfitEnLista) -> Unit,
     onCompartir: (OutfitEnLista, List<PrendaAvatar>) -> Unit,
 ) {
-    // Cada marco carga solo sus miniaturas, y solo cuando el carrusel lo compone (carga perezosa con caché).
+    // Cada polaroid carga solo sus miniaturas, y solo cuando la rejilla la compone (carga perezosa con caché).
     val imagenes = rememberMiniaturas(item.prendas.map { it.prenda.photoPath })
     val prendas = item.prendas.mapNotNull { p ->
         imagenes[p.prenda.photoPath]?.let {
             PrendaAvatar.de(p.prenda, it, subtipoPorDefecto(p.prenda.type), AjustePrenda(p.colocacion.x, p.colocacion.y, p.colocacion.scale))
         }
     }
-    Column(Modifier.width(228.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(painterResource(Res.drawable.percha), contentDescription = null, modifier = Modifier.size(120.dp, 56.dp))
+    var menu by remember { mutableStateOf(false) }
+    Box(Modifier.fillMaxWidth()) {
+        // Cordel continuo: las celdas no tienen separación horizontal.
+        Box(Modifier.fillMaxWidth().padding(top = 10.dp).height(2.dp).background(MaterialTheme.colorScheme.outline))
         Box(
-            Modifier
-                .size(228.dp, 300.dp)
-                .shadow(2.dp, RoundedCornerShape(2.dp))
-                .background(Color.White)
-                .clickable { onAbrir(item) }
-                .padding(10.dp)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            contentAlignment = Alignment.Center,
+            Modifier.fillMaxWidth().padding(horizontal = 14.dp).padding(top = 4.dp)
+                .graphicsLayer { rotationZ = if (indice % 2 == 0) -1.5f else 1.5f },
         ) {
-            AvatarConPrendas(prendas, Modifier.fillMaxHeight().padding(12.dp))
-            Box(
-                Modifier.align(Alignment.TopEnd).padding(4.dp).size(40.dp).clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable { onFavorito(item) }
-                    .semantics { contentDescription = if (item.outfit.favorite) "Quitar de favoritos" else "Marcar como favorito" },
-                contentAlignment = Alignment.Center,
+            Column(
+                Modifier.fillMaxWidth().padding(top = 14.dp)
+                    .shadow(3.dp, RoundedCornerShape(2.dp))
+                    .background(Color.White)
+                    .clickable { onAbrir(item) }
+                    .padding(start = 8.dp, end = 8.dp, top = 14.dp, bottom = 6.dp),
             ) {
-                Icon(
-                    if (item.outfit.favorite) Iconos.CorazonRelleno else Iconos.Looks,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-        }
-        var menu by remember { mutableStateOf(false) }
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f).padding(start = 8.dp)) {
-                Text(item.outfit.name, style = estiloCartela(), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(
-                    (item.outfit.occasion?.etiqueta() ?: "Sin ocasión").uppercase() + " · " +
-                        if (item.prendas.size == 1) "1 prenda" else "${item.prendas.size} prendas",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            // Compartir y Eliminar quedan tras el menú: en una exposición no se ve "Eliminar".
-            Box {
-                IconButton(onClick = { menu = true }) { Icon(Iconos.MasVertical, contentDescription = "Más acciones") }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Compartir") },
-                        enabled = prendas.isNotEmpty(),
-                        onClick = { menu = false; onCompartir(item, prendas) },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Eliminar", color = MaterialTheme.colorScheme.error) },
-                        onClick = { menu = false; onEliminar(item) },
-                    )
+                Box(
+                    Modifier.fillMaxWidth().aspectRatio(1f).background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    AvatarConPrendas(prendas, Modifier.fillMaxHeight().padding(6.dp))
+                    Box(
+                        Modifier.align(Alignment.TopEnd).padding(2.dp).size(40.dp).clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .clickable { onFavorito(item) }
+                            .semantics { contentDescription = if (item.outfit.favorite) "Quitar de favoritos" else "Marcar como favorito" },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            if (item.outfit.favorite) Iconos.CorazonRelleno else Iconos.Looks,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
+                Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f).padding(start = 2.dp)) {
+                        Text(item.outfit.name, style = estiloCartela(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            (item.outfit.occasion?.etiqueta() ?: "Sin ocasión").uppercase() + " · " +
+                                if (item.prendas.size == 1) "1 prenda" else "${item.prendas.size} prendas",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    // Compartir y Eliminar quedan tras el menú.
+                    Box {
+                        IconButton(onClick = { menu = true }) { Icon(Iconos.MasVertical, contentDescription = "Más acciones") }
+                        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Compartir") },
+                                enabled = prendas.isNotEmpty(),
+                                onClick = { menu = false; onCompartir(item, prendas) },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Eliminar", color = MaterialTheme.colorScheme.error) },
+                                onClick = { menu = false; onEliminar(item) },
+                            )
+                        }
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Clip()
+                Clip()
             }
         }
     }
