@@ -242,8 +242,7 @@ private fun Polaroid(
                     Column(Modifier.weight(1f).padding(start = 2.dp)) {
                         Text(item.outfit.name, style = estiloCartela(), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(
-                            (item.outfit.occasion?.etiqueta() ?: "Sin ocasión").uppercase() + " · " +
-                                if (item.prendas.size == 1) "1 prenda" else "${item.prendas.size} prendas",
+                            (item.outfit.occasion?.etiqueta() ?: "Sin ocasión").uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
