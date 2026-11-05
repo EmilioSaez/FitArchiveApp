@@ -137,7 +137,7 @@ fun EditorOutfitScreen(
         rutas.filter { it !in imagenes }.forEach { ruta -> cargarImagen(ruta)?.let { imagenes[ruta] = it } }
     }
     val prendasAvatar = estado.elegidas.values.mapNotNull { e ->
-        imagenes[e.prenda.photoPath]?.let { PrendaAvatar(it, subtipoPorDefecto(e.prenda.type), e.ajuste) }
+        imagenes[e.prenda.photoPath]?.let { PrendaAvatar.de(e.prenda, it, subtipoPorDefecto(e.prenda.type), e.ajuste) }
     }
     val compartir = rememberCompartirOutfit()
 

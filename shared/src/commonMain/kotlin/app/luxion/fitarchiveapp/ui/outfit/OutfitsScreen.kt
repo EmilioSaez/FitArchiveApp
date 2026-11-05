@@ -198,7 +198,7 @@ private fun MarcoOutfit(
     val imagenes = rememberMiniaturas(item.prendas.map { it.prenda.photoPath })
     val prendas = item.prendas.mapNotNull { p ->
         imagenes[p.prenda.photoPath]?.let {
-            PrendaAvatar(it, subtipoPorDefecto(p.prenda.type), p.colocacion.ajusteGuardado())
+            PrendaAvatar.de(p.prenda, it, subtipoPorDefecto(p.prenda.type), AjustePrenda(p.colocacion.x, p.colocacion.y, p.colocacion.scale))
         }
     }
     Column(Modifier.width(228.dp), horizontalAlignment = Alignment.CenterHorizontally) {

@@ -21,6 +21,7 @@ class Repositories(
     val calendar: CalendarRepository = SqlCalendarRepository(db, context)
     val trips: TripRepository = SqlTripRepository(db, context)
     val usos: UsoRepository = SqlUsoRepository(db, context)
+    val avatar: AvatarRepository = SqlAvatarRepository(db, context)
     val copia: BackupService? = photos?.let { BackupService(SqlWardrobeBackupStore(db, context), it, now) }
 }
 
