@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.avatar
 
+import app.luxion.fitarchiveapp.model.OutfitGarment
 import app.luxion.fitarchiveapp.model.GarmentType
 import kotlin.math.min
 
@@ -142,6 +143,9 @@ data class AjustePrenda(val dx: Float = 0f, val dy: Float = 0f, val escala: Floa
     companion object {
         const val ESCALA_MIN = 0.5f
         const val ESCALA_MAX = 1.5f
+
+        /** Multiplicador fijo: el tamaño real sale de las dimensiones de la prenda y las medidas del cuerpo. */
+        const val ESCALA_AUTOMATICA = 1f
         val Ninguno = AjustePrenda()
     }
 }
@@ -154,3 +158,9 @@ fun ajustar(base: Rect, ajuste: AjustePrenda): Rect {
     val cy = base.y + base.h / 2f + ajuste.dy
     return Rect(cx - w / 2f, cy - h / 2f, w, h)
 }
+
+/**
+ * Ajuste de una prenda guardada. La escala guardada se ignora (las primeras versiones dejaban elegirla a
+ * mano): el tamaño es siempre el automático.
+ */
+fun OutfitGarment.ajusteGuardado() = AjustePrenda(x, y, AjustePrenda.ESCALA_AUTOMATICA)

@@ -2,6 +2,7 @@ package app.luxion.fitarchiveapp.ui.outfit
 
 import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.Slot
+import app.luxion.fitarchiveapp.avatar.ajusteGuardado
 import app.luxion.fitarchiveapp.avatar.slotDe
 import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
 import app.luxion.fitarchiveapp.data.GarmentRepository
@@ -94,7 +95,7 @@ class EditorOutfitViewModel(
             val elegidas = guardado.garments.mapNotNull { g ->
                 val prenda = prendas[g.garmentId] ?: return@mapNotNull null
                 val slot = slotDe(prenda.type)
-                slot to PrendaElegida(prenda, AjustePrenda(g.x, g.y, g.scale))
+                slot to PrendaElegida(prenda, g.ajusteGuardado())
             }.toMap()
             original = guardado.outfit
             _estado.update {
@@ -142,17 +143,14 @@ class EditorOutfitViewModel(
     /** Desplaza la prenda activa [dx], [dy] unidades del lienzo (respetando los límites de su caja). */
     fun mover(dx: Float, dy: Float) = ajustarActiva { it.copy(dx = it.dx + dx, dy = it.dy + dy) }
 
-    /** Multiplica la escala de la prenda activa por [factor]. */
-    fun escalarPor(factor: Float) = ajustarActiva { it.copy(escala = it.escala * factor) }
-
-    fun fijarEscala(escala: Float) = ajustarActiva { it.copy(escala = escala) }
-
     fun restablecerAjuste() = ajustarActiva { AjustePrenda.Ninguno }
 
     private fun ajustarActiva(cambio: (AjustePrenda) -> AjustePrenda) = _estado.update { e ->
         val actual = e.elegidaActiva ?: return@update e
         val caja = subtipoPorDefecto(actual.prenda.type).caja
-        e.copy(elegidas = e.elegidas + (e.slotActivo to actual.copy(ajuste = cambio(actual.ajuste).limitado(caja))))
+        // El tamaño no lo elige el usuario: la escala sale de las dimensiones de la prenda y su cuerpo.
+        val ajuste = cambio(actual.ajuste).limitado(caja).copy(escala = AjustePrenda.ESCALA_AUTOMATICA)
+        e.copy(elegidas = e.elegidas + (e.slotActivo to actual.copy(ajuste = ajuste)))
     }
 
     fun mostrarError(mensaje: String) = _estado.update { it.copy(error = mensaje) }
@@ -189,7 +187,7 @@ class EditorOutfitViewModel(
     }
 }
 
-/** Prendas del outfit listas para guardar: posición y escala del ajuste, y `zIndex` = z del slot. */
+/** Prendas del outfit listas para guardar: posición del ajuste y su escala (siempre automática), y `zIndex` = z del slot. */
 fun Map<Slot, PrendaElegida>.aOutfitGarments(outfitId: Long = 0): List<OutfitGarment> =
     entries.sortedBy { it.key.z }.map { (slot, e) ->
         OutfitGarment(outfitId, e.prenda.id, e.ajuste.dx, e.ajuste.dy, e.ajuste.escala, slot.z)

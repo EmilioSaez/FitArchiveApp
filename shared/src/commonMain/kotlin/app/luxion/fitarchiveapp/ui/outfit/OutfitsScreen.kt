@@ -56,7 +56,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.luxion.fitarchiveapp.avatar.AjustePrenda
+import app.luxion.fitarchiveapp.avatar.ajusteGuardado
 import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
 import app.luxion.fitarchiveapp.compartir.rememberCompartirOutfit
 import app.luxion.fitarchiveapp.data.GarmentRepository
@@ -198,7 +198,7 @@ private fun MarcoOutfit(
     val imagenes = rememberMiniaturas(item.prendas.map { it.prenda.photoPath })
     val prendas = item.prendas.mapNotNull { p ->
         imagenes[p.prenda.photoPath]?.let {
-            PrendaAvatar(it, subtipoPorDefecto(p.prenda.type), AjustePrenda(p.colocacion.x, p.colocacion.y, p.colocacion.scale))
+            PrendaAvatar(it, subtipoPorDefecto(p.prenda.type), p.colocacion.ajusteGuardado())
         }
     }
     Column(Modifier.width(228.dp), horizontalAlignment = Alignment.CenterHorizontally) {
