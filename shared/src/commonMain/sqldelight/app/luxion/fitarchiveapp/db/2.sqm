@@ -1,0 +1,19 @@
+-- v2 -> v3: repara las BD instaladas antes de que existieran las migraciones.
+--
+-- Hasta la v1 no había migraciones: la versión del esquema era siempre 1 y las instalaciones existentes
+-- nunca recibieron lo añadido después, así que fallaban con "no such table: WearLog" o
+-- "no such column: TripGarment.manual". Como una BD antigua puede tener cualquier mezcla de partes del
+-- esquema nuevo, los pasos son idempotentes.
+--
+-- Aquí solo van las sentencias que lo son por sí mismas. Las columnas añadidas (Garment.fit,
+-- Measurements.foot_cm, TripGarment.manual) NO pueden ir aquí: SQLite no tiene ADD COLUMN IF NOT EXISTS.
+-- Las añade EsquemaFitArchive comprobando antes si ya existen.
+
+-- T33: historial de usos.
+CREATE TABLE IF NOT EXISTS WearLog (
+    date TEXT NOT NULL,
+    garment_id INTEGER NOT NULL REFERENCES Garment(id) ON DELETE CASCADE,
+    PRIMARY KEY (date, garment_id)
+);
+
+CREATE INDEX IF NOT EXISTS wear_log_garment ON WearLog(garment_id);

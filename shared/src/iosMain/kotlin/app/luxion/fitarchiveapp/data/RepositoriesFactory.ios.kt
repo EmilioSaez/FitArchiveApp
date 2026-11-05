@@ -7,7 +7,7 @@ import app.luxion.fitarchiveapp.db.FitArchiveDatabase
 /** Crea la base de datos local de iOS y los repositorios sobre ella. Llamar una sola vez por proceso. */
 fun crearRepositories(): Repositories {
     val driver = NativeSqliteDriver(
-        schema = FitArchiveDatabase.Schema,
+        schema = EsquemaFitArchive,
         name = NOMBRE_BD,
         onConfiguration = { it.copy(extendedConfig = it.extendedConfig.copy(foreignKeyConstraints = true)) },
     )
