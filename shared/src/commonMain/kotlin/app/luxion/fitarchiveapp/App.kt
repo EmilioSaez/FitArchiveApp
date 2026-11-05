@@ -3,7 +3,6 @@ package app.luxion.fitarchiveapp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,7 +33,6 @@ import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
 import app.luxion.fitarchiveapp.ui.navigation.BarraNavegacion
-import app.luxion.fitarchiveapp.ui.portada.PortadaScreen
 import app.luxion.fitarchiveapp.ui.viaje.ViajesScreen
 import app.luxion.fitarchiveapp.weather.CacheTiempo
 import app.luxion.fitarchiveapp.weather.ClienteHttpKtor
@@ -57,21 +55,6 @@ fun App(repositories: Repositories) {
             return@FitArchiveTheme
         }
         var anadiendo by remember { mutableStateOf(false) }
-        var portada by remember { mutableStateOf(true) }
-        if (portada) {
-            val prendas by repositories.garments.observeAll().collectAsState(emptyList())
-            val looks by repositories.outfits.observeAll().collectAsState(emptyList())
-            PortadaScreen(
-                prendas,
-                looks.size,
-                onVerOutfitDeHoy = { portada = false },
-                onAnadirPrenda = {
-                    portada = false
-                    anadiendo = true
-                },
-            )
-            return@FitArchiveTheme
-        }
         // Cada día que pasa con un outfit asignado suma un uso a sus prendas (T33).
         LaunchedEffect(Unit) {
             runCatching { repositories.usos.registrarHasta(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
