@@ -311,26 +311,32 @@ fun colocacionReal(
     escala: EscalaAvatar,
     anchoImg: Int,
     altoImg: Int,
+    nucleo: Nucleo? = null,
 ): Rect? {
     if (anchoImg <= 0 || altoImg <= 0) return null
     val slot = subtipo.slot
     if (slot == Slot.ACC_HEAD || slot == Slot.ACC_FACE || slot == Slot.ACC_NECK || slot == Slot.ACC_WAIST || slot == Slot.ACC_HAND) {
         return null
     }
+    // Con núcleo, escala y posición salen de él (lo fino que sobresale no cuenta), pero se devuelve la imagen entera.
+    val n = nucleo?.takeIf { slot.usaNucleo && it.ancho > 0 && it.alto > 0 } ?: Nucleo(0, 0, anchoImg, altoImg)
     val destinoCm = max(dim.medidaEjeCm, 1.0)
     val s = when (dim.eje) {
-        EjeEscala.ALTO -> escala.u(destinoCm) / altoImg
-        EjeEscala.ANCHO -> escala.u(destinoCm) / anchoImg
+        EjeEscala.ALTO -> escala.u(destinoCm) / n.alto
+        EjeEscala.ANCHO -> escala.u(destinoCm) / n.ancho
     }
     val h = altoImg * s
     // Compresión frontal solo en prendas de tela; el calzado ya viene de frente.
-    val w = anchoImg * s * (if (slot == Slot.SHOES) 1f else EscalaAvatar.ESCORZO_PRENDA)
+    val compresion = if (slot == Slot.SHOES) 1f else EscalaAvatar.ESCORZO_PRENDA
+    val w = anchoImg * s * compresion
     val cx = EscalaAvatar.CENTRO_X + if (subtipo == Subtipo.SHOES_PIE_DER) escala.u(6.0) else if (subtipo == Subtipo.SHOES_PIE_IZQ) -escala.u(6.0) else 0f
-    val y = when (slot) {
+    val yNucleo = when (slot) {
         Slot.TOP, Slot.OUTER, Slot.DRESS -> escala.yCuello - escala.u(2.0)
         Slot.BOTTOM -> escala.yCintura - escala.u(1.5)
         Slot.SHOES -> EscalaAvatar.SUELO.toFloat() + escala.u(1.0) - h
         else -> return null
     }
-    return Rect(cx - w / 2f, y, w, h)
+    // El centro del núcleo (no el de la imagen) cae en cx; su borde superior, en yNucleo.
+    val cxNucleo = (n.colInicio + n.colFin) / 2f * s * compresion
+    return Rect(cx - cxNucleo, yNucleo - n.filaInicio * s, w, h)
 }

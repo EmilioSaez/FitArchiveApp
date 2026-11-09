@@ -17,6 +17,7 @@ import app.luxion.fitarchiveapp.avatar.AspectoAvatar
 import app.luxion.fitarchiveapp.avatar.DimensionesPrendaCalc
 import app.luxion.fitarchiveapp.avatar.EscalaAvatar
 import app.luxion.fitarchiveapp.avatar.PerfilCorporal
+import app.luxion.fitarchiveapp.avatar.Nucleo
 import app.luxion.fitarchiveapp.avatar.Rect
 import app.luxion.fitarchiveapp.avatar.cajaAccesorio
 import app.luxion.fitarchiveapp.avatar.colocacionReal
@@ -32,6 +33,8 @@ import app.luxion.fitarchiveapp.avatar.Subtipo
 import app.luxion.fitarchiveapp.avatar.ajustar
 import app.luxion.fitarchiveapp.avatar.capasOrdenadas
 import app.luxion.fitarchiveapp.avatar.encajar
+import app.luxion.fitarchiveapp.avatar.nucleoPrenda
+import app.luxion.fitarchiveapp.avatar.usaNucleo
 
 /** Datos de la prenda necesarios para calcular su tamaño real (cm). */
 class DatosPrenda(val tipo: GarmentType, val talla: String?, val marca: String?, val corte: Fit)
@@ -46,6 +49,9 @@ class PrendaAvatar(
     val ajuste: AjustePrenda = AjustePrenda.Ninguno,
     val datos: DatosPrenda? = null,
 ) {
+    /** Zona ancha del recorte (sin tiras ni lazos) con la que se coloca; solo en prendas de cuerpo. */
+    val nucleo: Nucleo? by lazy { if (subtipo.slot.usaNucleo) imagen.nucleo() else null }
+
     companion object {
         fun de(prenda: Garment, imagen: ImageBitmap, subtipo: Subtipo, ajuste: AjustePrenda = AjustePrenda.Ninguno) =
             PrendaAvatar(imagen, subtipo, ajuste, DatosPrenda(prenda.type, prenda.size, prenda.brand, prenda.fit))
@@ -81,10 +87,19 @@ internal fun rectBase(ctx: ContextoAvatar, p: PrendaAvatar): Rect {
     val slot = p.subtipo.slot
     p.datos?.let { d ->
         val dim = DimensionesPrendaCalc.calcular(p.subtipo, d.tipo, d.talla, d.marca, d.corte, ctx.cuerpo, ctx.tablas)
-        colocacionReal(p.subtipo, dim, ctx.escala, p.imagen.width, p.imagen.height)?.let { return it }
+        colocacionReal(p.subtipo, dim, ctx.escala, p.imagen.width, p.imagen.height, p.nucleo)?.let { return it }
     }
     val caja = if (p.datos != null) cajaAccesorio(p.subtipo, ctx.escala) else p.subtipo.caja
-    return encajar(caja, p.imagen.width, p.imagen.height, slot.alineacion)
+    return encajar(caja, p.imagen.width, p.imagen.height, slot.alineacion, p.nucleo)
+}
+
+/** Núcleo del recorte a partir de su canal alfa. */
+private fun ImageBitmap.nucleo(): Nucleo? {
+    if (width <= 0 || height <= 0) return null
+    val pixeles = IntArray(width * height)
+    readPixels(pixeles)
+    val alfa = ByteArray(pixeles.size) { (pixeles[it] ushr 24).toByte() }
+    return nucleoPrenda(alfa, width, height)
 }
 
 /** Dibuja el lienzo del avatar (400 x 1000 unidades) con origen en (0, 0) y [escala] píxeles por unidad. */
