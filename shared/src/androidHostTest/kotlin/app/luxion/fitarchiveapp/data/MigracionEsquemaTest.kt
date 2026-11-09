@@ -18,8 +18,8 @@ import kotlin.test.assertTrue
  */
 class MigracionEsquemaTest {
     @Test
-    fun `la version del esquema es la 3 para que las BD antiguas se migren`() {
-        assertEquals(3L, EsquemaFitArchive.version)
+    fun `la version del esquema es la 4 para que las BD antiguas se migren`() {
+        assertEquals(4L, EsquemaFitArchive.version)
     }
 
     @Test
@@ -50,6 +50,11 @@ class MigracionEsquemaTest {
             assertEquals(5L, prenda.total_wears)
             assertEquals(100L, prenda.created_at)
             assertEquals("NORMAL", prenda.fit)
+            // v3 -> v4: sin subtipo ni ajuste (= por defecto del tipo y sin ajuste).
+            assertNull(prenda.subtype)
+            assertNull(prenda.adjust_dx)
+            assertNull(prenda.adjust_dy)
+            assertNull(prenda.adjust_scale)
 
             val medidas = db.measurementsQueries.select().executeAsOne()
             assertEquals(170.0, medidas.height_cm)
@@ -135,7 +140,8 @@ class MigracionEsquemaTest {
             val driver = bdAntigua(desde)
             sembrarDatosAntiguos(driver)
             migrar(driver, desde)
-            migrar(driver, 2) // `1.sqm` es el del avatar y no es idempotente: solo se repite lo nuestro
+            // Solo se repite la reparación (v2 -> v3): `1.sqm` es el del avatar y `3.sqm` añade columnas, no son idempotentes.
+            EsquemaFitArchive.migrate(driver, 2, 3)
             assertEquals(esquemaDe(bdNueva()), esquemaDe(driver), "desde v$desde")
         }
     }
@@ -143,7 +149,7 @@ class MigracionEsquemaTest {
     @Test
     fun `una BD migrada y una nueva, con distinto orden fisico de columnas, devuelven lo mismo`() {
         val nueva = bdNueva()
-        FitArchiveDatabase(nueva).garmentQueries.insert("a.png", "SHIRT", "#ffffff", "ALL", "CASUAL", "Zara", "M", "NORMAL", 1, 0, 2, 5, null, 100)
+        FitArchiveDatabase(nueva).garmentQueries.insert("a.png", "SHIRT", "#ffffff", "ALL", "CASUAL", "Zara", "M", "NORMAL", 1, 0, 2, 5, null, 100, null, null, null, null)
         nueva.execute(null, "INSERT INTO Measurements (id, height_cm, bust_cm, waist_cm, hip_cm, shoulders_cm, arm_cm, leg_cm, updated_at) VALUES (1, 170.0, 90.0, 70.0, 95.0, 40.0, 60.0, 41.0, 200)", 0)
         val dbNueva = FitArchiveDatabase(nueva)
 
@@ -153,7 +159,7 @@ class MigracionEsquemaTest {
             migrar(migrada, desde)
             // `fit` está en medio en la BD nueva y al final en la migrada; las lecturas no deben notarlo.
             assertEquals(columnasEnOrden(nueva, "Garment").indexOf("size") + 1, columnasEnOrden(nueva, "Garment").indexOf("fit"))
-            assertEquals("fit", columnasEnOrden(migrada, "Garment").last())
+            assertTrue(columnasEnOrden(migrada, "Garment").indexOf("fit") > columnasEnOrden(migrada, "Garment").indexOf("created_at"))
 
             val db = FitArchiveDatabase(migrada)
             assertEquals(dbNueva.garmentQueries.selectAll().executeAsList(), db.garmentQueries.selectAll().executeAsList(), "selectAll, desde v$desde")
@@ -167,8 +173,8 @@ class MigracionEsquemaTest {
     @Test
     fun `una BD v2 que ya tiene el esquema actual migra sin cambios`() {
         val driver = bdNueva()
-        FitArchiveDatabase(driver).garmentQueries.insert("b.png", "SHIRT", "#000", "ALL", "CASUAL", null, null, "SLIM", 0, 0, 0, 0, null, 1)
-        migrar(driver, 2)
+        FitArchiveDatabase(driver).garmentQueries.insert("b.png", "SHIRT", "#000", "ALL", "CASUAL", null, null, "SLIM", 0, 0, 0, 0, null, 1, null, null, null, null)
+        EsquemaFitArchive.migrate(driver, 2, 3)
         assertEquals(esquemaDe(bdNueva()), esquemaDe(driver))
         assertEquals("SLIM", FitArchiveDatabase(driver).garmentQueries.selectAll().executeAsList().single().fit)
     }
@@ -180,11 +186,53 @@ class MigracionEsquemaTest {
         val nuevas = actual.tablas.flatMap { (tabla, columnas) ->
             val antes = v1.tablas[tabla]?.map { it.nombre }?.toSet() ?: return@flatMap emptyList()
             columnas.filter { it.nombre !in antes }.map { tabla to it.nombre }
-        }.toSet()
+        }.toSet() - COLUMNAS_DE_V4 // las de `3.sqm` van por migración SQL normal, no por EsquemaFitArchive
         assertEquals(nuevas, EsquemaFitArchive.COLUMNAS_POSTERIORES_A_V1.map { it.first to it.second }.toSet())
     }
 
+    @Test
+    fun `una BD v3 ya instalada migra a la v4 conservando datos y con subtipo y ajuste vacios`() {
+        val driver = bdV3()
+        sembrarDatosAntiguos(driver)
+        driver.execute(null, "UPDATE Garment SET fit = 'SLIM' WHERE id = 1", 0)
+        assertTrue("subtype" !in columnasEnOrden(driver, "Garment"))
+
+        migrar(driver, 3)
+
+        assertEquals(esquemaDe(bdNueva()), esquemaDe(driver))
+        val db = FitArchiveDatabase(driver)
+        val prenda = db.garmentQueries.selectById(1).executeAsOne()
+        assertEquals("a.png", prenda.photo_path)
+        assertEquals("SLIM", prenda.fit)
+        assertEquals(5L, prenda.total_wears)
+        assertNull(prenda.subtype)
+        assertNull(prenda.adjust_dx)
+        assertEquals(1, db.outfitQueries.selectGarments(1).executeAsList().size)
+    }
+
+    @Test
+    fun `tras migrar a la v4 se guardan y leen el subtipo y el ajuste`() {
+        val driver = bdV3()
+        sembrarDatosAntiguos(driver)
+        migrar(driver, 3)
+        val db = FitArchiveDatabase(driver)
+
+        db.garmentQueries.setAjuste(1.5, -2.0, 1.25, 1)
+        driver.execute(null, "UPDATE Garment SET subtype = 'TOP_MANGA_LARGA' WHERE id = 1", 0)
+        val prenda = db.garmentQueries.selectById(1).executeAsOne()
+        assertEquals("TOP_MANGA_LARGA", prenda.subtype)
+        assertEquals(1.5, prenda.adjust_dx)
+        assertEquals(-2.0, prenda.adjust_dy)
+        assertEquals(1.25, prenda.adjust_scale)
+
+        db.garmentQueries.setAjuste(null, null, null, 1)
+        assertNull(db.garmentQueries.selectById(1).executeAsOne().adjust_scale)
+    }
+
     // --- utilidades ---
+
+    /** BD tal como la deja la v3 (la reparación aplicada, sin lo de la v4): una v2 migrada un paso. */
+    private fun bdV3() = bdAntigua(2).also { EsquemaFitArchive.migrate(it, 2, 3) }
 
     private data class Columna(val nombre: String, val tipo: String, val notNull: Boolean, val defecto: String?, val pk: Int)
 
@@ -257,6 +305,9 @@ class MigracionEsquemaTest {
 
     private companion object {
         val VERSIONES_ANTIGUAS = listOf(1L, 2L)
+
+        /** Columnas de `Garment` añadidas por `3.sqm` (v4). */
+        val COLUMNAS_DE_V4 = setOf("Garment" to "subtype", "Garment" to "adjust_dx", "Garment" to "adjust_dy", "Garment" to "adjust_scale")
 
         /** Esquema original (commit b623b6d, T03): lo que tienen las instalaciones antiguas. */
         val DDL_V1 = listOf(

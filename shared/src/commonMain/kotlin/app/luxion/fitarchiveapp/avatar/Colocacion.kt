@@ -69,7 +69,7 @@ enum class Subtipo(val slot: Slot, val caja: Caja, val reflejar: Boolean = false
     ACC_BOLSO_HOMBRO_IZQ(Slot.ACC_HAND, Caja(40f, 230f, 90f, 170f)),
 }
 
-/** Subtipo por defecto según el tipo del armario (la BD aún no guarda subtipo). */
+/** Subtipo por defecto según el tipo del armario: el que se usa mientras la prenda no tenga uno guardado. */
 fun subtipoPorDefecto(tipo: GarmentType): Subtipo = when (tipo) {
     GarmentType.TSHIRT -> Subtipo.TOP_MANGA_CORTA
     GarmentType.SHIRT, GarmentType.SWEATER -> Subtipo.TOP_MANGA_LARGA
@@ -158,6 +158,9 @@ fun ajustar(base: Rect, ajuste: AjustePrenda): Rect {
     val cy = base.y + base.h / 2f + ajuste.dy
     return Rect(cx - w / 2f, cy - h / 2f, w, h)
 }
+
+/** Como [ajustar], pero limitando antes el [ajuste] a la [caja] del subtipo (la prenda no sale de su zona). */
+fun ajustarEnCaja(base: Rect, ajuste: AjustePrenda, caja: Caja): Rect = ajustar(base, ajuste.limitado(caja))
 
 /**
  * Ajuste de una prenda guardada. La escala guardada se ignora (las primeras versiones dejaban elegirla a

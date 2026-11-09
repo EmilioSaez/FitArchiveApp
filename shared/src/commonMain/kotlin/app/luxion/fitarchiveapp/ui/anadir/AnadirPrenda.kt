@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.luxion.fitarchiveapp.avatar.sugerirSubtipo
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.foto.AlmacenFotos
 import app.luxion.fitarchiveapp.foto.FotoCapturada
@@ -213,7 +214,18 @@ internal fun FormularioPrenda(
         Seccion("Tipo *") {
             Opciones(GarmentType.entries, borrador.type, { it.etiqueta() }) { tipo ->
                 // Cambiar de tipo descarta la talla si ese tipo no la ofrece (p. ej. "M" al pasar a calzado).
-                borrador = borrador.copy(type = tipo, size = borrador.size?.takeIf { it in tallasPara(tipo) })
+                borrador = borrador.conTipo(tipo)
+            }
+        }
+        borrador.type?.let { tipo ->
+            Seccion("Subtipo") {
+                val sugerido = sugerirSubtipo(tipo)
+                SelectorSubtipo(
+                    tipo = tipo,
+                    elegido = borrador.subtipoEfectivo ?: sugerido,
+                    sugerido = sugerido,
+                    alElegir = { borrador = borrador.copy(subtipo = it) },
+                )
             }
         }
         Seccion("Color *") {

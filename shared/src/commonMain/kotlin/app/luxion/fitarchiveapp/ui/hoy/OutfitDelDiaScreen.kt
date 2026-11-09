@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
 import app.luxion.fitarchiveapp.data.Repositories
 import app.luxion.fitarchiveapp.foto.cargarImagen
 import app.luxion.fitarchiveapp.model.Garment
@@ -113,7 +112,7 @@ fun OutfitDelDiaScreen(
                 actual == null -> EstadoVacio(estado, onAnadirPrendas, vm::elegirOcasion)
                 else -> {
                     val prendasAvatar = actual.prendas.mapNotNull { p ->
-                        imagenes[p.photoPath]?.let { PrendaAvatar.de(p, it, subtipoPorDefecto(p.type)) }
+                        imagenes[p.photoPath]?.let { PrendaAvatar.de(p, it) }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         AvatarConPrendas(prendasAvatar, Modifier.height(340.dp))

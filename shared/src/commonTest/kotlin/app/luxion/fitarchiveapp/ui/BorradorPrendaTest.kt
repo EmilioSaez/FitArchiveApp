@@ -1,5 +1,7 @@
 package app.luxion.fitarchiveapp.ui
 
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
+import app.luxion.fitarchiveapp.avatar.Subtipo
 import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -89,5 +91,40 @@ class BorradorPrendaTest {
         assertTrue("XXL" in tallasPara(null))
         assertEquals((35..46).map { it.toString() }, tallasPara(GarmentType.SHOES))
         assertFalse("M" in tallasPara(GarmentType.SHOES))
+    }
+
+    @Test
+    fun elSubtipoSugeridoNoSeGuardaYElElegidoSi() {
+        // DRESS: el por defecto es DRESS_MIDI.
+        assertEquals(Subtipo.DRESS_MIDI, completo.subtipoEfectivo)
+        assertNull(completo.aPrenda("f.jpg", 1)!!.subtipo)
+        assertNull(completo.copy(subtipo = Subtipo.DRESS_MIDI).aPrenda("f.jpg", 1)!!.subtipo)
+        val largo = completo.copy(subtipo = Subtipo.DRESS_LARGO)
+        assertEquals(Subtipo.DRESS_LARGO, largo.subtipoEfectivo)
+        assertEquals(Subtipo.DRESS_LARGO, largo.aPrenda("f.jpg", 1)!!.subtipo)
+        assertNull(BorradorPrenda().subtipoEfectivo)
+    }
+
+    @Test
+    fun cambiarDeTipoDescartaUnSubtipoQueNoVale() {
+        val camisa = BorradorPrenda(type = GarmentType.SHIRT, subtipo = Subtipo.TOP_MANGA_CORTA)
+        assertEquals(Subtipo.TOP_MANGA_CORTA, camisa.conTipo(GarmentType.TSHIRT).subtipo)
+        assertNull(camisa.conTipo(GarmentType.JEANS).subtipo)
+    }
+
+    @Test
+    fun unSubtipoInvalidoParaElTipoNoSeGuarda() {
+        val g = completo.copy(subtipo = Subtipo.TOP_MANGA_LARGA).aPrenda("f.jpg", 1)!!
+        assertNull(g.subtipo)
+    }
+
+    @Test
+    fun editarConservaElAjusteSoloSiNoCambiaElSubtipo() {
+        val original = completo.aPrenda("f.jpg", 1)!!.copy(id = 7, ajuste = AjustePrenda(3f, -2f, 1.2f))
+        assertEquals(AjustePrenda(3f, -2f, 1.2f), completo.aplicarA(original)!!.ajuste)
+        val cambiado = completo.copy(subtipo = Subtipo.DRESS_CORTO).aplicarA(original)!!
+        assertEquals(Subtipo.DRESS_CORTO, cambiado.subtipo)
+        assertNull(cambiado.ajuste)
+        assertEquals(Subtipo.DRESS_CORTO, BorradorPrenda.desde(cambiado).subtipo)
     }
 }

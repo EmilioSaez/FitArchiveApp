@@ -1,5 +1,8 @@
 package app.luxion.fitarchiveapp.model
 
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
+import app.luxion.fitarchiveapp.avatar.Subtipo
+
 data class Garment(
     val id: Long,
     val photoPath: String,
@@ -18,6 +21,10 @@ data class Garment(
     val createdAt: Long,
     /** Corte (T29): corrige la talla recomendada. */
     val fit: Fit = Fit.NORMAL,
+    /** Subtipo que decide su slot y caja en el avatar; null = el por defecto del tipo (`subtipoPorDefecto`). */
+    val subtipo: Subtipo? = null,
+    /** Ajuste manual de su colocación en el avatar, sobre la caja del subtipo; null = sin ajuste. */
+    val ajuste: AjustePrenda? = null,
 )
 
 data class Outfit(

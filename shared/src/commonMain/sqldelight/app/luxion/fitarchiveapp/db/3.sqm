@@ -1,0 +1,9 @@
+-- v3 -> v4: subtipo de la prenda y ajuste manual de su colocación en el avatar.
+--
+-- Todas las columnas son opcionales: NULL en `subtype` = el subtipo por defecto del tipo (subtipoPorDefecto) y
+-- NULL en el ajuste = sin ajuste. Las BD en v3 ya tienen el esquema reparado (ver 2.sqm y EsquemaFitArchive),
+-- así que basta un ALTER TABLE por columna; las BD más antiguas pasan antes por esa reparación.
+ALTER TABLE Garment ADD COLUMN subtype TEXT;
+ALTER TABLE Garment ADD COLUMN adjust_dx REAL;
+ALTER TABLE Garment ADD COLUMN adjust_dy REAL;
+ALTER TABLE Garment ADD COLUMN adjust_scale REAL;

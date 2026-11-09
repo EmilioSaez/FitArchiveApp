@@ -3,6 +3,7 @@ package app.luxion.fitarchiveapp.data
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.db.FitArchiveDatabase
 import app.luxion.fitarchiveapp.db.GarmentQueries
 import app.luxion.fitarchiveapp.model.Garment
@@ -39,6 +40,9 @@ interface GarmentRepository {
     suspend fun add(garment: Garment): Long
     suspend fun update(garment: Garment)
     suspend fun setFavorite(id: Long, favorite: Boolean)
+
+    /** Guarda el ajuste manual de colocación de la prenda; null lo quita (restablecer). */
+    suspend fun setAjuste(id: Long, ajuste: AjustePrenda?)
 
     /** Al marcar limpia se reinicia el contador de usos desde el lavado. */
     suspend fun setDirty(id: Long, dirty: Boolean)
@@ -92,6 +96,10 @@ internal class SqlGarmentRepository(
                 total_wears = garment.totalWears.toLong(),
                 wash_after_wears = garment.washAfterWears?.toLong(),
                 created_at = garment.createdAt,
+                subtype = garment.subtipo?.name,
+                adjust_dx = garment.ajuste?.dx?.toDouble(),
+                adjust_dy = garment.ajuste?.dy?.toDouble(),
+                adjust_scale = garment.ajuste?.escala?.toDouble(),
             )
             queries.lastInsertId().executeAsOne()
         }
@@ -112,6 +120,10 @@ internal class SqlGarmentRepository(
             wears_since_wash = garment.wearsSinceWash.toLong(),
             total_wears = garment.totalWears.toLong(),
             wash_after_wears = garment.washAfterWears?.toLong(),
+            subtype = garment.subtipo?.name,
+            adjust_dx = garment.ajuste?.dx?.toDouble(),
+            adjust_dy = garment.ajuste?.dy?.toDouble(),
+            adjust_scale = garment.ajuste?.escala?.toDouble(),
             id = garment.id,
         )
         Unit
@@ -119,6 +131,11 @@ internal class SqlGarmentRepository(
 
     override suspend fun setFavorite(id: Long, favorite: Boolean) =
         withContext(context) { queries.setFavorite(favorite.toDb(), id); Unit }
+
+    override suspend fun setAjuste(id: Long, ajuste: AjustePrenda?) = withContext(context) {
+        queries.setAjuste(ajuste?.dx?.toDouble(), ajuste?.dy?.toDouble(), ajuste?.escala?.toDouble(), id)
+        Unit
+    }
 
     override suspend fun setDirty(id: Long, dirty: Boolean) =
         withContext(context) { queries.setDirty(dirty = dirty.toDb(), id = id); Unit }
@@ -157,6 +174,10 @@ internal fun GarmentQueries.registrarUsos(id: Long, veces: Int) {
         wears_since_wash = prenda.wearsSinceWash.toLong(),
         total_wears = prenda.totalWears.toLong(),
         wash_after_wears = prenda.washAfterWears?.toLong(),
+        subtype = prenda.subtipo?.name,
+        adjust_dx = prenda.ajuste?.dx?.toDouble(),
+        adjust_dy = prenda.ajuste?.dy?.toDouble(),
+        adjust_scale = prenda.ajuste?.escala?.toDouble(),
         id = prenda.id,
     )
 }

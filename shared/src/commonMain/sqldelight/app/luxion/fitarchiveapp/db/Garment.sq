@@ -13,7 +13,12 @@ CREATE TABLE Garment (
     wears_since_wash INTEGER NOT NULL DEFAULT 0,
     total_wears INTEGER NOT NULL DEFAULT 0,
     wash_after_wears INTEGER,
-    created_at INTEGER NOT NULL
+    created_at INTEGER NOT NULL,
+    -- Subtipo (enum Subtipo) y ajuste manual de la colocación en el avatar; NULL = por defecto / sin ajuste.
+    subtype TEXT,
+    adjust_dx REAL,
+    adjust_dy REAL,
+    adjust_scale REAL
 );
 
 CREATE INDEX garment_type ON Garment(type);
@@ -23,20 +28,20 @@ CREATE INDEX garment_season ON Garment(season);
 -- Las consultas de lectura listan las columnas (no SELECT *): los mapeadores generados leen por posición y el orden
 -- físico difiere entre una BD nueva y una migrada (ALTER TABLE ADD COLUMN añade siempre al final; ver EsquemaFitArchive).
 selectAll:
-SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at
+SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at, subtype, adjust_dx, adjust_dy, adjust_scale
 FROM Garment ORDER BY created_at DESC, id DESC;
 
 selectById:
-SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at
+SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at, subtype, adjust_dx, adjust_dy, adjust_scale
 FROM Garment WHERE id = ?;
 
 selectFavorites:
-SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at
+SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at, subtype, adjust_dx, adjust_dy, adjust_scale
 FROM Garment WHERE favorite = 1 ORDER BY created_at DESC, id DESC;
 
 -- Filtros opcionales: NULL = sin filtrar por ese criterio.
 selectFiltered:
-SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at
+SELECT id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at, subtype, adjust_dx, adjust_dy, adjust_scale
 FROM Garment
 WHERE (:type IS NULL OR type = :type)
   AND (:color IS NULL OR color = :color)
@@ -47,12 +52,16 @@ WHERE (:type IS NULL OR type = :type)
 ORDER BY created_at DESC, id DESC;
 
 insert:
-INSERT INTO Garment (photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Garment (photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at, subtype, adjust_dx, adjust_dy, adjust_scale)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
-UPDATE Garment SET photo_path = ?, type = ?, color = ?, season = ?, usage = ?, brand = ?, size = ?, fit = ?, favorite = ?, dirty = ?, wears_since_wash = ?, total_wears = ?, wash_after_wears = ?
+UPDATE Garment SET photo_path = ?, type = ?, color = ?, season = ?, usage = ?, brand = ?, size = ?, fit = ?, favorite = ?, dirty = ?, wears_since_wash = ?, total_wears = ?, wash_after_wears = ?, subtype = ?, adjust_dx = ?, adjust_dy = ?, adjust_scale = ?
 WHERE id = ?;
+
+-- Ajuste manual de la colocación: los tres a NULL lo quita.
+setAjuste:
+UPDATE Garment SET adjust_dx = :dx, adjust_dy = :dy, adjust_scale = :scale WHERE id = :id;
 
 setFavorite:
 UPDATE Garment SET favorite = ? WHERE id = ?;
@@ -76,8 +85,8 @@ SELECT last_insert_rowid();
 
 -- Copia de seguridad: inserta conservando el id.
 insertWithId:
-INSERT INTO Garment (id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Garment (id, photo_path, type, color, season, usage, brand, size, fit, favorite, dirty, wears_since_wash, total_wears, wash_after_wears, created_at, subtype, adjust_dx, adjust_dy, adjust_scale)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteAll:
 DELETE FROM Garment;

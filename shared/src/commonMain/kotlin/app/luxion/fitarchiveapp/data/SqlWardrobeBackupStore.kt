@@ -56,6 +56,8 @@ class SqlWardrobeBackupStore(
                     favorite = it.favorite.toDb(), dirty = it.dirty.toDb(),
                     wears_since_wash = it.wearsSinceWash.toLong(), total_wears = it.totalWears.toLong(),
                     wash_after_wears = it.washAfterWears?.toLong(), created_at = it.createdAt,
+                    subtype = it.subtipo?.name, adjust_dx = it.ajuste?.dx?.toDouble(),
+                    adjust_dy = it.ajuste?.dy?.toDouble(), adjust_scale = it.ajuste?.escala?.toDouble(),
                 )
             }
             snapshot.outfits.forEach {

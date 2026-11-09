@@ -1,5 +1,6 @@
 package app.luxion.fitarchiveapp.data
 
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.sucioTrasUso
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +44,8 @@ class GarmentRepositoryEnMemoria(inicial: List<Garment> = emptyList()) : Garment
 
     override suspend fun update(garment: Garment) = modificar(garment.id) { garment }
     override suspend fun setFavorite(id: Long, favorite: Boolean) = modificar(id) { it.copy(favorite = favorite) }
+
+    override suspend fun setAjuste(id: Long, ajuste: AjustePrenda?) = modificar(id) { it.copy(ajuste = ajuste) }
 
     override suspend fun setDirty(id: Long, dirty: Boolean) =
         modificar(id) { it.copy(dirty = dirty, wearsSinceWash = if (dirty) it.wearsSinceWash else 0) }

@@ -29,7 +29,10 @@ import app.luxion.fitarchiveapp.avatar.LIENZO_ALTO
 import app.luxion.fitarchiveapp.avatar.LIENZO_ANCHO
 import app.luxion.fitarchiveapp.avatar.Slot
 import app.luxion.fitarchiveapp.avatar.Subtipo
-import app.luxion.fitarchiveapp.avatar.ajustar
+import app.luxion.fitarchiveapp.avatar.ajusteManual
+import app.luxion.fitarchiveapp.avatar.plus
+import app.luxion.fitarchiveapp.avatar.subtipoEfectivo
+import app.luxion.fitarchiveapp.avatar.ajustarEnCaja
 import app.luxion.fitarchiveapp.avatar.capasOrdenadas
 import app.luxion.fitarchiveapp.avatar.encajar
 
@@ -47,8 +50,15 @@ class PrendaAvatar(
     val datos: DatosPrenda? = null,
 ) {
     companion object {
-        fun de(prenda: Garment, imagen: ImageBitmap, subtipo: Subtipo, ajuste: AjustePrenda = AjustePrenda.Ninguno) =
-            PrendaAvatar(imagen, subtipo, ajuste, DatosPrenda(prenda.type, prenda.size, prenda.brand, prenda.fit))
+        /**
+         * Con el subtipo y el ajuste guardados en la [prenda]; [ajuste] es el extra de quien la dibuja (p. ej. el
+         * del outfit) y se suma al de la prenda.
+         */
+        fun de(prenda: Garment, imagen: ImageBitmap, ajuste: AjustePrenda = AjustePrenda.Ninguno) =
+            PrendaAvatar(
+                imagen, prenda.subtipoEfectivo, prenda.ajusteManual + ajuste,
+                DatosPrenda(prenda.type, prenda.size, prenda.brand, prenda.fit),
+            )
     }
 }
 
@@ -97,7 +107,7 @@ fun DrawScope.dibujarAvatarConPrendas(ctx: ContextoAvatar, prendas: List<PrendaA
                 is Capa.Avatar -> dibujarCapaAvatar(capa.capa, ctx.escala, ctx.aspecto, ctx.rostro)
                 is Capa.Prenda -> {
                     val p = porSlot.getValue(capa.slot)
-                    val r = ajustar(rectBase(ctx, p), p.ajuste)
+                    val r = ajustarEnCaja(rectBase(ctx, p), p.ajuste, p.subtipo.caja)
                     val dibujar = {
                         drawImage(
                             p.imagen,
