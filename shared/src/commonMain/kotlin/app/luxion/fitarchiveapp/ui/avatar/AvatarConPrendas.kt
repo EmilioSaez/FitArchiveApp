@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.runtime.compositionLocalOf
 import app.luxion.fitarchiveapp.avatar.AjustePrenda
-import app.luxion.fitarchiveapp.avatar.AspectoAvatar
 import app.luxion.fitarchiveapp.avatar.DimensionesPrendaCalc
 import app.luxion.fitarchiveapp.avatar.EscalaAvatar
 import app.luxion.fitarchiveapp.avatar.PerfilCorporal
@@ -52,11 +51,9 @@ class PrendaAvatar(
     }
 }
 
-/** Cuerpo, aspecto y tablas de tallas con los que se dibuja el avatar; lo provee [ProveedorAvatar]. */
+/** Cuerpo y tablas de tallas con los que se dibuja el avatar; lo provee [ProveedorAvatar]. */
 class ContextoAvatar(
     val cuerpo: PerfilCorporal = PerfilCorporal(),
-    val aspecto: AspectoAvatar = AspectoAvatar(),
-    val rostro: ImageBitmap? = null,
     val tablas: Map<String, TablaTallas> = emptyMap(),
 ) {
     val escala = EscalaAvatar(cuerpo)
@@ -94,7 +91,7 @@ fun DrawScope.dibujarAvatarConPrendas(ctx: ContextoAvatar, prendas: List<PrendaA
     scale(escala, escala, pivot = Offset.Zero) {
         capas.forEach { capa ->
             when (capa) {
-                is Capa.Avatar -> dibujarCapaAvatar(capa.capa, ctx.escala, ctx.aspecto, ctx.rostro)
+                is Capa.Avatar -> dibujarCapaAvatar(capa.capa, ctx.escala)
                 is Capa.Prenda -> {
                     val p = porSlot.getValue(capa.slot)
                     val r = ajustar(rectBase(ctx, p), p.ajuste)

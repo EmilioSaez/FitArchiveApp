@@ -1,6 +1,6 @@
 # Avatar 2D a escala real y personalizable
 
-Sustituye al avatar fijo de `docs/avatar.md` (los `drawable/avatar_*.xml` ya no se cargan; se conservan como referencia de estilo).
+Sustituye al avatar fijo de `docs/avatar.md` (los `drawable/avatar_*.xml` ya no se cargan; se conservan como referencia de proporciones).
 
 ## 1. Medidas → cuerpo
 - `PerfilCorporal.de(Measurements?)` (`avatar/ModeloCorporal.kt`): altura, pecho, cintura, cadera, hombros, brazo, pierna y pie en cm. Lo que falta o está fuera de rango se rellena con una referencia (165 cm, 90-72-98…); `reales` indica qué medidas vinieron de la usuaria.
@@ -13,13 +13,10 @@ Sustituye al avatar fijo de `docs/avatar.md` (los `drawable/avatar_*.xml` ya no 
 - Accesorios (sombrero, gafas, collar, cinturón, bolsos): no van a escala real; usan su caja base adaptada al cuerpo (`cajaAccesorio`).
 - No se añaden campos a `Garment`: las dimensiones se calculan al dibujar. El ajuste manual (`AjustePrenda`) se aplica encima.
 
-## 3. Personalización
-- `AspectoAvatar`: tono de piel (8), color de pelo (8), peinado (largo, media melena, corto, recogido, sin pelo) y foto de la cara. Con foto, se recorta al óvalo de la cabeza y el pelo dibujado se omite.
-- Persistencia: tabla `Avatar` (una fila) con migración `1.sqm` (esquema v2). La foto se guarda en el almacén privado de fotos; **no entra todavía en la copia de seguridad**.
-- UI: sección «Tu avatar» en Perfil (`SeccionAvatar`).
-- `ProveedorAvatar` (en `App`) expone el `ContextoAvatar` (cuerpo, aspecto, rostro, tablas) por `LocalAvatar`; `AvatarConPrendas` y la tarjeta de compartir lo leen.
+## 3. Aspecto
+- Maniquí único, sin cara ni pelo (ver `docs/avatar.md`): ya no hay tono de piel, peinado ni foto de cara en la UI. `AspectoAvatar`, la tabla `Avatar` (migración `1.sqm`) y `AvatarRepository` se conservan por compatibilidad con las BD existentes, pero no se leen para dibujar.
+- UI: sección «Tu maniquí» en Perfil (`SeccionAvatar`, solo vista previa). `ProveedorAvatar` (en `App`) expone el `ContextoAvatar` (cuerpo, tablas) por `LocalAvatar`; `AvatarConPrendas` y la tarjeta de compartir lo leen.
 
 ## Pendiente
 - Revisión visual en dispositivo/emulador del dibujo para distintas medidas.
-- Foto de cuerpo entero (ahora solo cara) y copia de seguridad de la foto del avatar.
 - Rediseño de pantallas en Stitch si se quiere afinar el estilo de la sección.
