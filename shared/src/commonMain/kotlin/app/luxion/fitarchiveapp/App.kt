@@ -50,7 +50,7 @@ import kotlin.time.Clock
 
 @Composable
 fun App(repositories: Repositories) {
-    ProveedorAvatar(repositories.measurements, repositories.avatar) { AppContenido(repositories) }
+    ProveedorAvatar(repositories.measurements) { AppContenido(repositories) }
 }
 
 @Composable
@@ -168,7 +168,7 @@ private fun AppContenido(repositories: Repositories) {
                     Modifier.padding(padding),
                     irAlContenidoExtra = perfilEnUbicacion,
                 ) {
-                    SeccionAvatar(repositories.avatar)
+                    SeccionAvatar()
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                     repositories.copia?.let { SeccionCopia(it) }
                     Text(

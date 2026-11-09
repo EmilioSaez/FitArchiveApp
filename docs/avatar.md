@@ -1,13 +1,13 @@
 # Avatar 2D (T16)
 
-Figura ilustrada femenina neutra, línea limpia y tonos suaves (piel `#EBD8CB`, pelo `#5A4336`, línea `#2F2A2A`, labios `#A34A5E`). Pensada para recibir prendas por capas (T17).
+Maniquí abstracto de boutique: silueta lisa, sin cara ni pelo, líneas limpias y un único tono neutro suave (relleno `#E2DBD4` con degradado lateral a `#C4BBB2`, contorno fino `#A39A92`), legible en tema claro y oscuro. Pensado para recibir prendas por capas (T17). En runtime se dibuja por código (`ui/avatar/CuerpoParametrico.kt`, ajustado a las medidas); los drawables/SVG son la referencia para las proporciones por defecto.
 
 ## Recursos
 Todo en `shared/src/commonMain/composeResources/`:
 
 | Ruta | Uso |
 |---|---|
-| `drawable/avatar_{hair_back,body,face,arms,hair_front}.xml` | Capas del avatar como vector drawable. Compose Multiplatform las carga en Android e iOS con `painterResource(Res.drawable.avatar_body)`. |
+| `drawable/avatar_{body,arms}.xml` | Capas del maniquí como vector drawable (referencia con las medidas por defecto; el avatar real se dibuja por código). |
 | `files/avatar/*.svg` | Mismas capas en SVG (fuente editable; no cargar en runtime en Android). |
 | `files/avatar/anchors.json` | Puntos de referencia, orden de capas y cajas de colocación por tipo de prenda. Fuente de verdad para T17. |
 | `files/avatar/avatar_preview.svg` | Avatar completo. |
@@ -28,10 +28,8 @@ De abajo arriba (`z` ascendente):
 
 | z | Capa | Tipo | Contenido |
 |---|---|---|---|
-| 0 | `hair_back` | avatar | pelo por detrás de la cabeza y hombros |
-| 10 | `body` | avatar | cabeza, cuello, torso, piernas, pies |
-| 12 | `face` | avatar | ojos, cejas, nariz, labios (único toque de color: labios) |
-| 14 | `arms` | avatar | brazos |
+| 10 | `body` | avatar | cabeza lisa (sin rasgos), cuello, torso, piernas, pies |
+| 14 | `arms` | avatar | brazos (sin manos, punta redondeada) |
 | 20 | `shoes` | prenda | calzado |
 | 30 | `bottom` | prenda | pantalón, falda, shorts |
 | 40 | `top` | prenda | camiseta, camisa, jersey |
@@ -39,7 +37,6 @@ De abajo arriba (`z` ascendente):
 | 50 | `outer` | prenda | chaqueta, abrigo (categoría «arriba») |
 | 60 | `acc_waist` | accesorio | cinturón |
 | 62 | `acc_neck` | accesorio | collar, pañuelo |
-| 70 | `hair_front` | avatar | flequillo (queda por encima de la ropa y bajo sombreros) |
 | 72 | `acc_face` | accesorio | gafas, pendientes |
 | 80 | `acc_head` | accesorio | sombrero, gorro, diadema |
 | 90 | `acc_hand` | accesorio | bolsos |
@@ -76,6 +73,6 @@ Las cajas son una base; T17 puede permitir ajuste manual (arrastrar/escalar) par
 | accesorios | `acc_*` según subtipo |
 
 ## Para T17
-- Cargar las cinco capas del avatar con `painterResource` y apilarlas con `Box` en el orden de la tabla, todas con el mismo tamaño (`aspectRatio(0.4f)`).
+- Dibujar las dos capas del avatar (`body`, `arms`) con `dibujarCapaAvatar` e intercalarlas con las prendas en el orden de la tabla, todas en el mismo lienzo (`aspectRatio(0.4f)`).
 - Leer `anchors.json` (por ejemplo con `Res.readBytes("files/avatar/anchors.json")` y kotlinx.serialization) o copiar las cajas a constantes Kotlin.
 - Ordenar las prendas del outfit por `z` de su slot; si hay `dress`, omitir `top` y `bottom`.

@@ -69,18 +69,8 @@
   },
   "layers": [
     {
-      "id": "hair_back",
-      "z": 0,
-      "kind": "avatar"
-    },
-    {
       "id": "body",
       "z": 10,
-      "kind": "avatar"
-    },
-    {
-      "id": "face",
-      "z": 12,
       "kind": "avatar"
     },
     {
@@ -131,11 +121,6 @@
       "id": "acc_neck",
       "z": 62,
       "kind": "accessory"
-    },
-    {
-      "id": "hair_front",
-      "z": 70,
-      "kind": "avatar"
     },
     {
       "id": "acc_face",

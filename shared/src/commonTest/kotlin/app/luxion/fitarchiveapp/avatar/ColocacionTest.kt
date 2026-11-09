@@ -74,8 +74,8 @@ class ColocacionTest {
         val ids = orden.map { if (it is Capa.Prenda) it.slot.name else (it as Capa.Avatar).capa.name }
         assertEquals(
             listOf(
-                "HAIR_BACK", "BODY", "FACE", "ARMS", "SHOES", "BOTTOM", "TOP", "OUTER", "ACC_WAIST", "ACC_NECK",
-                "HAIR_FRONT", "ACC_FACE", "ACC_HEAD", "ACC_HAND",
+                "BODY", "ARMS", "SHOES", "BOTTOM", "TOP", "OUTER", "ACC_WAIST", "ACC_NECK",
+                "ACC_FACE", "ACC_HEAD", "ACC_HAND",
             ),
             ids,
         )

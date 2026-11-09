@@ -13,7 +13,7 @@ data class Caja(val x: Float, val y: Float, val w: Float, val h: Float)
 enum class Alineacion { ARRIBA_CENTRO, ABAJO_CENTRO, CENTRO }
 
 /** Capas del avatar (no prendas). */
-enum class CapaAvatar(val z: Int) { HAIR_BACK(0), BODY(10), FACE(12), ARMS(14), HAIR_FRONT(70) }
+enum class CapaAvatar(val z: Int) { BODY(10), ARMS(14) }
 
 /** Slots donde se coloca una prenda, con su z y su alineación en la caja. */
 enum class Slot(val z: Int, val alineacion: Alineacion) {
