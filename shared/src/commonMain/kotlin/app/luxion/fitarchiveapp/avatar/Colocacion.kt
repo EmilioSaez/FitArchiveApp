@@ -90,19 +90,23 @@ fun slotDe(tipo: GarmentType): Slot = subtipoPorDefecto(tipo).slot
 /** Rectángulo en unidades del lienzo. */
 data class Rect(val x: Float, val y: Float, val w: Float, val h: Float)
 
-/** Regla *contain*: la imagen cabe en [caja] manteniendo proporción y se alinea según [alineacion]. */
-fun encajar(caja: Caja, anchoImg: Int, altoImg: Int, alineacion: Alineacion): Rect {
+/**
+ * Regla *contain*: la imagen cabe en [caja] manteniendo proporción y se alinea según [alineacion].
+ * Con [nucleo] es el núcleo de la prenda (no el recorte entero) el que cabe y se alinea; lo que queda fuera
+ * del núcleo se dibuja igual y puede sobresalir de la caja. Devuelve siempre el rectángulo de la imagen entera.
+ */
+fun encajar(caja: Caja, anchoImg: Int, altoImg: Int, alineacion: Alineacion, nucleo: Nucleo? = null): Rect {
     if (anchoImg <= 0 || altoImg <= 0) return Rect(caja.x, caja.y, 0f, 0f)
-    val s = min(caja.w / anchoImg, caja.h / altoImg)
-    val w = anchoImg * s
-    val h = altoImg * s
-    val x = caja.x + (caja.w - w) / 2f
-    val y = when (alineacion) {
+    val n = nucleo?.takeIf { it.ancho > 0 && it.alto > 0 } ?: Nucleo(0, 0, anchoImg, altoImg)
+    val s = min(caja.w / n.ancho, caja.h / n.alto)
+    val hNucleo = n.alto * s
+    val xNucleo = caja.x + (caja.w - n.ancho * s) / 2f
+    val yNucleo = when (alineacion) {
         Alineacion.ARRIBA_CENTRO -> caja.y
-        Alineacion.ABAJO_CENTRO -> caja.y + caja.h - h
-        Alineacion.CENTRO -> caja.y + (caja.h - h) / 2f
+        Alineacion.ABAJO_CENTRO -> caja.y + caja.h - hNucleo
+        Alineacion.CENTRO -> caja.y + (caja.h - hNucleo) / 2f
     }
-    return Rect(x, y, w, h)
+    return Rect(xNucleo - n.colInicio * s, yNucleo - n.filaInicio * s, anchoImg * s, altoImg * s)
 }
 
 /** Capa a dibujar, ya en orden de apilado. */
