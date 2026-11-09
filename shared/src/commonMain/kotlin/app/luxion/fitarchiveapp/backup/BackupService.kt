@@ -1,5 +1,7 @@
 package app.luxion.fitarchiveapp.backup
 
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
+import app.luxion.fitarchiveapp.avatar.Subtipo
 import app.luxion.fitarchiveapp.model.CalendarDay
 import app.luxion.fitarchiveapp.model.WearRecord
 import app.luxion.fitarchiveapp.model.Fit
@@ -102,6 +104,7 @@ private fun WardrobeSnapshot.toManifest(createdAt: Long, photos: List<PhotoEntry
         GarmentDto(
             it.id, it.type.name, it.color.name, it.season.name, it.usage.name, it.brand, it.size, it.fit.name,
             it.favorite, it.dirty, it.wearsSinceWash, it.totalWears, it.washAfterWears, it.createdAt,
+            it.subtipo?.name, it.ajuste?.dx, it.ajuste?.dy, it.ajuste?.escala,
         )
     },
     outfits = outfits.map { OutfitDto(it.id, it.name, it.occasion?.name, it.favorite, it.createdAt) },
@@ -133,6 +136,12 @@ private fun BackupManifest.toSnapshot() = WardrobeSnapshot(
             brand = it.brand, size = it.size, fit = parse<Fit>(it.fit, "corte"), favorite = it.favorite, dirty = it.dirty,
             wearsSinceWash = it.wearsSinceWash, totalWears = it.totalWears,
             washAfterWears = it.washAfterWears, createdAt = it.createdAt,
+            subtipo = it.subtipo?.let { s -> parse<Subtipo>(s, "subtipo") },
+            ajuste = if (it.ajusteDx != null && it.ajusteDy != null && it.ajusteEscala != null) {
+                AjustePrenda(it.ajusteDx, it.ajusteDy, it.ajusteEscala)
+            } else {
+                null
+            },
         )
     },
     outfits = outfits.map { Outfit(it.id, it.name, it.occasion?.let { o -> parse<Occasion>(o, "ocasión") }, it.favorite, it.createdAt) },

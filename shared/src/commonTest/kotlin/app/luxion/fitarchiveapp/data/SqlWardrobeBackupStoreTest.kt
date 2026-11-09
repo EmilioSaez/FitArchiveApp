@@ -5,6 +5,8 @@ import app.luxion.fitarchiveapp.backup.PhotoStore
 import app.luxion.fitarchiveapp.backup.TripGarmentLink
 import app.luxion.fitarchiveapp.backup.TripOutfitLink
 import app.luxion.fitarchiveapp.backup.WardrobeSnapshot
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
+import app.luxion.fitarchiveapp.avatar.Subtipo
 import app.luxion.fitarchiveapp.model.CalendarDay
 import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
@@ -29,10 +31,11 @@ import kotlin.test.assertNull
 private fun garment(id: Long, path: String, brand: String? = null) = Garment(
     id, path, GarmentType.DRESS, GarmentColor.BURGUNDY, Season.WINTER, Usage.PARTY, brand, "M",
     favorite = true, dirty = true, wearsSinceWash = 2, totalWears = 9, washAfterWears = 3, createdAt = 1000L + id, fit = Fit.OVERSIZE,
+    subtipo = Subtipo.DRESS_LARGO, ajuste = AjustePrenda(-4.5f, 12f, 1.25f),
 )
 
 private fun sample() = WardrobeSnapshot(
-    garments = listOf(garment(1, "f/1.jpg", "Mango ñ \"é\""), garment(5, "f/5.jpg").copy(brand = null, size = null, washAfterWears = null, favorite = false, dirty = false)),
+    garments = listOf(garment(1, "f/1.jpg", "Mango ñ \"é\""), garment(5, "f/5.jpg").copy(subtipo = null, ajuste = null, brand = null, size = null, washAfterWears = null, favorite = false, dirty = false)),
     outfits = listOf(Outfit(10, "Cena", Occasion.DATE, true, 5), Outfit(11, "Sin ocasión", null, false, 6)),
     outfitGarments = listOf(OutfitGarment(10, 1, 0.25f, -3.5f, 1.5f, 2), OutfitGarment(10, 5, 0f, 0f, 1f, 0)),
     measurements = Measurements(165f, 90f, null, 95.5f, 40f, 58f, 100f, 777, footCm = 24.5f),

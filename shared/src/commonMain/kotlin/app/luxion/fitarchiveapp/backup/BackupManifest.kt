@@ -51,6 +51,11 @@ data class GarmentDto(
     val totalWears: Int = 0,
     val washAfterWears: Int? = null,
     val createdAt: Long,
+    /** Subtipo (nombre del enum) y ajuste manual de colocación; null = por defecto / sin ajuste. */
+    val subtipo: String? = null,
+    val ajusteDx: Float? = null,
+    val ajusteDy: Float? = null,
+    val ajusteEscala: Float? = null,
 )
 
 @Serializable

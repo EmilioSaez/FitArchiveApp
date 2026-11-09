@@ -1,5 +1,7 @@
 package app.luxion.fitarchiveapp.backup
 
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
+import app.luxion.fitarchiveapp.avatar.Subtipo
 import app.luxion.fitarchiveapp.model.CalendarDay
 import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
@@ -39,10 +41,11 @@ private class FakePhotos(val files: MutableMap<String, ByteArray> = mutableMapOf
 private fun garment(id: Long, path: String, brand: String? = null) = Garment(
     id, path, GarmentType.DRESS, GarmentColor.BURGUNDY, Season.WINTER, Usage.PARTY, brand, "M",
     favorite = true, dirty = true, wearsSinceWash = 2, totalWears = 9, washAfterWears = 3, createdAt = 1000L + id, fit = Fit.OVERSIZE,
+    subtipo = Subtipo.DRESS_LARGO, ajuste = AjustePrenda(-4.5f, 12f, 1.25f),
 )
 
 private fun sample() = WardrobeSnapshot(
-    garments = listOf(garment(1, "old/1.jpg", "Mango ñ \"é\""), garment(2, "old/2.jpg"), garment(3, "old/gone.jpg")),
+    garments = listOf(garment(1, "old/1.jpg", "Mango ñ \"é\""), garment(2, "old/2.jpg").copy(subtipo = null, ajuste = null), garment(3, "old/gone.jpg")),
     outfits = listOf(Outfit(10, "Cena", Occasion.DATE, true, 5), Outfit(11, "Sin ocasión", null, false, 6)),
     outfitGarments = listOf(OutfitGarment(10, 1, 0.25f, -3.5f, 1.5f, 2), OutfitGarment(10, 2, 0f, 0f, 1f, 0)),
     measurements = Measurements(165f, 90f, null, 95.5f, 40f, 58f, 100f, 777, footCm = 24.5f),

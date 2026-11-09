@@ -1,5 +1,7 @@
 package app.luxion.fitarchiveapp.data
 
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
+import app.luxion.fitarchiveapp.avatar.Subtipo
 import app.luxion.fitarchiveapp.model.CalendarDay
 import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.Garment
@@ -41,6 +43,13 @@ internal fun app.luxion.fitarchiveapp.db.Garment.toModel() = Garment(
     totalWears = total_wears.toInt(),
     washAfterWears = wash_after_wears?.toInt(),
     createdAt = created_at,
+    subtipo = subtype?.let { enumFromDb<Subtipo>(it) },
+    // El ajuste es todo o nada: con una columna a NULL (BD manipulada) se descarta entero.
+    ajuste = if (adjust_dx != null && adjust_dy != null && adjust_scale != null) {
+        AjustePrenda(adjust_dx.toFloat(), adjust_dy.toFloat(), adjust_scale.toFloat())
+    } else {
+        null
+    },
 )
 
 internal fun app.luxion.fitarchiveapp.db.Outfit.toModel() = Outfit(

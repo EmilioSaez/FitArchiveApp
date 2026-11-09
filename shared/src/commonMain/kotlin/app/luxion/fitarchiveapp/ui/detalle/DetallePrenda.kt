@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.MeasurementsRepository
 import app.luxion.fitarchiveapp.data.UsoRepository
@@ -53,6 +54,7 @@ import app.luxion.fitarchiveapp.model.usosParaLavar
 import app.luxion.fitarchiveapp.ui.anadir.BorradorPrenda
 import app.luxion.fitarchiveapp.ui.anadir.FormularioPrenda
 import app.luxion.fitarchiveapp.ui.anadir.etiqueta
+import app.luxion.fitarchiveapp.ui.avatar.AjusteColocacion
 import kotlinx.coroutines.launch
 
 /**
@@ -105,6 +107,8 @@ fun DetallePrendaScreen(
                 onEliminar = { confirmando = true },
                 onAlternarLimpieza = { scope.launch { garments.setDirty(actual.id, !actual.dirty) } },
                 onCambiarUsosParaLavar = { n -> scope.launch { garments.update(actual.copy(washAfterWears = n)) } },
+                onGuardarAjuste = { ajuste -> scope.launch { garments.setAjuste(actual.id, ajuste.takeIf { it != AjustePrenda.Ninguno }) } },
+                onRestablecerAjuste = { scope.launch { garments.setAjuste(actual.id, null) } },
                 measurements = measurements,
                 usos = usos,
                 onAbrirPerfil = onAbrirPerfil,
@@ -141,6 +145,8 @@ private fun DetalleContenido(
     onEliminar: () -> Unit,
     onAlternarLimpieza: () -> Unit,
     onCambiarUsosParaLavar: (Int) -> Unit,
+    onGuardarAjuste: (AjustePrenda) -> Unit,
+    onRestablecerAjuste: () -> Unit,
     measurements: MeasurementsRepository,
     usos: UsoRepository,
     onAbrirPerfil: () -> Unit,
@@ -196,6 +202,12 @@ private fun DetalleContenido(
 
             SeccionTalla(prenda, measurements, onAbrirPerfil)
             HuecoEstadoLimpieza(prenda, onAlternarLimpieza, onCambiarUsosParaLavar)
+
+            imagen?.let {
+                HorizontalDivider()
+                Text("Colocación en el avatar", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                AjusteColocacion(prenda, it, onGuardarAjuste, onRestablecerAjuste)
+            }
 
             HorizontalDivider()
             OutlinedButton(onClick = onEditar, modifier = Modifier.fillMaxWidth()) { Text("Editar") }

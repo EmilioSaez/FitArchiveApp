@@ -4,7 +4,7 @@ import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.Slot
 import app.luxion.fitarchiveapp.avatar.ajusteGuardado
 import app.luxion.fitarchiveapp.avatar.slotDe
-import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
+import app.luxion.fitarchiveapp.avatar.subtipoEfectivo
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
 import app.luxion.fitarchiveapp.model.Garment
@@ -147,7 +147,7 @@ class EditorOutfitViewModel(
 
     private fun ajustarActiva(cambio: (AjustePrenda) -> AjustePrenda) = _estado.update { e ->
         val actual = e.elegidaActiva ?: return@update e
-        val caja = subtipoPorDefecto(actual.prenda.type).caja
+        val caja = actual.prenda.subtipoEfectivo.caja
         // El tamaño no lo elige el usuario: la escala sale de las dimensiones de la prenda y su cuerpo.
         val ajuste = cambio(actual.ajuste).limitado(caja).copy(escala = AjustePrenda.ESCALA_AUTOMATICA)
         e.copy(elegidas = e.elegidas + (e.slotActivo to actual.copy(ajuste = ajuste)))

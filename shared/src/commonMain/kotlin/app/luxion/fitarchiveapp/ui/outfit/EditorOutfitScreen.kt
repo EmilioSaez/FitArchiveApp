@@ -80,7 +80,6 @@ import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.LIENZO_ALTO
 import app.luxion.fitarchiveapp.avatar.Slot
 import app.luxion.fitarchiveapp.avatar.slotDe
-import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
 import app.luxion.fitarchiveapp.compartir.rememberCompartirOutfit
 import app.luxion.fitarchiveapp.data.GarmentRepository
 import app.luxion.fitarchiveapp.data.OutfitRepository
@@ -137,7 +136,7 @@ fun EditorOutfitScreen(
         rutas.filter { it !in imagenes }.forEach { ruta -> cargarImagen(ruta)?.let { imagenes[ruta] = it } }
     }
     val prendasAvatar = estado.elegidas.values.mapNotNull { e ->
-        imagenes[e.prenda.photoPath]?.let { PrendaAvatar.de(e.prenda, it, subtipoPorDefecto(e.prenda.type), e.ajuste) }
+        imagenes[e.prenda.photoPath]?.let { PrendaAvatar.de(e.prenda, it, e.ajuste) }
     }
     val compartir = rememberCompartirOutfit()
 
