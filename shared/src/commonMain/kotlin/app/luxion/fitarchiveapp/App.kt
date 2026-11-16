@@ -120,6 +120,7 @@ private fun AppContenido(repositories: Repositories) {
                 },
                 outfitId = outfitEditadoId,
                 prendasIniciales = prendasIniciales,
+                servicioIa = servicioIa,
             )
             return@FitArchiveTheme
         }
@@ -182,6 +183,7 @@ private fun AppContenido(repositories: Repositories) {
                     },
                     onAnadirPrendas = { anadiendo = true },
                     modifier = Modifier.padding(padding),
+                    servicioIa = servicioIa,
                 )
                 Destino.Perfil -> MedidasScreen(
                     repositories.measurements,

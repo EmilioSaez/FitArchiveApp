@@ -14,7 +14,11 @@ import app.luxion.fitarchiveapp.suggestions.AfinidadAprendida
 import app.luxion.fitarchiveapp.suggestions.AfinidadEstilo
 import app.luxion.fitarchiveapp.suggestions.DesgloseSugerencia
 import app.luxion.fitarchiveapp.suggestions.MotorSugerencias
+import app.luxion.fitarchiveapp.ia.ErrorIa
 import app.luxion.fitarchiveapp.suggestions.OutfitGuardado
+import app.luxion.fitarchiveapp.suggestions.OutfitIa
+import app.luxion.fitarchiveapp.suggestions.PedidoIa
+import app.luxion.fitarchiveapp.suggestions.SugeridorIa
 import app.luxion.fitarchiveapp.suggestions.OutfitSugerido
 import app.luxion.fitarchiveapp.suggestions.PedidoSugerencia
 import app.luxion.fitarchiveapp.ui.outfit.PrendaElegida
@@ -66,6 +70,10 @@ data class OutfitDelDiaUiState(
     /** Outfit asignado hoy en el calendario, si hay. */
     val asignadoHoy: Long? = null,
     val ocupado: Boolean = false,
+    /** Pidiendo outfits a la IA. */
+    val iaCargando: Boolean = false,
+    /** Mensaje de la última petición a la IA que no dio propuestas (fallo o nada válido); las sugerencias locales siguen. */
+    val errorIa: String? = null,
     /** Confirmación breve de la última acción. */
     val aviso: String? = null,
     val error: String? = null,
@@ -77,6 +85,9 @@ data class OutfitDelDiaUiState(
     val guardadoActual get() = idGuardadoActual != null
     val aceptadoActual get() = idGuardadoActual != null && idGuardadoActual == asignadoHoy
     val hayVariasOpciones get() = sugerencias.size > 1
+
+    /** La sugerencia actual viene de la IA (explicación breve en lugar de puntuación). */
+    val actualEsDeIa get() = actual?.explicacionIa != null
 
     /** La sugerencia actual solo tiene prendas que nunca se han llevado. */
     val actualSinEstrenar get() = actual?.prendas?.all { it.id !in prendasUsadas } ?: false
@@ -107,9 +118,12 @@ class OutfitDelDiaViewModel(
      * bloquear el hilo de la interfaz con armarios grandes; por defecto se calculan en el contexto de [scope].
      */
     private val calculo: CoroutineContext = EmptyCoroutineContext,
+    /** Sugerencias con IA opcionales ([sugerirConIa]); null = sin IA y la pantalla no cambia. */
+    private val ia: SugeridorIa? = null,
 ) {
     private val _estado = MutableStateFlow(OutfitDelDiaUiState(hoy))
     private var trabajoCalculo: Job? = null
+    private var trabajoIa: Job? = null
     val estado: StateFlow<OutfitDelDiaUiState> = _estado.asStateFlow()
 
     private var historial: List<WearRecord> = emptyList()
@@ -156,6 +170,39 @@ class OutfitDelDiaViewModel(
         val nota = calendario.observe(_estado.value.hoy).first()?.note
         calendario.set(CalendarDay(_estado.value.hoy, id, nota))
     }
+
+    /**
+     * Pide a la IA hasta 3 outfits con el armario limpio, el tiempo, la ocasión y el estilo, y los pone delante de las
+     * sugerencias locales. Si falla o no devuelve nada válido, queda el motor local y se explica por qué.
+     * Cualquier cambio de armario u ocasión descarta las propuestas de la IA (ya no corresponden).
+     */
+    fun sugerirConIa() {
+        val sugeridor = ia ?: return
+        val e = _estado.value
+        if (e.iaCargando || e.cargando) return
+        _estado.update { it.copy(iaCargando = true, errorIa = null, aviso = null) }
+        val favoritos = guardadosParaAfinidad.filter { it.favorito }.map { it.prendaIds }
+        trabajoIa = scope.launch {
+            val resultado = sugeridor.sugerir(PedidoIa(e.armario, e.tiempoDia, e.ocasion, favoritos))
+            resultado.fold(
+                onSuccess = { propuestas ->
+                    if (propuestas.isEmpty()) {
+                        _estado.update { it.copy(iaCargando = false, errorIa = "La IA no propuso ningún outfit válido. Te mostramos las sugerencias de siempre.") }
+                    } else {
+                        _estado.update { s ->
+                            val locales = s.sugerencias.filter { it.explicacionIa == null }
+                            s.copy(iaCargando = false, sugerencias = propuestas.map { it.aSugerido() } + locales, indice = 0)
+                        }
+                    }
+                },
+                onFailure = { t ->
+                    _estado.update { it.copy(iaCargando = false, errorIa = (t as? ErrorIa)?.mensaje ?: "No se pudo consultar la IA.") }
+                },
+            )
+        }
+    }
+
+    fun descartarErrorIa() = _estado.update { it.copy(errorIa = null) }
 
     fun descartarError() = _estado.update { it.copy(error = null) }
 
@@ -251,12 +298,17 @@ class OutfitDelDiaViewModel(
         val usosAhora = historial
         val guardadosAhora = guardadosParaAfinidad
         trabajoCalculo?.cancel()
+        trabajoIa?.cancel()
         trabajoCalculo = scope.launch {
             val sugerencias = withContext(calculo) { motor.sugerir(pedido(e, usosAhora, guardadosAhora)) }
-            _estado.update { it.copy(sugerencias = sugerencias, indice = 0) }
+            _estado.update { it.copy(sugerencias = sugerencias, indice = 0, iaCargando = false) }
         }
     }
 }
+
+private fun OutfitIa.aSugerido() = OutfitSugerido(
+    prendas, puntuacion = 0.0, desglose = DesgloseSugerencia(clima = 0.0, ocasion = 0.0, colores = 0.0, frescura = 0.0), explicacionIa = explicacion,
+)
 
 private fun OutfitSugerido.clave(): List<Long> = prendas.map { it.id }.sorted()
 
