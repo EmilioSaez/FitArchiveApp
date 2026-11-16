@@ -20,7 +20,13 @@ import app.luxion.fitarchiveapp.suggestions.DesgloseSugerencia
 import app.luxion.fitarchiveapp.suggestions.MotorSugerencias
 import app.luxion.fitarchiveapp.suggestions.MotorSugerenciasPorReglas
 import app.luxion.fitarchiveapp.suggestions.OutfitSugerido
+import app.luxion.fitarchiveapp.suggestions.AJUSTES_CON_AVISO_DE_OUTFITS
+import app.luxion.fitarchiveapp.suggestions.AjustesDePrueba
+import app.luxion.fitarchiveapp.suggestions.BovedaDePrueba
 import app.luxion.fitarchiveapp.suggestions.PedidoSugerencia
+import app.luxion.fitarchiveapp.suggestions.ServicioIaDePrueba
+import app.luxion.fitarchiveapp.suggestions.SugeridorIa
+import io.ktor.http.HttpStatusCode
 import app.luxion.fitarchiveapp.weather.Ciudad
 import app.luxion.fitarchiveapp.weather.CondicionTiempo
 import app.luxion.fitarchiveapp.weather.Coordenadas
@@ -31,6 +37,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -126,11 +133,12 @@ class OutfitDelDiaViewModelTest {
         val tiempo: TiempoFijo = TiempoFijo(Result.success(templado)),
         val usos: UsosFijos = UsosFijos(),
         val ciudad: Ciudad? = madrid,
+        ia: SugeridorIa? = null,
     ) {
         val calendario = CalendarioEnMemoria()
         val outfits = OutfitsEnMemoria()
         val vm = OutfitDelDiaViewModel(
-            motor, GarmentRepositoryEnMemoria(armario), usos, calendario, outfits, tiempo, { ciudad }, scope, hoy, { 1234L },
+            motor, GarmentRepositoryEnMemoria(armario), usos, calendario, outfits, tiempo, { ciudad }, scope, hoy, { 1234L }, ia = ia,
         )
         val estado get() = vm.estado.value
     }
@@ -400,5 +408,92 @@ class OutfitDelDiaViewModelTest {
             listOf("Clima", "Ocasión", "Colores", "Frescura", "Tu estilo"),
             d.copy(afinidad = 0.4).criterios(hayTiempo = true, hayOcasion = true).map { it.etiqueta },
         )
+    }
+
+    @Test
+    fun conIaLasPropuestasValidasVanDelanteYElMotorLocalSigue() = runTest(UnconfinedTestDispatcher()) {
+        val servicio = ServicioIaDePrueba("""{"outfits":[{"prendas":[1,2,3],"explicacion":"Cómodo y fresco"},{"prendas":[1,99],"explicacion":"inventado"}]}""")
+        val e = Entorno(backgroundScope, motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]))), ia = SugeridorIa(servicio.servicio))
+        assertEquals(1, e.estado.sugerencias.size)
+
+        e.vm.sugerirConIa()
+        e.vm.estado.first { !it.iaCargando } // La red simulada responde en otro hilo.
+
+        val s = e.estado
+        assertFalse(s.iaCargando)
+        assertNull(s.errorIa)
+        assertEquals(2, s.sugerencias.size)
+        assertEquals("Cómodo y fresco", s.actual!!.explicacionIa)
+        assertTrue(s.actualEsDeIa)
+        assertEquals(setOf(1L, 2L, 3L), s.actual!!.prendas.map { it.id }.toSet())
+        assertNull(s.sugerencias[1].explicacionIa) // la local sigue detrás
+
+        // Se puede guardar como cualquier otra.
+        e.vm.guardar()
+        e.vm.estado.first { it.guardadoActual }
+        assertEquals(1, e.outfits.creados.size)
+    }
+
+    @Test
+    fun siLaIaFallaSeMuestraSuMensajeYSeConservaElMotorLocal() = runTest(UnconfinedTestDispatcher()) {
+        val servicio = ServicioIaDePrueba(estado = HttpStatusCode.InternalServerError)
+        val e = Entorno(backgroundScope, motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]))), ia = SugeridorIa(servicio.servicio))
+
+        e.vm.sugerirConIa()
+        e.vm.estado.first { !it.iaCargando } // La red simulada responde en otro hilo.
+
+        assertFalse(e.estado.iaCargando)
+        assertTrue(e.estado.errorIa!!.contains("IA"))
+        assertEquals(1, e.estado.sugerencias.size)
+        assertNull(e.estado.actual!!.explicacionIa)
+    }
+
+    @Test
+    fun siLaIaNoDaNadaValidoCaeAlMotorLocalConUnAviso() = runTest(UnconfinedTestDispatcher()) {
+        val servicio = ServicioIaDePrueba("""{"outfits":[{"prendas":[99,98],"explicacion":"x"}]}""")
+        val e = Entorno(backgroundScope, motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]))), ia = SugeridorIa(servicio.servicio))
+
+        e.vm.sugerirConIa()
+        e.vm.estado.first { !it.iaCargando } // La red simulada responde en otro hilo.
+
+        assertNotNull(e.estado.errorIa)
+        assertEquals(1, e.estado.sugerencias.size)
+        assertFalse(e.estado.actualEsDeIa)
+    }
+
+    @Test
+    fun sinClaveNoSeLlamaAlaIaNiCambiaNada() = runTest(UnconfinedTestDispatcher()) {
+        val servicio = ServicioIaDePrueba(boveda = BovedaDePrueba(null), ajustes = AjustesDePrueba(AJUSTES_CON_AVISO_DE_OUTFITS))
+        val e = Entorno(backgroundScope, motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]))), ia = SugeridorIa(servicio.servicio))
+
+        e.vm.sugerirConIa()
+        e.vm.estado.first { !it.iaCargando } // La red simulada responde en otro hilo.
+
+        assertTrue(servicio.cuerpos.isEmpty())
+        assertTrue(e.estado.errorIa!!.contains("clave"))
+        assertEquals(1, e.estado.sugerencias.size)
+    }
+
+    @Test
+    fun cambiarLaOcasionDescartaLasPropuestasDeLaIa() = runTest(UnconfinedTestDispatcher()) {
+        val servicio = ServicioIaDePrueba("""{"outfits":[{"prendas":[1,2],"explicacion":"ok"}]}""")
+        val e = Entorno(backgroundScope, motor = MotorEspia(listOf(sugerido(armarioBasico[0], armarioBasico[1]))), ia = SugeridorIa(servicio.servicio))
+        e.vm.sugerirConIa()
+        e.vm.estado.first { !it.iaCargando } // La red simulada responde en otro hilo.
+        assertTrue(e.estado.actualEsDeIa)
+
+        e.vm.elegirOcasion(Occasion.CASUAL)
+        e.vm.estado.first { !it.actualEsDeIa }
+
+        assertFalse(e.estado.actualEsDeIa)
+    }
+
+    @Test
+    fun sinSugeridorSugerirConIaNoHaceNada() = runTest(UnconfinedTestDispatcher()) {
+        val e = Entorno(backgroundScope)
+        val antes = e.estado
+        e.vm.sugerirConIa()
+        e.vm.estado.first { !it.iaCargando } // La red simulada responde en otro hilo.
+        assertEquals(antes, e.estado)
     }
 }

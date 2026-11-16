@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -31,6 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,7 +46,11 @@ import app.luxion.fitarchiveapp.data.Repositories
 import app.luxion.fitarchiveapp.foto.cargarImagen
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.Occasion
+import app.luxion.fitarchiveapp.ia.ErrorIa
+import app.luxion.fitarchiveapp.ia.ServicioIa
+import app.luxion.fitarchiveapp.suggestions.AVISO_OUTFITS_IA
 import app.luxion.fitarchiveapp.suggestions.MotorSugerenciasPorReglas
+import app.luxion.fitarchiveapp.suggestions.SugeridorIa
 import app.luxion.fitarchiveapp.ui.armario.FotoPrenda
 import app.luxion.fitarchiveapp.ui.avatar.AvatarConPrendas
 import app.luxion.fitarchiveapp.ui.avatar.PrendaAvatar
@@ -70,9 +77,11 @@ fun OutfitDelDiaScreen(
     onAbrirPerfil: () -> Unit,
     onAnadirPrendas: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Sin servicio de IA la pantalla funciona solo con el motor local. */
+    servicioIa: ServicioIa? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val vm = remember(repositories, tiempo) {
+    val vm = remember(repositories, tiempo, servicioIa) {
         OutfitDelDiaViewModel(
             motor = MotorSugerenciasPorReglas(),
             armario = repositories.garments,
@@ -85,6 +94,7 @@ fun OutfitDelDiaScreen(
             hoy = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString(),
             ahora = { Clock.System.now().toEpochMilliseconds() },
             calculo = Dispatchers.Default, // El motor con armarios grandes no debe bloquear la interfaz.
+            ia = servicioIa?.let { SugeridorIa(it) },
         )
     }
     val estado by vm.estado.collectAsState()
@@ -104,6 +114,7 @@ fun OutfitDelDiaScreen(
             Cabecera(estado)
             AvisoTiempo(estado.tiempo, onConfigurar = onAbrirPerfil, onReintentar = vm::regenerar)
             Ocasiones(estado.ocasion, vm::elegirOcasion)
+            if (servicioIa != null) SugerirConIa(servicioIa, estado, onSugerir = vm::sugerirConIa)
 
             when {
                 estado.cargando -> Box(Modifier.fillMaxWidth().height(240.dp), contentAlignment = Alignment.Center) {
@@ -117,17 +128,22 @@ fun OutfitDelDiaScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         AvatarConPrendas(prendasAvatar, Modifier.height(340.dp))
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text(
-                                "${(actual.puntuacion * 100).roundToInt()}%",
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                            Text(
-                                motivoBreve(actual.desglose, estado.tiempoDia != null, estado.ocasion != null, estado.actualSinEstrenar),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            actual.desglose.criterios(estado.tiempoDia != null, estado.ocasion != null).forEach { c ->
-                                Criterio(c)
+                            if (actual.explicacionIa != null) {
+                                Text("Propuesta de la IA", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                                Text(actual.explicacionIa, style = MaterialTheme.typography.bodyMedium)
+                            } else {
+                                Text(
+                                    "${(actual.puntuacion * 100).roundToInt()}%",
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                                Text(
+                                    motivoBreve(actual.desglose, estado.tiempoDia != null, estado.ocasion != null, estado.actualSinEstrenar),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                                actual.desglose.criterios(estado.tiempoDia != null, estado.ocasion != null).forEach { c ->
+                                    Criterio(c)
+                                }
                             }
                         }
                     }
@@ -181,6 +197,43 @@ private fun AvisoTiempo(tiempo: EstadoTiempo, onConfigurar: () -> Unit, onReinte
             Text(texto, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
             TextButton(onClick = onAccion) { Text(accion) }
         }
+    }
+}
+
+/**
+ * "Sugerir con IA": solo aparece con clave y la IA activada; con el tope diario alcanzado se muestra deshabilitado y
+ * si falta aceptar el aviso de esta función se pide antes de la primera consulta.
+ */
+@Composable
+private fun SugerirConIa(servicio: ServicioIa, estado: OutfitDelDiaUiState, onSugerir: () -> Unit) {
+    val estadoIa by servicio.estado.collectAsState()
+    val bloqueo = remember(estadoIa) { servicio.bloqueo(AVISO_OUTFITS_IA) }
+    if (bloqueo is ErrorIa.SinClave || bloqueo is ErrorIa.Desactivada) return
+    var pidiendoAviso by remember { mutableStateOf(false) }
+    val puede = bloqueo !is ErrorIa.TopeAlcanzado && !estado.iaCargando && !estado.cargando && !estado.armarioSinPrendas
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        OutlinedButton(
+            onClick = { if (bloqueo is ErrorIa.AvisoPendiente) pidiendoAviso = true else onSugerir() },
+            enabled = puede,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text(if (estado.iaCargando) "Pensando…" else "Sugerir con IA") }
+        (bloqueo as? ErrorIa.TopeAlcanzado)?.let { Text(it.mensaje, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        estado.errorIa?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
+    }
+    if (pidiendoAviso) {
+        AlertDialog(
+            onDismissRequest = { pidiendoAviso = false },
+            title = { Text(AVISO_OUTFITS_IA.titulo) },
+            text = { Text(AVISO_OUTFITS_IA.texto) },
+            confirmButton = {
+                TextButton(onClick = {
+                    servicio.aceptarAviso(AVISO_OUTFITS_IA)
+                    pidiendoAviso = false
+                    onSugerir()
+                }) { Text("Aceptar y sugerir") }
+            },
+            dismissButton = { TextButton(onClick = { pidiendoAviso = false }) { Text("Cancelar") } },
+        )
     }
 }
 
