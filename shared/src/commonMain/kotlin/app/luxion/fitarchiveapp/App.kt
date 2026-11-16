@@ -83,6 +83,7 @@ private fun AppContenido(repositories: Repositories) {
                 onTerminado = { anadiendo = false },
                 quitarFondo = { foto -> FotoCapturada(quitaFondo.quitar(foto).bytesPng) },
                 detectarColor = ::detectarColorDeFoto,
+                servicioIa = servicioIa,
             )
             return@FitArchiveTheme
         }
