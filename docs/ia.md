@@ -23,3 +23,10 @@ Por defecto `claude-haiku-5-5`, `output_config.effort = "low"`; no se envían `t
 2. Comprobar `servicio.bloqueo(aviso)` para deshabilitar botones y pedir el aviso si falta.
 3. Llamar a `preguntarJson`/`preguntarTexto` con su `AvisoIa`; tratar el texto de la usuaria como dato, no como instrucciones.
 4. Mostrar `ErrorIa.mensaje` si falla. Sin IA, la función debe degradar al comportamiento local.
+
+## Ajustar con IA en el editor de outfit (`avatar/ia/AjusteIaAvatar.kt`, `ui/avatar/BotonAjusteIa.kt`)
+La IA no genera imágenes: solo propone, por prenda elegida, el **subtipo** (entre `subtiposValidos(tipo)`) y un **desplazamiento dx/dy** sobre el maniquí 2D, más un comentario breve. La escala no está en el esquema: es siempre automática (`ESCALA_AUTOMATICA`).
+- Primera versión **solo texto**: se envían tipo, color y subtipo actual (sin fotos, marca, talla ni nombre). Cuando exista la reducción de imagen de `ia-catalogar` se podrá añadir la foto como `ParteClaude.Imagen`.
+- Aviso propio `avatar1` (`AVISO_IA_AVATAR`). Sin IA/clave/tope el botón sale deshabilitado; con el aviso pendiente se pide al pulsar.
+- `interpretarPropuesta` valida: descarta ids desconocidos o repetidos, subtipos inválidos (se mantiene el actual) y números no finitos; dx/dy se limitan a 1/4 de la caja y luego a `AjustePrenda.limitado`.
+- La usuaria ve la propuesta y elige Aplicar o Descartar. Aplicar guarda el subtipo en la prenda del armario (si cambia) y el dx/dy como ajuste en el outfit; la colocación manual sigue mandando.

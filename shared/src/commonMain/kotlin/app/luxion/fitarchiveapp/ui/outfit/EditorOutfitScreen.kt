@@ -88,7 +88,9 @@ import app.luxion.fitarchiveapp.foto.cargarMiniatura
 import app.luxion.fitarchiveapp.model.Garment
 import app.luxion.fitarchiveapp.model.Occasion
 import app.luxion.fitarchiveapp.ui.anadir.etiqueta
+import app.luxion.fitarchiveapp.ia.ServicioIa
 import app.luxion.fitarchiveapp.ui.avatar.AvatarConPrendas
+import app.luxion.fitarchiveapp.ui.avatar.BotonAjusteIa
 import app.luxion.fitarchiveapp.ui.avatar.PrendaAvatar
 import app.luxion.fitarchiveapp.ui.theme.Iconos
 import kotlin.math.roundToInt
@@ -122,6 +124,8 @@ fun EditorOutfitScreen(
     outfitId: Long? = null,
     /** Prendas con las que arranca un outfit nuevo. */
     prendasIniciales: List<Long> = emptyList(),
+    /** IA opcional: con ella aparece "Ajustar con IA"; sin ella el editor es el de siempre. */
+    servicioIa: ServicioIa? = null,
 ) {
     val scope = rememberCoroutineScope()
     val vm = remember(outfits, armario, outfitId) {
@@ -230,6 +234,9 @@ fun EditorOutfitScreen(
                         arrastre = null
                     },
                 )
+            }
+            if (servicioIa != null) {
+                BotonAjusteIa(servicioIa, puestas, onAplicar = vm::aplicarPropuestaIa, modifier = Modifier.padding(horizontal = 20.dp))
             }
             Pie(
                 puestas = estado.elegidas,
