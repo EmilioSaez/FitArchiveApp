@@ -182,6 +182,7 @@ private fun AppContenido(repositories: Repositories) {
                     },
                     onAnadirPrendas = { anadiendo = true },
                     modifier = Modifier.padding(padding),
+                    servicioIa = servicioIa,
                 )
                 Destino.Perfil -> MedidasScreen(
                     repositories.measurements,
