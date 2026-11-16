@@ -36,6 +36,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,8 @@ import app.luxion.fitarchiveapp.foto.FotoCapturada
 import app.luxion.fitarchiveapp.foto.decodificarImagen
 import app.luxion.fitarchiveapp.foto.rememberAlmacenFotos
 import app.luxion.fitarchiveapp.foto.rememberSelectorFoto
+import app.luxion.fitarchiveapp.ia.ErrorIa
+import app.luxion.fitarchiveapp.ia.ServicioIa
 import app.luxion.fitarchiveapp.model.Fit
 import app.luxion.fitarchiveapp.model.GarmentColor
 import app.luxion.fitarchiveapp.model.GarmentType
@@ -67,7 +70,8 @@ import kotlin.time.Clock
 /**
  * Punto de entrada de T08: botón añadir → foto (cámara/galería) → formulario → guardar.
  * [onTerminado] se llama al guardar o al cancelar. Los enganches [quitarFondo] (T07) y
- * [detectarColor] (T09) se pasan aquí; por defecto no hacen nada.
+ * [detectarColor] (T09) se pasan aquí; por defecto no hacen nada. Con [servicioIa] el formulario ofrece
+ * "Rellenar con IA"; sin él (o sin clave) el alta es manual como siempre.
  */
 @Composable
 fun AnadirPrendaFlow(
@@ -77,6 +81,7 @@ fun AnadirPrendaFlow(
     quitarFondo: QuitarFondo = SinQuitarFondo,
     detectarColor: DetectarColor = SinDetectarColor,
     almacen: AlmacenFotos = rememberAlmacenFotos(),
+    servicioIa: ServicioIa? = null,
 ) {
     var foto by remember { mutableStateOf<FotoCapturada?>(null) }
     var colorDetectado by remember { mutableStateOf<GarmentColor?>(null) }
@@ -135,6 +140,7 @@ fun AnadirPrendaFlow(
                 imagen = remember(actual) { decodificarImagen(actual.bytes) },
                 borradorInicial = BorradorPrenda(color = colorDetectado),
                 textoGuardar = "Guardar prenda",
+                asistenteIa = servicioIa?.let { AsistenteCatalogo(it, actual) },
                 onCambiarFoto = { foto = null; colorDetectado = null },
                 onCancelar = onTerminado,
                 onGuardar = { borrador ->
@@ -167,6 +173,9 @@ private fun ElegirFoto(onCamara: () -> Unit, onGaleria: () -> Unit, onCancelar: 
     }
 }
 
+/** Lo que el formulario necesita para "Rellenar con IA": el servicio y la foto que se enviaría. */
+internal class AsistenteCatalogo(val servicio: ServicioIa, val foto: FotoCapturada)
+
 /**
  * Formulario de prenda compartido por añadir (T08) y editar (T13).
  * [onCambiarFoto] null = la foto no se puede cambiar (edición).
@@ -181,9 +190,45 @@ internal fun FormularioPrenda(
     onCambiarFoto: (() -> Unit)?,
     onCancelar: () -> Unit,
     onGuardar: (BorradorPrenda) -> Unit,
+    asistenteIa: AsistenteCatalogo? = null,
 ) {
     var borrador by remember { mutableStateOf(borradorInicial) }
     var guardando by remember { mutableStateOf(false) }
+    var consultandoIa by remember { mutableStateOf(false) }
+    var mostrarAviso by remember { mutableStateOf(false) }
+    var mensajeIa by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    fun rellenarConIa(asistente: AsistenteCatalogo) {
+        scope.launch {
+            consultandoIa = true
+            mensajeIa = null
+            catalogarConIa(asistente.servicio, asistente.foto).fold(
+                onSuccess = {
+                    borrador = borrador.conSugerencia(it)
+                    mensajeIa = "Rellenado con IA. Revisa los datos y corrige lo que haga falta."
+                },
+                onFailure = { mensajeIa = (it as? ErrorIa)?.mensaje ?: it.message ?: "No se pudo rellenar con IA." },
+            )
+            consultandoIa = false
+        }
+    }
+
+    if (mostrarAviso && asistenteIa != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarAviso = false },
+            title = { Text(AVISO_CATALOGAR.titulo) },
+            text = { Text(AVISO_CATALOGAR.texto) },
+            confirmButton = {
+                TextButton(onClick = {
+                    mostrarAviso = false
+                    asistenteIa.servicio.aceptarAviso(AVISO_CATALOGAR)
+                    rellenarConIa(asistenteIa)
+                }) { Text("Aceptar y rellenar") }
+            },
+            dismissButton = { TextButton(onClick = { mostrarAviso = false }) { Text("Cancelar") } },
+        )
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 16.dp),
@@ -208,7 +253,23 @@ internal fun FormularioPrenda(
             }
         }
         if (onCambiarFoto != null) {
-            TextButton(onClick = onCambiarFoto, enabled = !guardando) { Text("Cambiar foto") }
+            TextButton(onClick = onCambiarFoto, enabled = !guardando && !consultandoIa) { Text("Cambiar foto") }
+        }
+        if (asistenteIa != null) {
+            // Se observa el estado para que el botón se actualice al cambiar clave, ajustes o tope.
+            val estado by asistenteIa.servicio.estado.collectAsState()
+            val bloqueo = remember(estado) { asistenteIa.servicio.bloqueo(AVISO_CATALOGAR) }
+            // Solo falta aceptar el aviso: se puede pulsar y se pide. Cualquier otro bloqueo deshabilita con su pista.
+            val pendienteAviso = bloqueo is ErrorIa.AvisoPendiente
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                OutlinedButton(
+                    onClick = { if (pendienteAviso) mostrarAviso = true else rellenarConIa(asistenteIa) },
+                    enabled = (bloqueo == null || pendienteAviso) && !consultandoIa && !guardando,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(if (consultandoIa) "Analizando la foto…" else "Rellenar con IA") }
+                val pista = if (bloqueo != null && !pendienteAviso) bloqueo.mensaje else mensajeIa
+                if (pista != null) Text(pista, style = MaterialTheme.typography.bodySmall)
+            }
         }
 
         Seccion("Tipo *") {

@@ -34,6 +34,10 @@ import app.luxion.fitarchiveapp.ui.copia.SeccionCopia
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import app.luxion.fitarchiveapp.ui.asistente.AsistenteScreen
+import app.luxion.fitarchiveapp.ui.asistente.EntradaAsistente
+import app.luxion.fitarchiveapp.ui.ia.SeccionIa
+import app.luxion.fitarchiveapp.ui.ia.rememberServicioIa
 import app.luxion.fitarchiveapp.ui.theme.SeccionTema
 import app.luxion.fitarchiveapp.ui.theme.rememberAlmacenTema
 import app.luxion.fitarchiveapp.ui.navigation.BarraNavegacion
@@ -58,6 +62,7 @@ private fun AppContenido(repositories: Repositories) {
     FitArchiveTheme {
         // Fuera de las ramas con return: el servicio del tiempo se recrea al volver de otras pantallas, la caché no.
         val cacheTiempo = remember { CacheTiempo() }
+        val servicioIa = rememberServicioIa()
         var cargando by remember { mutableStateOf(true) }
         if (cargando) {
             PantallaCarga(onTerminado = { cargando = false })
@@ -78,6 +83,7 @@ private fun AppContenido(repositories: Repositories) {
                 onTerminado = { anadiendo = false },
                 quitarFondo = { foto -> FotoCapturada(quitaFondo.quitar(foto).bytesPng) },
                 detectarColor = ::detectarColorDeFoto,
+                servicioIa = servicioIa,
             )
             return@FitArchiveTheme
         }
@@ -99,6 +105,7 @@ private fun AppContenido(repositories: Repositories) {
         var viendoViajes by remember { mutableStateOf(false) }
         var viajeInicialId by remember { mutableStateOf<Long?>(null) }
         var viendoCarpetas by remember { mutableStateOf(false) }
+        var viendoAsistente by remember { mutableStateOf(false) }
         var prendasIniciales by remember { mutableStateOf(emptyList<Long>()) }
         var editandoOutfit by remember { mutableStateOf(false) }
         var outfitEditadoId by remember { mutableStateOf<Long?>(null) }
@@ -113,6 +120,7 @@ private fun AppContenido(repositories: Repositories) {
                 },
                 outfitId = outfitEditadoId,
                 prendasIniciales = prendasIniciales,
+                servicioIa = servicioIa,
             )
             return@FitArchiveTheme
         }
@@ -127,6 +135,19 @@ private fun AppContenido(repositories: Repositories) {
                     viendoViajes = false
                     viajeInicialId = null
                 },
+            )
+            return@FitArchiveTheme
+        }
+        if (viendoAsistente) {
+            AsistenteScreen(
+                servicioIa,
+                repositories.garments,
+                onVolver = { viendoAsistente = false },
+                onAbrirPerfil = {
+                    viendoAsistente = false
+                    destino = Destino.Perfil
+                },
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
             )
             return@FitArchiveTheme
         }
@@ -162,6 +183,7 @@ private fun AppContenido(repositories: Repositories) {
                     },
                     onAnadirPrendas = { anadiendo = true },
                     modifier = Modifier.padding(padding),
+                    servicioIa = servicioIa,
                 )
                 Destino.Perfil -> MedidasScreen(
                     repositories.measurements,
@@ -169,6 +191,8 @@ private fun AppContenido(repositories: Repositories) {
                     irAlContenidoExtra = perfilEnUbicacion,
                 ) {
                     SeccionAvatar()
+                    SeccionIa(servicioIa)
+                    EntradaAsistente(onAbrir = { viendoAsistente = true })
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                     repositories.copia?.let { SeccionCopia(it) }
                     Text(

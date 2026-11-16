@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: la clave de API de la IA (cifrada) y sus ajustes no viajan en copias en la nube ni al cambiar de móvil. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="fitarchive_ia_secreto.xml" />
+        <exclude domain="sharedpref" path="fitarchive_ia_ajustes.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="fitarchive_ia_secreto.xml" />
+        <exclude domain="sharedpref" path="fitarchive_ia_ajustes.xml" />
+    </device-transfer>
+</data-extraction-rules>

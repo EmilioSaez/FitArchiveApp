@@ -3,6 +3,9 @@ package app.luxion.fitarchiveapp.ui.outfit
 import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.Rect
 import app.luxion.fitarchiveapp.avatar.Slot
+import app.luxion.fitarchiveapp.avatar.Subtipo
+import app.luxion.fitarchiveapp.avatar.ia.PropuestaAvatar
+import app.luxion.fitarchiveapp.avatar.ia.PropuestaPrenda
 import app.luxion.fitarchiveapp.avatar.ajustar
 import app.luxion.fitarchiveapp.avatar.ajusteGuardado
 import app.luxion.fitarchiveapp.avatar.subtipoPorDefecto
@@ -66,6 +69,28 @@ class EditorOutfitViewModelTest {
     private suspend fun Entorno.nueva(tipo: GarmentType): Garment {
         val id = armario.add(prenda(tipo))
         return armario.get(id)!!
+    }
+
+    @Test
+    fun aplicarPropuestaIaCambiaSubtipoYAjusteYGuardaElSubtipo() = runTest(UnconfinedTestDispatcher()) {
+        val e = entorno(backgroundScope)
+        val top = e.nueva(GarmentType.TSHIRT)
+        val falda = e.nueva(GarmentType.SKIRT)
+        e.vm.alternarPrenda(top); e.vm.alternarPrenda(falda)
+        e.vm.aplicarPropuestaIa(
+            PropuestaAvatar(
+                listOf(
+                    PropuestaPrenda(top.id, Subtipo.TOP_MANGA_LARGA, AjustePrenda(3f, 4f, 1f)),
+                    PropuestaPrenda(falda.id, subtipoPorDefecto(GarmentType.SKIRT), AjustePrenda.Ninguno),
+                ),
+                "ok",
+            ),
+        )
+        val elegida = e.vm.estado.value.elegidas.getValue(Slot.TOP)
+        assertEquals(Subtipo.TOP_MANGA_LARGA, elegida.prenda.subtipo)
+        assertEquals(AjustePrenda(3f, 4f, 1f), elegida.ajuste)
+        assertEquals(Subtipo.TOP_MANGA_LARGA, e.armario.get(top.id)!!.subtipo)
+        assertNull(e.armario.get(falda.id)!!.subtipo) // sin cambio de subtipo no se toca el armario
     }
 
     @Test

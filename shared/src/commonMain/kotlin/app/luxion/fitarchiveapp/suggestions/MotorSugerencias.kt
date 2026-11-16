@@ -66,6 +66,8 @@ data class OutfitSugerido(
     /** De 0.0 a 1.0; es la media ponderada de [desglose]. */
     val puntuacion: Double,
     val desglose: DesgloseSugerencia,
+    /** Solo si la propuesta viene de la IA: su explicación breve. Entonces [puntuacion] y [desglose] no significan nada. */
+    val explicacionIa: String? = null,
 )
 
 /** Motor basado en reglas: clima, ocasión, color y rotación de prendas. */

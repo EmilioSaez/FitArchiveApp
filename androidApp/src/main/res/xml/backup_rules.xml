@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 y anteriores: misma exclusión que data_extraction_rules.xml. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="fitarchive_ia_secreto.xml" />
+    <exclude domain="sharedpref" path="fitarchive_ia_ajustes.xml" />
+</full-backup-content>

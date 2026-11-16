@@ -1,0 +1,38 @@
+# IA en FitArchive
+
+Opcional y con la **clave de API de Anthropic de cada usuaria** (como EasyFood). Sin servidor propio ni coste para el proyecto.
+
+## Arquitectura (`shared/.../ia/`)
+- `ClienteClaude`: HTTP directo con Ktor a `https://api.anthropic.com` (`POST /v1/messages`, `GET /v1/models/{id}`), cabeceras `x-api-key` y `anthropic-version`. Sin plugin de logging a propósito (la clave no debe llegar a registros). Reintenta 429, 5xx y fallos de red hasta 2 veces; no reintenta 400/401/402/403/404.
+- `ServicioIa`: **único punto de entrada**. Antes de cada llamada exige IA activada, clave, aviso aceptado y tope diario sin alcanzar. API para las funciones: `preguntar`, `preguntarTexto`, `preguntarJson` (salida estructurada con esquema). Nada más llama a `ClienteClaude`.
+- `ErrorIa`: errores en español, sin la clave. Un 401 borra la clave y desactiva la IA.
+- `AlmacenIa`: `BovedaClaveIa` (clave) y `AlmacenAjustesIa` (ajustes no sensibles: activada, modelo, avisos aceptados, tope, contadores).
+- `AvisoIa`: aviso de privacidad. Cada función que envíe datos distintos declara su propio `AvisoIa` (otro `id`) y se acepta aparte.
+- UI: `ui/ia/SeccionIa.kt` en Perfil (clave, activar, tope, probar conexión, borrar) y `rememberServicioIa()`.
+
+## Almacén de la clave
+- Android: AES-256-GCM con llave no exportable en AndroidKeyStore; en SharedPreferences (`fitarchive_ia_secreto`) solo el bloque cifrado. Si el Keystore falla, no se guarda (no hay degradación a texto plano). Excluido de copias con `data_extraction_rules.xml`, `backup_rules.xml` y `allowBackup="false"`.
+- iOS: Keychain (`kSecClassGenericPassword`, `WhenUnlockedThisDeviceOnly`). **Pendiente de probar en iPhone real (T56)**.
+- Nunca en SQLDelight, exportar/importar copia ni logs.
+
+## Modelo y parámetros
+Por defecto `claude-haiku-5-5`, `output_config.effort = "low"`; no se envían `temperature`/`top_p`/`top_k`. **Aún no se ha hecho ninguna llamada real con clave**: hay que verificarlo a mano con una clave de prueba (los tests usan MockEngine).
+
+## Cómo añadir una función de IA
+1. Recibir `ServicioIa` por parámetro (se crea en `App.kt`).
+2. Comprobar `servicio.bloqueo(aviso)` para deshabilitar botones y pedir el aviso si falta.
+3. Llamar a `preguntarJson`/`preguntarTexto` con su `AvisoIa`; tratar el texto de la usuaria como dato, no como instrucciones.
+4. Mostrar `ErrorIa.mensaje` si falla. Sin IA, la función debe degradar al comportamiento local.
+
+## Funciones
+- **Rellenar con IA** (`ui/anadir/CatalogarConIa.kt`, botón en el formulario de alta): envía la foto y rellena tipo, subtipo, color, estación y uso. `AvisoIa` propio (`catalogar1`). La foto se reduce a lado mayor 1024 px, JPEG calidad 80 y sin EXIF con `reducirParaIa` (expect/actual en `foto/`), solo en memoria. Respuesta con esquema JSON ligado a `GarmentType`, `Subtipo`, `GarmentColor`, `Season` y `Usage`; los valores desconocidos se ignoran y el subtipo solo se acepta si vale para el tipo. Sin clave o con IA desactivada el botón sale deshabilitado con la pista. **`reducirParaIa` en iOS no está probado (sin Mac); en Android tampoco con foto real.**
+
+## Ajustar con IA en el editor de outfit (`avatar/ia/AjusteIaAvatar.kt`, `ui/avatar/BotonAjusteIa.kt`)
+La IA no genera imágenes: solo propone, por prenda elegida, el **subtipo** (entre `subtiposValidos(tipo)`) y un **desplazamiento dx/dy** sobre el maniquí 2D, más un comentario breve. La escala no está en el esquema: es siempre automática (`ESCALA_AUTOMATICA`).
+- Primera versión **solo texto**: se envían tipo, color y subtipo actual (sin fotos, marca, talla ni nombre). Cuando exista la reducción de imagen de `ia-catalogar` se podrá añadir la foto como `ParteClaude.Imagen`.
+- Aviso propio `avatar1` (`AVISO_IA_AVATAR`). Sin IA/clave/tope el botón sale deshabilitado; con el aviso pendiente se pide al pulsar.
+- `interpretarPropuesta` valida: descarta ids desconocidos o repetidos, subtipos inválidos (se mantiene el actual) y números no finitos; dx/dy se limitan a 1/4 de la caja y luego a `AjustePrenda.limitado`.
+- La usuaria ve la propuesta y elige Aplicar o Descartar. Aplicar guarda el subtipo en la prenda del armario (si cambia) y el dx/dy como ajuste en el outfit; la colocación manual sigue mandando.
+
+## Asistente de estilo (`asistente/`, `ui/asistente/`)
+Conversación sobre el armario, abierta desde Perfil → «Abrir el asistente». Aviso propio (`asistente1`). Envía un resumen compacto del armario (tipo, subtipo, color, estación y uso, agrupado con cantidades; sin fotos, nombres, marcas ni ubicación) en el `system`, y los últimos 6 intercambios en memoria (no se persisten). El texto de la usuaria va entre `<mensaje_usuaria>` con `<`/`>` neutralizados. Multi-turno: `ServicioIa.preguntar(..., historial: List<TurnoClaude>)`; vacío = una sola pregunta como antes.
