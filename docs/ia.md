@@ -26,3 +26,6 @@ Por defecto `claude-haiku-5-5`, `output_config.effort = "low"`; no se envían `t
 
 ## Funciones
 - **Rellenar con IA** (`ui/anadir/CatalogarConIa.kt`, botón en el formulario de alta): envía la foto y rellena tipo, subtipo, color, estación y uso. `AvisoIa` propio (`catalogar1`). La foto se reduce a lado mayor 1024 px, JPEG calidad 80 y sin EXIF con `reducirParaIa` (expect/actual en `foto/`), solo en memoria. Respuesta con esquema JSON ligado a `GarmentType`, `Subtipo`, `GarmentColor`, `Season` y `Usage`; los valores desconocidos se ignoran y el subtipo solo se acepta si vale para el tipo. Sin clave o con IA desactivada el botón sale deshabilitado con la pista. **`reducirParaIa` en iOS no está probado (sin Mac); en Android tampoco con foto real.**
+
+## Asistente de estilo (`asistente/`, `ui/asistente/`)
+Conversación sobre el armario, abierta desde Perfil → «Abrir el asistente». Aviso propio (`asistente1`). Envía un resumen compacto del armario (tipo, subtipo, color, estación y uso, agrupado con cantidades; sin fotos, nombres, marcas ni ubicación) en el `system`, y los últimos 6 intercambios en memoria (no se persisten). El texto de la usuaria va entre `<mensaje_usuaria>` con `<`/`>` neutralizados. Multi-turno: `ServicioIa.preguntar(..., historial: List<TurnoClaude>)`; vacío = una sola pregunta como antes.

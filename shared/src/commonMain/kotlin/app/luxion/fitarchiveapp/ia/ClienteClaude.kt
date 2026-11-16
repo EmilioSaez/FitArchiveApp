@@ -34,6 +34,12 @@ sealed interface ParteClaude {
     data class Imagen(val base64: String, val tipoMime: String = "image/jpeg") : ParteClaude
 }
 
+/** Quién dijo un turno previo de la conversación. */
+enum class RolClaude(val valor: String) { USUARIA("user"), ASISTENTE("assistant") }
+
+/** Turno anterior de una conversación (solo texto). Deben alternar usuaria/asistente empezando por la usuaria. */
+data class TurnoClaude(val rol: RolClaude, val texto: String)
+
 data class PeticionClaude(
     val modelo: String,
     val partes: List<ParteClaude>,
@@ -41,6 +47,8 @@ data class PeticionClaude(
     val maxTokens: Int = 1024,
     /** Esquema JSON de la salida estructurada; si es null la respuesta es texto libre. */
     val esquemaJson: JsonObject? = null,
+    /** Turnos anteriores, antes del mensaje final formado por [partes]. Vacío = una sola pregunta. */
+    val historial: List<TurnoClaude> = emptyList(),
 )
 
 data class RespuestaClaude(
@@ -161,6 +169,12 @@ class ClienteClaude(
             put("max_tokens", p.maxTokens)
             p.sistema?.let { put("system", it) }
             putJsonArray("messages") {
+                p.historial.forEach { turno ->
+                    add(buildJsonObject {
+                        put("role", turno.rol.valor)
+                        put("content", turno.texto)
+                    })
+                }
                 add(buildJsonObject {
                     put("role", "user")
                     put("content", buildJsonArray {
