@@ -23,3 +23,6 @@ Por defecto `claude-haiku-5-5`, `output_config.effort = "low"`; no se envían `t
 2. Comprobar `servicio.bloqueo(aviso)` para deshabilitar botones y pedir el aviso si falta.
 3. Llamar a `preguntarJson`/`preguntarTexto` con su `AvisoIa`; tratar el texto de la usuaria como dato, no como instrucciones.
 4. Mostrar `ErrorIa.mensaje` si falla. Sin IA, la función debe degradar al comportamiento local.
+
+## Funciones
+- **Rellenar con IA** (`ui/anadir/CatalogarConIa.kt`, botón en el formulario de alta): envía la foto y rellena tipo, subtipo, color, estación y uso. `AvisoIa` propio (`catalogar1`). La foto se reduce a lado mayor 1024 px, JPEG calidad 80 y sin EXIF con `reducirParaIa` (expect/actual en `foto/`), solo en memoria. Respuesta con esquema JSON ligado a `GarmentType`, `Subtipo`, `GarmentColor`, `Season` y `Usage`; los valores desconocidos se ignoran y el subtipo solo se acepta si vale para el tipo. Sin clave o con IA desactivada el botón sale deshabilitado con la pista. **`reducirParaIa` en iOS no está probado (sin Mac); en Android tampoco con foto real.**
