@@ -59,10 +59,11 @@ class ServicioIa(
         esquemaJson: JsonObject? = null,
         maxTokens: Int = 1024,
         aviso: AvisoIa = AvisosIa.GENERAL,
+        historial: List<TurnoClaude> = emptyList(),
     ): Result<RespuestaClaude> {
         bloqueo(aviso)?.let { return Result.failure(it) }
         val clave = almacen.boveda.leer() ?: return Result.failure(ErrorIa.SinClave())
-        val peticion = PeticionClaude(_estado.value.ajustes.modelo, partes, sistema, maxTokens, esquemaJson)
+        val peticion = PeticionClaude(_estado.value.ajustes.modelo, partes, sistema, maxTokens, esquemaJson, historial)
         return try {
             val r = cliente.enviar(clave, peticion)
             contar(r) // Cuenta toda respuesta 200, también una negativa o una respuesta cortada.

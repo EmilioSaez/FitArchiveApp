@@ -23,3 +23,6 @@ Por defecto `claude-haiku-5-5`, `output_config.effort = "low"`; no se envían `t
 2. Comprobar `servicio.bloqueo(aviso)` para deshabilitar botones y pedir el aviso si falta.
 3. Llamar a `preguntarJson`/`preguntarTexto` con su `AvisoIa`; tratar el texto de la usuaria como dato, no como instrucciones.
 4. Mostrar `ErrorIa.mensaje` si falla. Sin IA, la función debe degradar al comportamiento local.
+
+## Asistente de estilo (`asistente/`, `ui/asistente/`)
+Conversación sobre el armario, abierta desde Perfil → «Abrir el asistente». Aviso propio (`asistente1`). Envía un resumen compacto del armario (tipo, subtipo, color, estación y uso, agrupado con cantidades; sin fotos, nombres, marcas ni ubicación) en el `system`, y los últimos 6 intercambios en memoria (no se persisten). El texto de la usuaria va entre `<mensaje_usuaria>` con `<`/`>` neutralizados. Multi-turno: `ServicioIa.preguntar(..., historial: List<TurnoClaude>)`; vacío = una sola pregunta como antes.
