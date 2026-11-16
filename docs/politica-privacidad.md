@@ -42,6 +42,9 @@ No recopilamos datos en ningún servidor propio. No tenemos acceso a tu armario,
 ### Consulta del tiempo (servicio externo)
 Para mostrar el tiempo, la app envía a un servicio meteorológico externo (Open-Meteo, https://open-meteo.com/en/terms#privacy) las **coordenadas aproximadas** o la **ciudad** elegida, junto con la dirección IP inevitable en cualquier conexión a internet. No se envía ninguna foto, prenda, medida ni identificador tuyo. Ese servicio tiene su propia política de privacidad. Si no quieres esta consulta, no concedas la ubicación y no uses la sugerencia por tiempo.
 
+### Inteligencia artificial (opcional)
+Las funciones de IA solo se activan si pones **tu propia clave de API de Anthropic** y aceptas un aviso. Entonces la app envía **directamente desde tu móvil a Anthropic** (https://www.anthropic.com/legal/privacy) lo necesario para cada consulta: las fotos de las prendas que analices, datos de tu armario (tipo, color, estación, uso…) y el texto que escribas. No pasa por ningún servidor de FitArchive y no se envía tu nombre, correo, ubicación ni identificadores. Anthropic trata esos datos según su política y el uso se factura a tu cuenta. La clave se guarda cifrada solo en tu móvil (Keystore en Android, Keychain en iPhone), fuera de las copias de seguridad y de la exportación. Puedes borrarla o desactivar la IA cuando quieras en Perfil.
+
 ### Copias de seguridad: exportar e importar
 Puedes exportar tu armario a un archivo y volver a importarlo, por ejemplo al cambiar de móvil. **Tú decides dónde guardas ese archivo** (tu móvil, tu nube personal, un correo…). FitArchive no lo envía a ningún sitio ni lo guarda. Ten en cuenta que el archivo contiene tus fotos y medidas: guárdalo en un lugar de confianza. Al importar, solo se lee el archivo que eliges.
 

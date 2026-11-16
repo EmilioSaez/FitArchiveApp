@@ -46,3 +46,6 @@ Si se deniega un permiso, la app sigue funcionando: sin cámara, elegir de galer
 - Declarar: sin cuenta, sin recopilación de datos por el desarrollador, sin analítica, sin anuncios, sin compartir datos con terceros salvo la consulta del tiempo (Open-Meteo, sin clave de API, recibe coordenadas aproximadas o ciudad).
 - URL de la política de privacidad: [PENDIENTE: URL pública donde se alojará `politica-privacidad.md`].
 - Revisar este documento si se añade cualquier SDK o permiso nuevo.
+
+## IA
+La IA no añade permisos nuevos: usa `INTERNET` (ya declarado) y la cámara/galería existentes. El aviso de privacidad de la IA se muestra una vez, al activarla (`AvisosIa` en `shared/.../ia/AvisoIa.kt`).

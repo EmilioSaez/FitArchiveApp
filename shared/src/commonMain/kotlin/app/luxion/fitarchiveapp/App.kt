@@ -34,6 +34,8 @@ import app.luxion.fitarchiveapp.ui.copia.SeccionCopia
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import app.luxion.fitarchiveapp.ui.ia.SeccionIa
+import app.luxion.fitarchiveapp.ui.ia.rememberServicioIa
 import app.luxion.fitarchiveapp.ui.theme.SeccionTema
 import app.luxion.fitarchiveapp.ui.theme.rememberAlmacenTema
 import app.luxion.fitarchiveapp.ui.navigation.BarraNavegacion
@@ -58,6 +60,7 @@ private fun AppContenido(repositories: Repositories) {
     FitArchiveTheme {
         // Fuera de las ramas con return: el servicio del tiempo se recrea al volver de otras pantallas, la caché no.
         val cacheTiempo = remember { CacheTiempo() }
+        val servicioIa = rememberServicioIa()
         var cargando by remember { mutableStateOf(true) }
         if (cargando) {
             PantallaCarga(onTerminado = { cargando = false })
@@ -169,6 +172,7 @@ private fun AppContenido(repositories: Repositories) {
                     irAlContenidoExtra = perfilEnUbicacion,
                 ) {
                     SeccionAvatar()
+                    SeccionIa(servicioIa)
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                     repositories.copia?.let { SeccionCopia(it) }
                     Text(

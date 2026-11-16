@@ -1,6 +1,6 @@
 # FitArchive: requisitos
 
-App móvil gratuita (Android + iPhone) para mujeres: convierte su armario en un armario digital y le propone outfits con la ropa que tiene. Todo se guarda en el móvil, sin cuenta, con opción de exportar copia.
+App móvil gratuita (Android + iPhone) para mujeres: convierte su armario en un armario digital y le propone outfits con la ropa que tiene. Todo se guarda en el móvil, sin cuenta, con opción de exportar copia. La IA es opcional y usa la clave de la propia usuaria.
 
 ## Decisiones
 | Aspecto | Decisión |
@@ -25,7 +25,7 @@ App móvil gratuita (Android + iPhone) para mujeres: convierte su armario en un 
 - Sugerencias automáticas según tiempo, ocasión (trabajo, cita, fiesta, casual, deporte), colores que combinan y estilo aprendido (likes y outfits guardados).
 - Solo prendas limpias.
 
-## Avatar 2D y tallas (sin IA ni APIs de pago)
+## Avatar 2D y tallas
 - Avatar ilustrado con prendas superpuestas por capas.
 - La usuaria guarda sus medidas una vez (altura, pecho, cintura, cadera, hombros, brazos, piernas…).
 - Al registrar la prenda indica marca, tipo y talla; la app busca esa talla en la tabla de la marca, compara y muestra etiqueta (ajustada/bien/holgada) y talla ideal.
@@ -41,7 +41,14 @@ App móvil gratuita (Android + iPhone) para mujeres: convierte su armario en un 
 - Tiempo: ubicación del móvil o ciudad elegida si no da permiso.
 
 ## Descartado / futuro
-Descartado: catálogo de tiendas e IA de prueba virtual. Opcional más adelante: importar prendas desde tiendas online, prueba virtual con IA.
+Descartado: catálogo de tiendas y prueba virtual con imágenes generadas (la API de Claude no genera imágenes). Opcional más adelante: importar prendas desde tiendas online.
+
+## IA (opcional, con clave propia)
+Detalle técnico en [ia.md](ia.md). La usuaria pega su propia clave de API de Anthropic en Perfil; se guarda cifrada solo en el móvil. Sin clave, la app funciona igual.
+- Catalogar prenda: la IA rellena tipo, subtipo, color, estación y uso a partir de la foto.
+- Sugerir outfits: propuestas con explicación, junto al motor de sugerencias local.
+- Asistente de estilo: consejos y preguntas sobre el armario.
+- Avatar: la IA decide qué prendas van y su colocación sobre el maniquí 2D (sin generar imágenes).
 
 ## Diseño
 Pantallas en Claude Design ("Armario inteligente: pantallas", 13 pantallas): carga, armario, filtro, añadir prenda, detalle, outfit del día, editor con avatar, mis outfits, compartir, calendario, maleta, medidas, ajustes. Navegación inferior: Hoy, Armario, Outfits, Calendario, Perfil.
