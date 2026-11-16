@@ -119,6 +119,7 @@ private fun AppContenido(repositories: Repositories) {
                 },
                 outfitId = outfitEditadoId,
                 prendasIniciales = prendasIniciales,
+                servicioIa = servicioIa,
             )
             return@FitArchiveTheme
         }

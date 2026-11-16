@@ -3,6 +3,7 @@ package app.luxion.fitarchiveapp.ui.outfit
 import app.luxion.fitarchiveapp.avatar.AjustePrenda
 import app.luxion.fitarchiveapp.avatar.Slot
 import app.luxion.fitarchiveapp.avatar.ajusteGuardado
+import app.luxion.fitarchiveapp.avatar.ia.PropuestaAvatar
 import app.luxion.fitarchiveapp.avatar.slotDe
 import app.luxion.fitarchiveapp.avatar.subtipoEfectivo
 import app.luxion.fitarchiveapp.data.GarmentRepository
@@ -52,7 +53,7 @@ data class EditorOutfitUiState(
  */
 class EditorOutfitViewModel(
     private val outfits: OutfitRepository,
-    armario: GarmentRepository,
+    private val armario: GarmentRepository,
     private val scope: CoroutineScope,
     private val outfitId: Long? = null,
     /** Prendas con las que arranca un outfit nuevo (las elegidas en el armario). */
@@ -151,6 +152,33 @@ class EditorOutfitViewModel(
         // El tamaño no lo elige el usuario: la escala sale de las dimensiones de la prenda y su cuerpo.
         val ajuste = cambio(actual.ajuste).limitado(caja).copy(escala = AjustePrenda.ESCALA_AUTOMATICA)
         e.copy(elegidas = e.elegidas + (e.slotActivo to actual.copy(ajuste = ajuste)))
+    }
+
+    /**
+     * Aplica la [propuesta] de la IA (ya validada) a las prendas elegidas: el subtipo se guarda en la prenda del
+     * armario (si cambia) y el desplazamiento pasa a ser el ajuste de la prenda en este outfit. La usuaria puede
+     * seguir moviéndola a mano después.
+     */
+    fun aplicarPropuestaIa(propuesta: PropuestaAvatar) {
+        val porId = propuesta.prendas.associateBy { it.prendaId }
+        val cambiadas = mutableListOf<Garment>()
+        _estado.update { e ->
+            e.copy(elegidas = e.elegidas.mapValues { (_, el) ->
+                val p = porId[el.prenda.id] ?: return@mapValues el
+                val prenda = if (p.subtipo != el.prenda.subtipoEfectivo) el.prenda.copy(subtipo = p.subtipo).also { cambiadas += it } else el.prenda
+                PrendaElegida(prenda, p.ajuste)
+            })
+        }
+        if (cambiadas.isEmpty()) return
+        scope.launch {
+            try {
+                cambiadas.forEach { armario.update(it) }
+            } catch (c: CancellationException) {
+                throw c
+            } catch (t: Throwable) {
+                _estado.update { it.copy(error = "No se pudo guardar el subtipo de alguna prenda") }
+            }
+        }
     }
 
     fun mostrarError(mensaje: String) = _estado.update { it.copy(error = mensaje) }
