@@ -30,3 +30,6 @@ La IA no genera imágenes: solo propone, por prenda elegida, el **subtipo** (ent
 - Aviso propio `avatar1` (`AVISO_IA_AVATAR`). Sin IA/clave/tope el botón sale deshabilitado; con el aviso pendiente se pide al pulsar.
 - `interpretarPropuesta` valida: descarta ids desconocidos o repetidos, subtipos inválidos (se mantiene el actual) y números no finitos; dx/dy se limitan a 1/4 de la caja y luego a `AjustePrenda.limitado`.
 - La usuaria ve la propuesta y elige Aplicar o Descartar. Aplicar guarda el subtipo en la prenda del armario (si cambia) y el dx/dy como ajuste en el outfit; la colocación manual sigue mandando.
+
+## Asistente de estilo (`asistente/`, `ui/asistente/`)
+Conversación sobre el armario, abierta desde Perfil → «Abrir el asistente». Aviso propio (`asistente1`). Envía un resumen compacto del armario (tipo, subtipo, color, estación y uso, agrupado con cantidades; sin fotos, nombres, marcas ni ubicación) en el `system`, y los últimos 6 intercambios en memoria (no se persisten). El texto de la usuaria va entre `<mensaje_usuaria>` con `<`/`>` neutralizados. Multi-turno: `ServicioIa.preguntar(..., historial: List<TurnoClaude>)`; vacío = una sola pregunta como antes.

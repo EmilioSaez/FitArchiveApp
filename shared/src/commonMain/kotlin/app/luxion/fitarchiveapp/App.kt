@@ -34,6 +34,8 @@ import app.luxion.fitarchiveapp.ui.copia.SeccionCopia
 import app.luxion.fitarchiveapp.ui.screens.MedidasScreen
 import app.luxion.fitarchiveapp.ui.screens.PantallaCarga
 import app.luxion.fitarchiveapp.ui.theme.FitArchiveTheme
+import app.luxion.fitarchiveapp.ui.asistente.AsistenteScreen
+import app.luxion.fitarchiveapp.ui.asistente.EntradaAsistente
 import app.luxion.fitarchiveapp.ui.ia.SeccionIa
 import app.luxion.fitarchiveapp.ui.ia.rememberServicioIa
 import app.luxion.fitarchiveapp.ui.theme.SeccionTema
@@ -102,6 +104,7 @@ private fun AppContenido(repositories: Repositories) {
         var viendoViajes by remember { mutableStateOf(false) }
         var viajeInicialId by remember { mutableStateOf<Long?>(null) }
         var viendoCarpetas by remember { mutableStateOf(false) }
+        var viendoAsistente by remember { mutableStateOf(false) }
         var prendasIniciales by remember { mutableStateOf(emptyList<Long>()) }
         var editandoOutfit by remember { mutableStateOf(false) }
         var outfitEditadoId by remember { mutableStateOf<Long?>(null) }
@@ -131,6 +134,19 @@ private fun AppContenido(repositories: Repositories) {
                     viendoViajes = false
                     viajeInicialId = null
                 },
+            )
+            return@FitArchiveTheme
+        }
+        if (viendoAsistente) {
+            AsistenteScreen(
+                servicioIa,
+                repositories.garments,
+                onVolver = { viendoAsistente = false },
+                onAbrirPerfil = {
+                    viendoAsistente = false
+                    destino = Destino.Perfil
+                },
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
             )
             return@FitArchiveTheme
         }
@@ -174,6 +190,7 @@ private fun AppContenido(repositories: Repositories) {
                 ) {
                     SeccionAvatar()
                     SeccionIa(servicioIa)
+                    EntradaAsistente(onAbrir = { viendoAsistente = true })
                     SeccionUbicacionTiempo(seleccionCiudad, ubicacion)
                     repositories.copia?.let { SeccionCopia(it) }
                     Text(

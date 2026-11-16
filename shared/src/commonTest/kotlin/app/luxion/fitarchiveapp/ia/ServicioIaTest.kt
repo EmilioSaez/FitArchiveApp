@@ -11,7 +11,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -202,5 +206,27 @@ class ServicioIaTest {
         assertEquals(AjustesIa(), AjustesIaCodec.decodificar("{roto"))
         val a = AjustesIa(activada = true, topeDiario = 7, avisosAceptados = setOf("x"))
         assertEquals(a, AjustesIaCodec.decodificar(AjustesIaCodec.codificar(a)))
+    }
+
+    private fun mensajesEnviados() =
+        Json.parseToJsonElement(cuerpos.single()).jsonObject["messages"]!!.jsonArray.map { it.jsonObject }
+
+    @Test
+    fun `el historial se envia antes del mensaje final`() = runTest {
+        servicio().preguntar(
+            listOf(ParteClaude.Texto("tercera")),
+            historial = listOf(TurnoClaude(RolClaude.USUARIA, "primera"), TurnoClaude(RolClaude.ASISTENTE, "segunda")),
+        ).getOrThrow()
+        val m = mensajesEnviados()
+        assertEquals(listOf("user", "assistant", "user"), m.map { it["role"]!!.jsonPrimitive.content })
+        assertEquals("primera", m[0]["content"]!!.jsonPrimitive.content)
+        assertEquals("segunda", m[1]["content"]!!.jsonPrimitive.content)
+        assertTrue("tercera" in m[2].toString())
+    }
+
+    @Test
+    fun `sin historial el cuerpo tiene un solo mensaje`() = runTest {
+        servicio().preguntarTexto("hola").getOrThrow()
+        assertEquals(1, mensajesEnviados().size)
     }
 }
